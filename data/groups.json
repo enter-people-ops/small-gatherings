@@ -1,0 +1,456 @@
+{
+  "month": "Setembro/2026",
+  "generated_at": "2026-09-09",
+  "groups": [
+    [
+      {
+        "id": "e043",
+        "name": "Sara Bittencourt",
+        "gender": "M",
+        "team": "Engenharia",
+        "department": "People",
+        "seniority": "Lead",
+        "is_leader": true
+      },
+      {
+        "id": "e005",
+        "name": "Felipe Costa",
+        "gender": "Outro",
+        "team": "People",
+        "department": "People",
+        "seniority": "Gerência",
+        "is_leader": false
+      },
+      {
+        "id": "e017",
+        "name": "Rafael Pinto",
+        "gender": "Outro",
+        "team": "AID",
+        "department": "Finance",
+        "seniority": "Lead",
+        "is_leader": false
+      },
+      {
+        "id": "e032",
+        "name": "Giovana Aragão",
+        "gender": "F",
+        "team": "Finance",
+        "department": "Finance",
+        "seniority": "Estágio",
+        "is_leader": false
+      },
+      {
+        "id": "e006",
+        "name": "Gabriela Nunes",
+        "gender": "M",
+        "team": "Legal Strategy",
+        "department": "Produto",
+        "seniority": "Júnior",
+        "is_leader": false
+      },
+      {
+        "id": "e022",
+        "name": "Wanda Luz",
+        "gender": "M",
+        "team": "Produto",
+        "department": "GTM",
+        "seniority": "Lead",
+        "is_leader": false
+      }
+    ],
+    [
+      {
+        "id": "e019",
+        "name": "Thiago Braga",
+        "gender": "F",
+        "team": "GTM",
+        "department": "AID",
+        "seniority": "Lead",
+        "is_leader": true
+      },
+      {
+        "id": "e004",
+        "name": "Elena Rocha",
+        "gender": "M",
+        "team": "Produto",
+        "department": "People",
+        "seniority": "Lead",
+        "is_leader": false
+      },
+      {
+        "id": "e031",
+        "name": "Fábio Guedes",
+        "gender": "F",
+        "team": "AID",
+        "department": "Engenharia",
+        "seniority": "Estágio",
+        "is_leader": false
+      },
+      {
+        "id": "e036",
+        "name": "Kelly Amaral",
+        "gender": "F",
+        "team": "People",
+        "department": "People",
+        "seniority": "Lead",
+        "is_leader": false
+      },
+      {
+        "id": "e028",
+        "name": "Clara Viana",
+        "gender": "F",
+        "team": "Finance",
+        "department": "Finance",
+        "seniority": "Estágio",
+        "is_leader": false
+      },
+      {
+        "id": "e002",
+        "name": "Carla Dias",
+        "gender": "Outro",
+        "team": "Engenharia",
+        "department": "Finance",
+        "seniority": "Estágio",
+        "is_leader": false
+      }
+    ],
+    [
+      {
+        "id": "e037",
+        "name": "Leo Tavares",
+        "gender": "F",
+        "team": "Produto",
+        "department": "GTM",
+        "seniority": "Lead",
+        "is_leader": true
+      },
+      {
+        "id": "e041",
+        "name": "Paula Nogueira",
+        "gender": "Outro",
+        "team": "AID",
+        "department": "Finance",
+        "seniority": "Pleno",
+        "is_leader": false
+      },
+      {
+        "id": "e009",
+        "name": "João Vieira",
+        "gender": "F",
+        "team": "AID",
+        "department": "GTM",
+        "seniority": "Estágio",
+        "is_leader": false
+      },
+      {
+        "id": "e024",
+        "name": "Yara Mendes",
+        "gender": "F",
+        "team": "GTM",
+        "department": "Produto",
+        "seniority": "Sênior",
+        "is_leader": false
+      },
+      {
+        "id": "e045",
+        "name": "Vera Quintana",
+        "gender": "M",
+        "team": "People",
+        "department": "AID",
+        "seniority": "Gerência",
+        "is_leader": false
+      },
+      {
+        "id": "e034",
+        "name": "Iris Camargo",
+        "gender": "M",
+        "team": "Legal Strategy",
+        "department": "Produto",
+        "seniority": "Estágio",
+        "is_leader": false
+      }
+    ],
+    [
+      {
+        "id": "e038",
+        "name": "Mia Barbosa",
+        "gender": "Outro",
+        "team": "Engenharia",
+        "department": "Finance",
+        "seniority": "Lead",
+        "is_leader": true
+      },
+      {
+        "id": "e035",
+        "name": "Júlio Farias",
+        "gender": "M",
+        "team": "AID",
+        "department": "AID",
+        "seniority": "Júnior",
+        "is_leader": false
+      },
+      {
+        "id": "e042",
+        "name": "Rui Cardoso",
+        "gender": "F",
+        "team": "GTM",
+        "department": "People",
+        "seniority": "Lead",
+        "is_leader": false
+      },
+      {
+        "id": "e033",
+        "name": "Hugo Bastos",
+        "gender": "M",
+        "team": "People",
+        "department": "AID",
+        "seniority": "Lead",
+        "is_leader": false
+      },
+      {
+        "id": "e020",
+        "name": "Ursula Faria",
+        "gender": "M",
+        "team": "Produto",
+        "department": "GTM",
+        "seniority": "Pleno",
+        "is_leader": false
+      }
+    ],
+    [
+      {
+        "id": "e029",
+        "name": "Davi Antunes",
+        "gender": "F",
+        "team": "Produto",
+        "department": "Finance",
+        "seniority": "Lead",
+        "is_leader": true
+      },
+      {
+        "id": "e021",
+        "name": "Vitor Campos",
+        "gender": "Outro",
+        "team": "Finance",
+        "department": "Finance",
+        "seniority": "Estágio",
+        "is_leader": false
+      },
+      {
+        "id": "e008",
+        "name": "Isabela Prado",
+        "gender": "F",
+        "team": "Legal Strategy",
+        "department": "GTM",
+        "seniority": "Lead",
+        "is_leader": false
+      },
+      {
+        "id": "e039",
+        "name": "Nina Correia",
+        "gender": "M",
+        "team": "People",
+        "department": "Produto",
+        "seniority": "Gerência",
+        "is_leader": false
+      },
+      {
+        "id": "e003",
+        "name": "Diego Alves",
+        "gender": "F",
+        "team": "AID",
+        "department": "Finance",
+        "seniority": "Júnior",
+        "is_leader": false
+      }
+    ],
+    [
+      {
+        "id": "e040",
+        "name": "Otávio Freitas",
+        "gender": "M",
+        "team": "AID",
+        "department": "People",
+        "seniority": "Lead",
+        "is_leader": true
+      },
+      {
+        "id": "e011",
+        "name": "Lucas Reis",
+        "gender": "F",
+        "team": "Produto",
+        "department": "GTM",
+        "seniority": "Sênior",
+        "is_leader": false
+      },
+      {
+        "id": "e000",
+        "name": "Ana Souza",
+        "gender": "M",
+        "team": "Finance",
+        "department": "Finance",
+        "seniority": "Júnior",
+        "is_leader": false
+      },
+      {
+        "id": "e027",
+        "name": "Breno Duarte",
+        "gender": "F",
+        "team": "GTM",
+        "department": "People",
+        "seniority": "Estágio",
+        "is_leader": false
+      },
+      {
+        "id": "e026",
+        "name": "Alice Fonseca",
+        "gender": "F",
+        "team": "Legal Strategy",
+        "department": "Engenharia",
+        "seniority": "Pleno",
+        "is_leader": false
+      }
+    ],
+    [
+      {
+        "id": "e023",
+        "name": "Xavier Nobre",
+        "gender": "M",
+        "team": "AID",
+        "department": "Engenharia",
+        "seniority": "Lead",
+        "is_leader": true
+      },
+      {
+        "id": "e007",
+        "name": "Henrique Melo",
+        "gender": "Outro",
+        "team": "People",
+        "department": "Produto",
+        "seniority": "Estágio",
+        "is_leader": false
+      },
+      {
+        "id": "e047",
+        "name": "Zoe Martins",
+        "gender": "F",
+        "team": "Engenharia",
+        "department": "Finance",
+        "seniority": "Estágio",
+        "is_leader": false
+      },
+      {
+        "id": "e018",
+        "name": "Sofia Moraes",
+        "gender": "F",
+        "team": "Finance",
+        "department": "Legal Strategy",
+        "seniority": "Pleno",
+        "is_leader": false
+      },
+      {
+        "id": "e015",
+        "name": "Pedro Ramos",
+        "gender": "M",
+        "team": "Produto",
+        "department": "People",
+        "seniority": "Gerência",
+        "is_leader": false
+      }
+    ],
+    [
+      {
+        "id": "e001",
+        "name": "Bruno Lima",
+        "gender": "M",
+        "team": "Finance",
+        "department": "People",
+        "seniority": "Lead",
+        "is_leader": true
+      },
+      {
+        "id": "e010",
+        "name": "Karina Sá",
+        "gender": "M",
+        "team": "People",
+        "department": "Finance",
+        "seniority": "Gerência",
+        "is_leader": false
+      },
+      {
+        "id": "e044",
+        "name": "Tomás Aguiar",
+        "gender": "Outro",
+        "team": "Produto",
+        "department": "Legal Strategy",
+        "seniority": "Estágio",
+        "is_leader": false
+      },
+      {
+        "id": "e014",
+        "name": "Olívia Castro",
+        "gender": "F",
+        "team": "Legal Strategy",
+        "department": "People",
+        "seniority": "Júnior",
+        "is_leader": false
+      },
+      {
+        "id": "e025",
+        "name": "Zeca Pires",
+        "gender": "F",
+        "team": "AID",
+        "department": "GTM",
+        "seniority": "Estágio",
+        "is_leader": false
+      }
+    ],
+    [
+      {
+        "id": "e016",
+        "name": "Queila Barros",
+        "gender": "M",
+        "team": "People",
+        "department": "Finance",
+        "seniority": "Lead",
+        "is_leader": true
+      },
+      {
+        "id": "e030",
+        "name": "Erika Lopes",
+        "gender": "Outro",
+        "team": "AID",
+        "department": "Finance",
+        "seniority": "Júnior",
+        "is_leader": false
+      },
+      {
+        "id": "e046",
+        "name": "William Sales",
+        "gender": "M",
+        "team": "Finance",
+        "department": "Produto",
+        "seniority": "Pleno",
+        "is_leader": false
+      },
+      {
+        "id": "e012",
+        "name": "Marina Teixeira",
+        "gender": "F",
+        "team": "Produto",
+        "department": "GTM",
+        "seniority": "Lead",
+        "is_leader": false
+      },
+      {
+        "id": "e013",
+        "name": "Nathan Gomes",
+        "gender": "F",
+        "team": "Legal Strategy",
+        "department": "AID",
+        "seniority": "Estágio",
+        "is_leader": false
+      }
+    ]
+  ]
+}

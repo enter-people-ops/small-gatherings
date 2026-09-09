@@ -1,0 +1,15 @@
+{
+  "month": "Setembro/2026",
+  "office_ref": "Região da Faria Lima / Itaim",
+  "items": [
+    {"cat": "Café", "name": "Coffee Lab", "area": "Vila Madalena", "note": "Clássico do café de especialidade paulistano."},
+    {"cat": "Café", "name": "Santo Grão", "area": "Itaim / Oscar Freire", "note": "Perto do escritório, bom pra reunião curta."},
+    {"cat": "Almoço", "name": "Mercado de Pinheiros", "area": "Pinheiros", "note": "Várias opções num lugar só, funciona pra grupo grande."},
+    {"cat": "Almoço", "name": "Tan Tan", "area": "Vila Madalena", "note": "Asiático descontraído, bom pra dividir pratos."},
+    {"cat": "Happy hour", "name": "Boteco São Bento", "area": "Itaim", "note": "Depois do trabalho, a pé de vários pontos do Itaim."},
+    {"cat": "Happy hour", "name": "Empório Alto de Pinheiros", "area": "Alto de Pinheiros", "note": "Cervejas e petiscos num quarteirão animado."},
+    {"cat": "Cultura", "name": "Instituto Moreira Salles", "area": "Paulista", "note": "Exposições grátis + café com vista, ótimo pra sábado."},
+    {"cat": "Cultura", "name": "Beco do Batman", "area": "Vila Madalena", "note": "Rolê a céu aberto de grafite, combina com café antes."},
+    {"cat": "Ar livre", "name": "Parque do Povo", "area": "Itaim", "note": "Coladinho no escritório, bom pra um almoço ao ar livre."}
+  ]
+}
