@@ -14,8 +14,8 @@ from __future__ import annotations
 import csv, io, json, os, unicodedata
 import requests
 
-def _norm(s: str) -> str:
-    s = "".join(c for c in unicodedata.normalize("NFKD", s or "") if not unicodedata.combining(c))
+def _norm(s) -> str:
+    s = "".join(c for c in unicodedata.normalize("NFKD", str(s or "")) if not unicodedata.combining(c))
     return s.strip().lower()
 
 def read_leaders_csv(csv_url: str) -> list[dict]:
@@ -23,7 +23,13 @@ def read_leaders_csv(csv_url: str) -> list[dict]:
     rows = list(csv.DictReader(io.StringIO(r.text)))
     out = []
     for row in rows:
-        low = {(_norm(k)): (v or "").strip() for k, v in row.items()}
+        low = {}
+        for k, v in row.items():
+            if k is None:            # colunas extras além do cabeçalho (restkey)
+                continue
+            if isinstance(v, list):  # célula sobrando vira lista -> junta como texto
+                v = " ".join(str(x) for x in v)
+            low[_norm(k)] = str(v or "").strip()
         nome = low.get("nome") or low.get("name") or low.get("líder") or low.get("lider")
         if not nome:
             continue

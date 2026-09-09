@@ -23,6 +23,20 @@ import os, sys, json, argparse, datetime as dt
 import convenia, sheets, render, slack_msgs as S
 from grouping import Person, Config, make_groups
 
+def _load_env(path: str = "../.env"):
+    """Carrega um .env simples (KEY=VALUE) para os.environ, se existir.
+    No Railway as variáveis já vêm do ambiente, então isto é só p/ uso local."""
+    if not os.path.exists(path):
+        return
+    for line in open(path, encoding="utf-8"):
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        k, v = line.split("=", 1)
+        os.environ.setdefault(k.strip(), v.strip())
+
+_load_env()
+
 MONTHS_PT = ["", "Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho",
              "Agosto","Setembro","Outubro","Novembro","Dezembro"]
 
