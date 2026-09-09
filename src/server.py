@@ -37,8 +37,24 @@ def run():
     if os.environ.get("RUN_KEY") and request.headers.get("X-Run-Key") != os.environ["RUN_KEY"]:
         abort(401)
     send = request.args.get("send", "false").lower() == "true"
-    result = pipeline.run_api(send=send)   # ver main.run_api abaixo
-    return jsonify(result)
+    try:
+        result = pipeline.run_api(send=send)
+        return jsonify(result)
+    except Exception as e:
+        import traceback
+        return jsonify({"error": type(e).__name__, "message": str(e),
+                        "trace": traceback.format_exc().splitlines()[-6:]}), 200
+
+@app.get("/debug")
+def debug():
+    if os.environ.get("RUN_KEY") and request.headers.get("X-Run-Key") != os.environ["RUN_KEY"]:
+        abort(401)
+    try:
+        return jsonify(pipeline.diagnose())
+    except Exception as e:
+        import traceback
+        return jsonify({"error": type(e).__name__, "message": str(e),
+                        "trace": traceback.format_exc().splitlines()[-6:]}), 200
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", "8080")))
