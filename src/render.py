@@ -88,7 +88,11 @@ header .logo{height:22px;width:auto;display:block}
 .member.me{background:var(--brand-100);box-shadow:var(--ring-brand)}
 /* hotspots — superfície inversa oficial */
 .spots{margin-top:20px;background:var(--inverse);color:var(--tx-inv);border-radius:var(--r-2xl);padding:24px}
-.spots h3{font-weight:600;margin:0 0 4px;font-size:19px;letter-spacing:-.4px}
+.spots-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.spots h3{font-weight:600;margin:0;font-size:19px;letter-spacing:-.4px}
+.spots .btn{background:rgba(255,255,255,.08);color:var(--tx-inv);box-shadow:var(--ring-dark)}
+.spots .btn:hover{background:rgba(255,255,255,.14)}
+.spots-body{margin-top:18px}
 .spots .sub{margin:0 0 18px;color:rgba(250,250,250,.65);font-size:13px}
 .spotgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:12px}
 .spot{display:block;background:rgba(255,255,255,.05);box-shadow:var(--ring-dark);border-radius:var(--r-xl);
@@ -98,11 +102,15 @@ header .logo{height:22px;width:auto;display:block}
 .spot .n{font-weight:500;margin:6px 0 2px;font-size:15px}
 .spot .a{font-size:13px;color:rgba(250,250,250,.7)}
 .spot .no{font-size:12px;color:rgba(250,250,250,.55);margin-top:6px;line-height:1.45}
+/* botões (toggle "ver todos os grupos" / "ver sugestões") */
+.btn{display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:14px;font-weight:500;
+  background:var(--bg);border:0;box-shadow:var(--ring-2);border-radius:var(--r-full);
+  padding:10px 18px;cursor:pointer;color:var(--tx);transition:box-shadow var(--dur) var(--ease);
+  list-style:none}
+.btn::-webkit-details-marker{display:none}
+.btn:hover{box-shadow:var(--ring)}
 /* browse */
 .browse{margin-top:56px;box-shadow:inset 0 1px 0 rgba(0,0,0,.05);padding-top:28px}
-.browse summary{font-weight:600;font-size:17px;cursor:pointer;list-style:none;color:var(--tx)}
-.browse summary::-webkit-details-marker{display:none}
-.browse summary .tw{color:var(--brand-400);font-family:var(--mono);margin-right:8px}
 .allgroups{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:14px;margin-top:20px}
 .mini{background:var(--bg-2);box-shadow:var(--ring-3);border-radius:var(--r-xl);padding:15px 16px}
 .mini h4{font-weight:600;margin:0 0 9px;font-size:14px}
@@ -119,7 +127,7 @@ footer a{color:inherit;text-decoration:underline}
 <div class="wrap">
   <header>
     <span class="logo">__LOGO__</span>
-    <span class="eyebrow">Encontros · __MONTH__</span>
+    <span class="eyebrow">Small Gatherings · __MONTH__</span>
   </header>
 
   <section class="hero">
@@ -134,7 +142,7 @@ footer a{color:inherit;text-decoration:underline}
   <div class="results" id="results"></div>
 
   <details class="browse">
-    <summary><span class="tw">▸</span>Ver todos os grupos</summary>
+    <summary class="btn">Ver todos os grupos</summary>
     <div class="allgroups" id="allgroups"></div>
   </details>
 
@@ -160,7 +168,7 @@ function renderGroup(group, meId){
       <div class="av" style="background:${av}">${initials(p.name).toUpperCase()}</div>
       <div class="who"><div class="nm">${p.name}${isMe?' · você':''}</div>
       <div class="meta">${p.team||'—'} · ${p.tenure_label||'—'}</div></div>
-      ${p.is_leader?'<span class="lead">líder</span>':''}
+      ${p.is_leader?'<span class="lead">capitão</span>':''}
     </li>`;}).join("");
   const spots = (HOTSPOTS.items||[]).map(s=>{
     const url = s.maps_url || ('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent((s.name||'')+' '+(s.area||'')));
@@ -170,13 +178,19 @@ function renderGroup(group, meId){
   }).join("");
   return `<div class="groupcard">
     <div class="gc-top"><div><p class="you">Seu Small Gathering de ${DATA.month}</p>
-      <h2>Capitão: ${leader.name.split(' ')[0]} · ${group.length} Pessoas</h2></div>
+      <h2>${group.length} Pessoas</h2></div>
       <span class="chip">${leader.name} é responsável por garantir que o Small Gathering vai sair do papel!</span></div>
     <ul class="members">${members}</ul>
   </div>
-  <div class="spots"><h3>Onde marcar</h3>
-    <p class="sub">Sugestões perto de ${HOTSPOTS.office_ref||'São Paulo'} — ${HOTSPOTS.month||''}</p>
-    <div class="spotgrid">${spots}</div></div>`;
+  <div class="spots">
+    <div class="spots-head"><h3>Onde marcar</h3>
+      <button class="btn" onclick="const el=this.closest('.spots').querySelector('.spots-body'); el.hidden=!el.hidden; this.textContent=el.hidden?'Ver sugestões':'Ocultar sugestões';">Ver sugestões</button>
+    </div>
+    <div class="spots-body" hidden>
+      <p class="sub">Sugestões perto de ${HOTSPOTS.office_ref||'São Paulo'} — ${HOTSPOTS.month||''}</p>
+      <div class="spotgrid">${spots}</div>
+    </div>
+  </div>`;
 }
 
 const results = document.getElementById('results');
@@ -188,7 +202,7 @@ function search(v){
   const hits = all.filter(p=>norm(p.name).includes(q));
   if(hits.length===0){results.innerHTML=`<p class="empty">Não achei ninguém com “${v}”. Confere a grafia ou tenta só o primeiro nome.</p>`;return;}
   if(hits.length===1){show(hits[0].id);return;}
-  results.innerHTML = `<p class="empty">Achei ${hits.length} pessoas. Qual é você?</p>
+  results.innerHTML = `<p class="empty">Achei ${hits.length} pessoas</p>
     <div class="pick">${hits.slice(0,12).map(p=>`<button data-id="${p.id}">${p.name} · ${p.team||''}</button>`).join("")}</div>`;
   results.querySelectorAll('button').forEach(b=>b.onclick=()=>show(b.dataset.id));
 }
