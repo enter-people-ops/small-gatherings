@@ -51,6 +51,20 @@ agendada pelo Make (dia 1º às 09:00). Base: ~229 pessoas ativas.
   só preenchendo os vazios; togglável por `INFER_GENDER`. Relatório avisa a inferência.
 - Nomes na planilha de líderes costumam ser apelidos/curtos ("Banduk", "cezar",
   "Mike Mac-Vicar") — por isso o casamento é por tokens de e-mail e depois nome.
+- **Nome exibido no artefato/mensagens = nome do Slack** (display_name >
+  real_name), não o nome completo do Convenia — resolvido em `main.py` antes
+  de gerar o artefato. Quem não tem match no Slack mantém o nome do Convenia
+  (é o único que temos).
+- **`GET /employees` só devolve ATIVOS** — é assim que a API do Convenia
+  documenta o endpoint (confirmado em docs-api.convenia.com.br/#colaboradores).
+  Desligados têm endpoint próprio (`GET /employees/dismissed`, com
+  `from_date`/`to_date`). **Não existe nenhum endpoint de listagem pra quem
+  está "em admissão"** (só `/admission-types`, que é uma lista de categorias,
+  não de pessoas) — a única forma de saber sobre admissões em andamento é via
+  **webhook** (`admission.started`/`admission.finished`), que hoje este app
+  não recebe. Na prática: alguém contratado no meio do mês só aparece pra nós
+  quando o Convenia mudar o status dele pra "Ativo" (o que pode não acontecer
+  a tempo do dia 1º) — ver TODO na seção 14.
 
 ## 4. Arquitetura / arquivos
 ```
@@ -204,6 +218,14 @@ Cenário: **"Enter · Encontros — mensal (dia 1º)"**, id **6227802**.
   ou Drive), pra novidade vs histórico não zerar a cada deploy.
 - Ir ao ar: `TEST_MODE=false` + ativar o cenário no Make.
 - (Opcional) senioridade real se preencherem cargos.
+- **Gente "em admissão" (contratada, ainda não Ativo no Convenia) não entra
+  no mês corrente** — decisão consciente por ora (ver seção 3). Se quiser
+  resolver de verdade, precisa de: (1) um endpoint de webhook pra receber
+  `admission.started`/`admission.finished` do Convenia, (2) armazenamento
+  persistente pra guardar esses IDs (Railway não tem volume hoje), e (3)
+  merge desses IDs (via `GET /employees/{id}`) na hora de montar os grupos.
+  Alternativa mais simples: manter uma aba/lista manual de próximas
+  admissões (nome + data de início) que o pipeline lê e mescla, sem webhook.
 
 ## 15. Deploy
 Repositório ligado ao Railway (auto-deploy no push da branch `main`).
