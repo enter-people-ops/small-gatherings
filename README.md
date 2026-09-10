@@ -57,17 +57,14 @@ distribuído o mais uniformemente possível. Não há mais tamanho fixo configur
     RUN_KEY, TEST_MODE,
     CANAL_TESTE_GERAL, CANAL_TESTE_LIDERES, CANAL_TESTE_DM_LIDERES, CANAL_TESTE_RELATORIO,
     CANAL_GERAL, CANAL_LIDERES, DM_RELATORIO,
-    GROUP_MIN_WOMEN=2, EMAIL_DOMAIN=getenter.ai,
-    OFFICE_ADDRESS
+    GROUP_MIN_WOMEN=2, EMAIL_DOMAIN=getenter.ai
 
 Scopes do bot Slack: chat:write, users:read, users:read.email.
 
-## Sugestões de rolê (OpenStreetMap)
-`src/hotspots.py` busca lugares reais (Nominatim + Overpass API, gratuitos,
-sem key/conta/faturamento) num raio de 5km do `OFFICE_ADDRESS`, sempre
-cobrindo Almoço/Jantar/Barzinhos/Aulas, e escreve em `data/hotspots.json` com
-link direto pro Google Maps (busca por nome). Se a busca falhar, mantém o
-hotspots.json existente (não quebra o pipeline). Detalhes: `CLAUDE.md` seção 16.
+## Sugestões de rolê ("Onde marcar")
+Lista fixa, curada à mão em `data/hotspots.json` (nome, categoria, área, nota
+e link do Google Maps). Não há mais busca automática por API — para atualizar,
+edite o arquivo diretamente. Detalhes: `CLAUDE.md` seção 16.
 
 ## Persistência do histórico
 `data/history.json` é append-only com janela deslizante. No Railway, use um
@@ -89,7 +86,7 @@ gravar o histórico numa aba da própria planilha / no Drive (conectores já ati
     src/render.py     gera index.html a partir de groups.json + hotspots.json
     src/main.py       orquestrador (CLI --dry-run/--send + run_api p/ o servidor)
     src/server.py     Flask: GET / (artefato) e POST /run (Make)
-    data/hotspots.json  sugestões de SP do mês (editável / auto-atualizável)
+    data/hotspots.json  sugestões de rolê ("Onde marcar") — lista fixa, editada à mão
     Procfile          start do Railway (gunicorn)
 
 ## Identidade visual (Enter Design System)

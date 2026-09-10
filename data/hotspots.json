@@ -1,15 +1,14 @@
 {
-  "month": "Setembro/2026",
-  "office_ref": "Região da Faria Lima / Itaim",
+  "month": "",
+  "office_ref": "Rua Capote Valente, 839 - Pinheiros, São Paulo - SP, 05409-002",
   "items": [
-    {"cat": "Café", "name": "Coffee Lab", "area": "Vila Madalena", "note": "Clássico do café de especialidade paulistano."},
-    {"cat": "Café", "name": "Santo Grão", "area": "Itaim / Oscar Freire", "note": "Perto do escritório, bom pra reunião curta."},
-    {"cat": "Almoço", "name": "Mercado de Pinheiros", "area": "Pinheiros", "note": "Várias opções num lugar só, funciona pra grupo grande."},
-    {"cat": "Almoço", "name": "Tan Tan", "area": "Vila Madalena", "note": "Asiático descontraído, bom pra dividir pratos."},
-    {"cat": "Happy hour", "name": "Boteco São Bento", "area": "Itaim", "note": "Depois do trabalho, a pé de vários pontos do Itaim."},
-    {"cat": "Happy hour", "name": "Empório Alto de Pinheiros", "area": "Alto de Pinheiros", "note": "Cervejas e petiscos num quarteirão animado."},
-    {"cat": "Cultura", "name": "Instituto Moreira Salles", "area": "Paulista", "note": "Exposições grátis + café com vista, ótimo pra sábado."},
-    {"cat": "Cultura", "name": "Beco do Batman", "area": "Vila Madalena", "note": "Rolê a céu aberto de grafite, combina com café antes."},
-    {"cat": "Ar livre", "name": "Parque do Povo", "area": "Itaim", "note": "Coladinho no escritório, bom pra um almoço ao ar livre."}
+    {"cat": "Almoço", "name": "Antonietta Cucina", "area": "R. Artur de Azevedo, 542 - Pinheiros", "note": "Italiano · 4,4★ (1.376 avaliações)", "maps_url": "https://maps.app.goo.gl/F7tqo8mXWHZ2NHWC8"},
+    {"cat": "Almoço", "name": "Levena SP", "area": "R. Artur de Azevedo, 495 - Cerqueira César", "note": "Brunch · 4,5★ (3.692 avaliações)", "maps_url": "https://maps.app.goo.gl/LqqE1f5JHaurNfTp6"},
+    {"cat": "Almoço", "name": "Make Hommus. Not war", "area": "R. Oscar Freire, 2270 - Pinheiros", "note": "Árabe · 4,5★ (1.094 avaliações)", "maps_url": "https://maps.app.goo.gl/75B1sfuixsnAFWhT7"},
+    {"cat": "Jantar", "name": "Bark n'Crust", "area": "R. Artur de Azevedo, 657 - Cerqueira César", "note": "4,6★ (1.797 avaliações)", "maps_url": "https://maps.app.goo.gl/DZigfJ68YAFgC6Er5"},
+    {"cat": "Jantar", "name": "Hirá Ramen Izakaya", "area": "R. Fradique Coutinho, 1240 - Pinheiros", "note": "Izakaya moderno · 4,5★ (3.883 avaliações)", "maps_url": "https://maps.app.goo.gl/iJFyqsnVsHr2bfEh6"},
+    {"cat": "Jantar", "name": "Quino Parrilla", "area": "Rua Cardeal Arcoverde, 201 - Jardim Paulista", "note": "Parrilla argentina · 4,9★ (53 avaliações)", "maps_url": "https://maps.app.goo.gl/z7c4JKJCBkfZAiG37"},
+    {"cat": "Barzinhos", "name": "TAN TAN", "area": "R. Fradique Coutinho, 153 - Pinheiros", "note": "Bar de cozinha oriental · 4,5★ (2.672 avaliações)", "maps_url": "https://maps.app.goo.gl/p4aiWv32LSTE3z2fA"},
+    {"cat": "Aulas", "name": "Shoyu Crafts Ateliê de Cerâmica", "area": "R. Capote Valente, 697 - Pinheiros", "note": "Aulas de cerâmica · 5,0★ (63 avaliações)", "maps_url": "https://maps.app.goo.gl/NvP1g8LtbQ5AtRNz9"}
   ]
 }

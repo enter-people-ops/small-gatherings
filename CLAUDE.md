@@ -12,10 +12,8 @@ agendada pelo Make (dia 1º às 09:00). Base: ~229 pessoas ativas.
 2. Lê a planilha de líderes (Google Sheets publicado como CSV) e casa cada
    líder com um ativo do Convenia (por e-mail primeiro, depois por nome).
 3. Forma os grupos respeitando as regras (seção 2).
-4. Busca sugestões de rolê reais no OpenStreetMap (`src/hotspots.py`, sem API
-   key nem billing), num raio de 5km do escritório, cobrindo
-   Almoço/Jantar/Barzinhos/Aulas — atualiza `data/hotspots.json` (se a busca
-   falhar, mantém o hotspots.json existente).
+4. Sugestões de rolê ("Onde marcar") vêm de uma lista fixa, curada à mão em
+   `data/hotspots.json` — não há mais busca automática por API.
 5. Gera `data/index.html` — artefato pesquisável com a identidade visual da Enter.
 6. Monta e envia no Slack: msg geral, msg de líderes, uma DM por líder e um
    relatório de conformidade das regras.
@@ -74,12 +72,10 @@ src/gender_infer.py inferência de gênero por nome (BR)
 src/sheets.py       leitura de líderes (CSV) + histórico + casamento por tokens
 src/slack_msgs.py   match Convenia→Slack + 3 mensagens + relatório
 src/render.py       gera index.html a partir de groups.json + hotspots.json
-src/hotspots.py     busca sugestões de rolê no Google Places (raio de 5km do escritório)
 src/main.py         run_api (pipeline), build_groups (grupo do Mateus),
                     _send (roteamento TESTE), diagnose, work_anniversaries
 src/server.py       Flask: GET / (artefato), GET /fonts, POST /run, GET /debug, GET /health
-data/hotspots.json  sugestões de rolê — auto-atualizado todo mês via OpenStreetMap
-                    (fallback pro conteúdo existente se a busca falhar)
+data/hotspots.json  sugestões de rolê ("Onde marcar") — lista fixa, editada à mão
 data/fonts/         Geist (auto-hospedada, identidade Enter)
 data/logo-enter.svg logo oficial
 Procfile            gunicorn (timeout 300, threads 4)
@@ -120,7 +116,6 @@ ANNIVERSARY_LEADER_EMAIL=mateus@getenter.ai
 GROUP_MIN_WOMEN=2
 INFER_GENDER=true
 EMAIL_DOMAIN=getenter.ai
-OFFICE_ADDRESS=Rua Capote Valente, 839 - Pinheiros, São Paulo - SP, 05409-002
 ```
 Scopes do bot Slack: `chat:write`, `users:read`, `users:read.email`.
 
@@ -252,21 +247,18 @@ está commitado no repo até que `/run` rode de novo (ver seção 10) — então
 mudanças de copy/design só aparecem no artefato ao vivo depois de chamar
 `POST /run?send=false` (ou `send=true`) uma vez após o deploy.
 
-## 16. Sugestões de rolê (OpenStreetMap — sem API key)
-`src/hotspots.py` busca, todo mês, lugares reais num raio de 5km do
-`OFFICE_ADDRESS` (Nominatim pra geocodificar + Overpass API pra achar
-lugares), cobrindo Almoço/Jantar/Barzinhos/Aulas (arts_centre, ateliês de
-cerâmica/escultura/arte), e escreve em `data/hotspots.json` com links
-clicáveis que abrem o lugar no Google Maps (busca por nome — sem place_id
-exato, mas geralmente cai certo). 100% gratuito, sem key/conta/faturamento —
-se a busca falhar (o Overpass é um servidor público compartilhado, pode ficar
-lento/instável), o pipeline **não quebra**, só mantém o hotspots.json que já
-estiver lá.
+## 16. Sugestões de rolê ("Onde marcar")
+Lista **fixa**, curada à mão em `data/hotspots.json` — não há mais busca
+automática (o antigo `src/hotspots.py`, que buscava lugares via
+Nominatim/Overpass num raio de 5km do escritório, foi removido em set/2026
+porque o Overpass é um servidor público compartilhado e ficava
+lento/instável, e porque o time preferiu curar os lugares manualmente em vez
+de depender de heurísticas de "lugar estabelecido").
 
-Uma única query Overpass combina todas as categorias (usando só tags
-indexadas — `amenity=restaurant`, `amenity~bar|pub`, `amenity=arts_centre`,
-`craft=pottery/sculptor`, `shop=art`) pra evitar regex livre em `name`, que é
-lento e costuma dar timeout no servidor público.
-
-Se o endereço do escritório mudar, atualize `OFFICE_ADDRESS` (Railway
-Variables) — não precisa mexer em código.
+Cada item tem `cat` (Almoço/Jantar/Barzinhos/Aulas — livre, o front-end lê os
+valores que existirem e monta os filtros dinamicamente), `name`, `area`,
+`note` (nota/avaliação/observação) e `maps_url` (link direto — hoje são
+links curtos `maps.app.goo.gl` colados manualmente). O pipeline (`main.py`)
+não toca mais nesse arquivo — para atualizar as sugestões, edite
+`data/hotspots.json` diretamente e rode `POST /run?send=false` (ou
+`send=true`) uma vez para regenerar o artefato (ver seção 15).

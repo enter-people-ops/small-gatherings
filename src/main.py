@@ -20,10 +20,8 @@ Uso:
 from __future__ import annotations
 import os, sys, json, argparse, datetime as dt
 
-import convenia, sheets, render, hotspots, slack_msgs as S
+import convenia, sheets, render, slack_msgs as S
 from grouping import Person, Config, make_groups
-
-DEFAULT_OFFICE_ADDRESS = "Rua Capote Valente, 839 - Pinheiros, São Paulo - SP, 05409-002"
 
 def _load_env(path: str = "../.env"):
     """Carrega um .env simples (KEY=VALUE) para os.environ, se existir.
@@ -237,13 +235,8 @@ def run_api(send: bool) -> dict:
     payload = {"month": label, "generated_at": ref.isoformat(), "groups": groups_d}
     json.dump(payload, open("../data/groups.json","w",encoding="utf-8"), ensure_ascii=False, indent=2)
 
-    # sugestões de rolê via OpenStreetMap (raio de 5km do escritório); se a
-    # busca falhar, mantém o hotspots.json existente
-    fresh_hotspots, hotspots_error = hotspots.fetch_hotspots(
-        os.environ.get("OFFICE_ADDRESS", DEFAULT_OFFICE_ADDRESS), label)
-    if fresh_hotspots:
-        json.dump(fresh_hotspots, open("../data/hotspots.json","w",encoding="utf-8"), ensure_ascii=False, indent=2)
-
+    # sugestões de rolê ("Onde marcar") são uma lista fixa, curada à mão em
+    # data/hotspots.json — editar esse arquivo diretamente para atualizar.
     render.main("../data/groups.json","../data/hotspots.json","../data/index.html")
     artifact_url = os.environ.get("ARTIFACT_URL","")
     msgs = S.build_all(groups_d, artifact_url, label, token=os.environ.get("SLACK_BOT_TOKEN",""), ids=slack_ids)
@@ -259,7 +252,6 @@ def run_api(send: bool) -> dict:
               "general_channel": os.environ.get("CANAL_TESTE_GERAL") if test_mode else os.environ.get("CANAL_GERAL"),
               "leaders_channel": os.environ.get("CANAL_TESTE_LIDERES") if test_mode else os.environ.get("CANAL_LIDERES"),
               "report_target": os.environ.get("CANAL_TESTE_RELATORIO") if test_mode else os.environ.get("DM_RELATORIO"),
-              "hotspots_updated": bool(fresh_hotspots), "hotspots_error": hotspots_error,
               "general_msg": msgs["geral"], "leaders_msg": msgs["lideres"],
               "report_msg": msgs["relatorio"],
               "dms": [{"slack_id": d["slack_id"], "name": d["leader"]["name"], "text": d["text"]} for d in msgs["dms"]],

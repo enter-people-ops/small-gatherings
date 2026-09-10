@@ -1,1202 +1,254 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Enter — Small Gatherings</title>
-    <style>
-      /* ── Geist (auto-hospedado, como o Design System da Enter) ── */
-      @font-face {
-        font-family: "Geist";
-        src: url("fonts/Geist-Regular.ttf") format("truetype");
-        font-weight: 400;
-        font-display: swap;
-      }
-      @font-face {
-        font-family: "Geist";
-        src: url("fonts/Geist-Medium.ttf") format("truetype");
-        font-weight: 500;
-        font-display: swap;
-      }
-      @font-face {
-        font-family: "Geist";
-        src: url("fonts/Geist-SemiBold.ttf") format("truetype");
-        font-weight: 600;
-        font-display: swap;
-      }
-      @font-face {
-        font-family: "Geist";
-        src: url("fonts/Geist-Bold.ttf") format("truetype");
-        font-weight: 700;
-        font-display: swap;
-      }
-      @font-face {
-        font-family: "Geist Mono";
-        src: url("fonts/GeistMono-Regular.ttf") format("truetype");
-        font-weight: 400;
-        font-display: swap;
-      }
-      @font-face {
-        font-family: "Geist Mono";
-        src: url("fonts/GeistMono-Medium.ttf") format("truetype");
-        font-weight: 500;
-        font-display: swap;
-      }
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title> Enter — Small Gatherings</title>
+<style>
+/* ── Geist (auto-hospedado, como o Design System da Enter) ── */
+@font-face{font-family:"Geist";src:url("fonts/Geist-Regular.ttf") format("truetype");font-weight:400;font-display:swap}
+@font-face{font-family:"Geist";src:url("fonts/Geist-Medium.ttf") format("truetype");font-weight:500;font-display:swap}
+@font-face{font-family:"Geist";src:url("fonts/Geist-SemiBold.ttf") format("truetype");font-weight:600;font-display:swap}
+@font-face{font-family:"Geist";src:url("fonts/Geist-Bold.ttf") format("truetype");font-weight:700;font-display:swap}
+@font-face{font-family:"Geist Mono";src:url("fonts/GeistMono-Regular.ttf") format("truetype");font-weight:400;font-display:swap}
+@font-face{font-family:"Geist Mono";src:url("fonts/GeistMono-Medium.ttf") format("truetype");font-weight:500;font-display:swap}
 
-      :root {
-        /* cores semânticas (light) — fig-tokens.css */
-        --bg: rgb(255, 255, 255);
-        --bg-2: rgb(250, 250, 250);
-        --surface: rgba(0, 0, 0, 0.05);
-        --inverse: rgb(23, 24, 30);
-        --brand: rgb(255, 174, 53);
-        --brand-100: rgb(255, 238, 196);
-        --brand-200: rgb(255, 217, 138);
-        --brand-400: rgb(227, 141, 31);
-        --on-brand: rgb(10, 10, 10);
-        --tx: rgb(23, 23, 23);
-        --tx-2: rgb(82, 82, 82);
-        --tx-3: rgb(161, 161, 161);
-        --tx-inv: rgb(250, 250, 250);
-        /* strokes como anéis inset (o DS nunca usa border) */
-        --ring: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
-        --ring-2: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
-        --ring-3: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
-        --ring-dark: inset 0 0 0 1px rgba(255, 255, 255, 0.15);
-        --ring-focus: inset 0 0 0 2px rgb(0, 0, 0);
-        --ring-brand: inset 0 0 0 2px rgb(255, 174, 53);
-        --shadow-overlay: 0 4px 16px rgba(0, 0, 0, 0.15);
-        --font:
-          "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial,
-          sans-serif;
-        --mono:
-          "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-        --r-lg: 8px;
-        --r-xl: 12px;
-        --r-2xl: 16px;
-        --r-full: 9999px;
-        --ease: cubic-bezier(0.2, 0, 0.2, 1);
-        --dur: 180ms;
-        /* tag líder (tag-purple) + fills saturados oficiais p/ avatares */
-        --tag-lead-bg: rgb(226, 217, 238);
-        --tag-lead-fg: rgb(99, 71, 148);
-      }
-      * {
-        box-sizing: border-box;
-      }
-      html {
-        -webkit-text-size-adjust: 100%;
-      }
-      body {
-        margin: 0;
-        background: var(--bg);
-        color: var(--tx);
-        font-family: var(--font);
-        font-size: 16px;
-        line-height: 1.5;
-        -webkit-font-smoothing: antialiased;
-      }
-      .wrap {
-        max-width: 960px;
-        margin: 0 auto;
-        padding: clamp(20px, 5vw, 56px) 20px 80px;
-      }
-      header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 16px;
-        margin-bottom: clamp(32px, 6vw, 56px);
-      }
-      header .logo {
-        height: 22px;
-        width: auto;
-        display: block;
-      }
-      .eyebrow {
-        font-family: var(--mono);
-        font-weight: 500;
-        font-size: 12px;
-        letter-spacing: 1.6px;
-        text-transform: uppercase;
-        color: var(--tx-3);
-      }
-      /* hero */
-      .hero h1 {
-        font-weight: 600;
-        font-size: clamp(30px, 7vw, 48px);
-        line-height: 1.05;
-        letter-spacing: -0.4px;
-        margin: 0 0 14px;
-      }
-      .hero p {
-        margin: 0 0 28px;
-        color: var(--tx-2);
-        font-size: clamp(15px, 2.4vw, 17px);
-      }
-      .searchbox {
-        position: relative;
-        max-width: 560px;
-      }
-      #q {
-        width: 100%;
-        font-family: var(--font);
-        font-size: 18px;
-        font-weight: 400;
-        height: 56px;
-        padding: 0 18px 0 50px;
-        border: 0;
-        border-radius: var(--r-xl);
-        background: var(--bg);
-        color: var(--tx);
-        box-shadow: var(--ring);
-        outline: none;
-        transition: box-shadow var(--dur) var(--ease);
-      }
-      #q::placeholder {
-        color: var(--tx-3);
-      }
-      #q:focus {
-        box-shadow: var(--ring-focus);
-      }
-      .searchbox svg.ic {
-        position: absolute;
-        left: 17px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: var(--tx-3);
-      }
-      .results {
-        margin-top: 36px;
-      }
-      .empty {
-        color: var(--tx-2);
-        margin-top: 24px;
-        font-size: 15px;
-      }
-      .pick {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        margin-top: 14px;
-      }
-      .pick button {
-        text-align: left;
-        font: inherit;
-        font-size: 15px;
-        background: var(--bg);
-        border: 0;
-        box-shadow: var(--ring-2);
-        border-radius: var(--r-lg);
-        padding: 13px 15px;
-        cursor: pointer;
-        transition: box-shadow var(--dur) var(--ease);
-      }
-      .pick button:hover {
-        box-shadow: var(--ring);
-      }
-      /* group card */
-      .groupcard {
-        background: var(--bg);
-        box-shadow: var(--ring);
-        border-radius: var(--r-2xl);
-        overflow: hidden;
-        opacity: 0;
-        transform: translateY(8px);
-        animation: rise 0.4s var(--ease) forwards;
-      }
-      @keyframes rise {
-        to {
-          opacity: 1;
-          transform: none;
-        }
-      }
-      @media (prefers-reduced-motion: reduce) {
-        .groupcard {
-          animation: none;
-          opacity: 1;
-          transform: none;
-        }
-      }
-      .gc-top {
-        padding: 22px 24px;
-        box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.05);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 14px;
-        flex-wrap: wrap;
-      }
-      .gc-top .you {
-        font-family: var(--mono);
-        font-size: 11px;
-        letter-spacing: 1.6px;
-        text-transform: uppercase;
-        color: var(--tx-3);
-        margin: 0 0 6px;
-      }
-      .gc-top h2 {
-        font-weight: 600;
-        font-size: 22px;
-        margin: 0;
-        letter-spacing: -0.4px;
-      }
-      .chip {
-        font-size: 13px;
-        font-weight: 500;
-        padding: 7px 13px;
-        border-radius: var(--r-full);
-        background: var(--brand);
-        color: var(--on-brand);
-        white-space: nowrap;
-      }
-      .members {
-        list-style: none;
-        margin: 0;
-        padding: 6px 12px;
-      }
-      .member {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        padding: 12px;
-        border-radius: var(--r-lg);
-      }
-      .member + .member {
-        box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.05);
-      }
-      .member .av {
-        width: 40px;
-        height: 40px;
-        border-radius: var(--r-full);
-        flex: none;
-        display: grid;
-        place-items: center;
-        font-weight: 500;
-        color: #fff;
-        font-size: 15px;
-      }
-      .member .who {
-        flex: 1;
-        min-width: 0;
-      }
-      .member .nm {
-        font-weight: 500;
-        font-size: 15px;
-      }
-      .member .meta {
-        color: var(--tx-2);
-        font-size: 13px;
-      }
-      .lead {
-        font-size: 12px;
-        font-weight: 500;
-        color: var(--tag-lead-fg);
-        background: var(--tag-lead-bg);
-        padding: 4px 10px;
-        border-radius: var(--r-full);
-      }
-      .member.me {
-        background: var(--brand-100);
-        box-shadow: var(--ring-brand);
-      }
-      /* hotspots — superfície inversa oficial */
-      .spots {
-        margin-top: 20px;
-        background: var(--inverse);
-        color: var(--tx-inv);
-        border-radius: var(--r-2xl);
-        padding: 24px;
-      }
-      .spots h3 {
-        font-weight: 600;
-        margin: 0 0 4px;
-        font-size: 19px;
-        letter-spacing: -0.4px;
-      }
-      .spots .sub {
-        margin: 0 0 18px;
-        color: rgba(250, 250, 250, 0.65);
-        font-size: 13px;
-      }
-      .spotgrid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
-        gap: 12px;
-      }
-      .spot {
-        background: rgba(255, 255, 255, 0.05);
-        box-shadow: var(--ring-dark);
-        border-radius: var(--r-xl);
-        padding: 14px 16px;
-      }
-      .spot .c {
-        font-family: var(--mono);
-        font-size: 11px;
-        letter-spacing: 1.2px;
-        text-transform: uppercase;
-        color: var(--brand);
-      }
-      .spot .n {
-        font-weight: 500;
-        margin: 6px 0 2px;
-        font-size: 15px;
-      }
-      .spot .a {
-        font-size: 13px;
-        color: rgba(250, 250, 250, 0.7);
-      }
-      .spot .no {
-        font-size: 12px;
-        color: rgba(250, 250, 250, 0.55);
-        margin-top: 6px;
-        line-height: 1.45;
-      }
-      /* browse */
-      .browse {
-        margin-top: 56px;
-        box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.05);
-        padding-top: 28px;
-      }
-      .browse summary {
-        font-weight: 600;
-        font-size: 17px;
-        cursor: pointer;
-        list-style: none;
-        color: var(--tx);
-      }
-      .browse summary::-webkit-details-marker {
-        display: none;
-      }
-      .browse summary .tw {
-        color: var(--brand-400);
-        font-family: var(--mono);
-        margin-right: 8px;
-      }
-      .allgroups {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
-        gap: 14px;
-        margin-top: 20px;
-      }
-      .mini {
-        background: var(--bg-2);
-        box-shadow: var(--ring-3);
-        border-radius: var(--r-xl);
-        padding: 15px 16px;
-      }
-      .mini h4 {
-        font-weight: 600;
-        margin: 0 0 9px;
-        font-size: 14px;
-      }
-      .mini ul {
-        margin: 0;
-        padding-left: 0;
-        list-style: none;
-      }
-      .mini li {
-        font-size: 13px;
-        padding: 3px 0;
-        color: var(--tx-2);
-      }
-      .mini li b {
-        color: var(--tx);
-        font-weight: 500;
-      }
-      .mini .star {
-        color: var(--brand-400);
-      }
-      .wa-note {
-        margin-top: 24px;
-        color: var(--tx-2);
-        font-size: 13px;
-        text-align: center;
-      }
-      footer {
-        margin-top: 20px;
-        color: var(--tx-3);
-        font-size: 12px;
-        text-align: center;
-        font-family: var(--mono);
-        letter-spacing: 0.3px;
-      }
-      footer a {
-        color: inherit;
-        text-decoration: underline;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="wrap">
-      <header>
-        <span class="logo"
-          ><svg
-            width="134"
-            height="24"
-            viewBox="0 0 134 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <g clip-path="url(#clip0_1_219)">
-              <path
-                d="M89.9901 23.885V0H100.05C104.409 0 107.428 2.72971 107.428 6.48307C107.428 9.55398 105.751 11.8401 103.571 12.5225C106.254 12.5225 107.092 13.4779 107.092 15.8664V23.885H103.739V16.7195C103.739 14.8428 103.236 14.331 101.391 14.331H93.3434V23.885H89.9901ZM93.3434 11.26H99.5472C102.397 11.26 104.074 9.38339 104.074 6.99488C104.074 4.43579 102.397 3.07091 99.5472 3.07091H93.3434V11.26Z"
-                fill="#171717"
-              ></path>
-              <path
-                d="M68.1147 23.885V0H85.2168V3.07091H71.4681V10.0658H83.2048V13.1367H71.4681V20.814H85.5522V23.885H68.1147Z"
-                fill="#171717"
-              ></path>
-              <path
-                d="M52.7972 23.885V3.07091H44.4136V0H64.5337V3.07091H56.1503V23.885H52.7972Z"
-                fill="#171717"
-              ></path>
-              <path
-                d="M21.8752 23.885V0H26.5699L37.4682 19.7563V0H40.8216V23.885H36.127L25.2286 4.1287V23.885H21.8752Z"
-                fill="#171717"
-              ></path>
-              <path
-                d="M0 23.885V0H17.1021V3.07091H3.35334V10.0658H15.09V13.1367H3.35334V20.814H17.4374V23.885H0Z"
-                fill="#171717"
-              ></path>
-              <path
-                d="M133.082 0H119.99C119.838 0 119.715 0.125671 119.715 0.280694V13.0561C119.715 13.2111 119.591 13.3368 119.439 13.3368H112.603C112.451 13.3368 112.327 13.4624 112.327 13.6175V23.6043C112.327 23.7593 112.451 23.8849 112.603 23.8849H133.082C133.234 23.8849 133.358 23.7593 133.358 23.6043V0.280694C133.358 0.125671 133.234 0 133.082 0Z"
-                fill="#171717"
-              ></path>
-            </g>
-            <defs>
-              <clipPath id="clip0_1_219">
-                <rect width="133.565" height="24" fill="white"></rect>
-              </clipPath>
-            </defs></svg
-        ></span>
-        <span class="eyebrow">Small Gatherings · Setembro/2026</span>
-      </header>
+:root{
+  /* cores semânticas (light) — fig-tokens.css */
+  --bg:rgb(255,255,255); --bg-2:rgb(250,250,250); --surface:rgba(0,0,0,.05); --inverse:rgb(23,24,30);
+  --brand:rgb(255,174,53); --brand-100:rgb(255,238,196); --brand-200:rgb(255,217,138);
+  --brand-400:rgb(227,141,31); --on-brand:rgb(10,10,10);
+  --tx:rgb(23,23,23); --tx-2:rgb(82,82,82); --tx-3:rgb(161,161,161); --tx-inv:rgb(250,250,250);
+  /* strokes como anéis inset (o DS nunca usa border) */
+  --ring:inset 0 0 0 1px rgba(0,0,0,.15); --ring-2:inset 0 0 0 1px rgba(0,0,0,.10);
+  --ring-3:inset 0 0 0 1px rgba(0,0,0,.05); --ring-dark:inset 0 0 0 1px rgba(255,255,255,.15);
+  --ring-focus:inset 0 0 0 2px rgb(0,0,0); --ring-brand:inset 0 0 0 2px rgb(255,174,53);
+  --shadow-overlay:0 4px 16px rgba(0,0,0,.15);
+  --font:"Geist",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  --mono:"Geist Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --r-lg:8px; --r-xl:12px; --r-2xl:16px; --r-full:9999px;
+  --ease:cubic-bezier(.2,0,.2,1); --dur:180ms;
+  /* tag líder (tag-purple) + fills saturados oficiais p/ avatares */
+  --tag-lead-bg:rgb(226,217,238); --tag-lead-fg:rgb(99,71,148);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--font);
+  font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:960px;margin:0 auto;padding:clamp(20px,5vw,56px) 20px 80px}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:clamp(32px,6vw,56px)}
+header .logo{height:22px;width:auto;display:block}
+.eyebrow{font-family:var(--mono);font-weight:500;font-size:12px;letter-spacing:1.6px;
+  text-transform:uppercase;color:var(--tx-3)}
+/* hero */
+.hero h1{font-weight:600;font-size:clamp(30px,7vw,48px);line-height:1.05;
+  letter-spacing:-.4px;margin:0 0 14px}
+.hero p{margin:0 0 28px;color:var(--tx-2);font-size:clamp(15px,2.4vw,17px)}
+.searchbox{position:relative;max-width:560px}
+#q{width:100%;font-family:var(--font);font-size:18px;font-weight:400;height:56px;
+  padding:0 18px 0 50px;border:0;border-radius:var(--r-xl);background:var(--bg);
+  color:var(--tx);box-shadow:var(--ring);outline:none;transition:box-shadow var(--dur) var(--ease)}
+#q::placeholder{color:var(--tx-3)}
+#q:focus{box-shadow:var(--ring-focus)}
+.searchbox svg.ic{position:absolute;left:17px;top:50%;transform:translateY(-50%);color:var(--tx-3)}
+.results{margin-top:36px}
+.empty{color:var(--tx-2);margin-top:24px;font-size:15px}
+.pick{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+.pick button{text-align:left;font:inherit;font-size:15px;background:var(--bg);border:0;
+  box-shadow:var(--ring-2);border-radius:var(--r-lg);padding:13px 15px;cursor:pointer;
+  transition:box-shadow var(--dur) var(--ease)}
+.pick button:hover{box-shadow:var(--ring)}
+/* group card */
+.groupcard{background:var(--bg);box-shadow:var(--ring);border-radius:var(--r-2xl);overflow:hidden;
+  opacity:0;transform:translateY(8px);animation:rise .4s var(--ease) forwards}
+@keyframes rise{to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.groupcard{animation:none;opacity:1;transform:none}}
+.gc-top{padding:22px 24px;box-shadow:inset 0 -1px 0 rgba(0,0,0,.05);
+  display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.gc-top .you{font-family:var(--mono);font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:var(--tx-3);margin:0 0 6px}
+.gc-top h2{font-weight:600;font-size:22px;margin:0;letter-spacing:-.4px}
+.chip{font-size:13px;font-weight:500;padding:7px 13px;border-radius:var(--r-full);
+  background:var(--brand);color:var(--on-brand);white-space:nowrap}
+.members{list-style:none;margin:0;padding:6px 12px}
+.member{display:flex;align-items:center;gap:14px;padding:12px;border-radius:var(--r-lg)}
+.member+.member{box-shadow:inset 0 1px 0 rgba(0,0,0,.05)}
+.member .av{width:40px;height:40px;border-radius:var(--r-full);flex:none;display:grid;place-items:center;
+  font-weight:500;color:#fff;font-size:15px}
+.member .who{flex:1;min-width:0}
+.member .nm{font-weight:500;font-size:15px}
+.member .meta{color:var(--tx-2);font-size:13px}
+.lead{font-size:12px;font-weight:500;color:var(--tag-lead-fg);background:var(--tag-lead-bg);
+  padding:4px 10px;border-radius:var(--r-full)}
+.member.me{background:var(--brand-100);box-shadow:var(--ring-brand)}
+/* hotspots — superfície inversa oficial */
+.spots{margin-top:20px;background:var(--inverse);color:var(--tx-inv);border-radius:var(--r-2xl);padding:24px}
+.spots-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:16px}
+.spots h3{font-weight:600;margin:0;font-size:19px;letter-spacing:-.4px}
+.spots-count{font-family:var(--mono);font-size:12px;color:rgba(250,250,250,.5)}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.filter-btn{font:inherit;font-size:13px;font-weight:500;color:rgba(250,250,250,.75);
+  background:rgba(255,255,255,.06);box-shadow:var(--ring-dark);border:0;border-radius:var(--r-full);
+  padding:8px 15px;cursor:pointer;transition:background var(--dur) var(--ease),color var(--dur) var(--ease)}
+.filter-btn:hover{background:rgba(255,255,255,.12)}
+.filter-btn.active{background:var(--brand);color:var(--on-brand);box-shadow:none;font-weight:600}
+.spotgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:12px}
+.spot{display:block;background:rgba(255,255,255,.05);box-shadow:var(--ring-dark);border-radius:var(--r-xl);
+  padding:14px 16px;color:inherit;text-decoration:none;transition:background var(--dur) var(--ease)}
+.spot:hover{background:rgba(255,255,255,.1)}
+.spot .c{font-family:var(--mono);font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--brand)}
+.spot .n{font-weight:500;margin:6px 0 2px;font-size:15px}
+.spot .a{font-size:13px;color:rgba(250,250,250,.7)}
+.spot .no{font-size:12px;color:rgba(250,250,250,.55);margin-top:6px;line-height:1.45}
+.spots-empty{color:rgba(250,250,250,.55);font-size:14px;padding:8px 0}
+/* botão "ver todos os grupos" */
+.btn{display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:14px;font-weight:500;
+  background:var(--bg);border:0;box-shadow:var(--ring-2);border-radius:var(--r-full);
+  padding:10px 18px;cursor:pointer;color:var(--tx);transition:box-shadow var(--dur) var(--ease)}
+.btn:hover{box-shadow:var(--ring)}
+/* browse */
+.browse{margin-top:56px;box-shadow:inset 0 1px 0 rgba(0,0,0,.05);padding-top:28px}
+.browse h3{font-weight:600;font-size:16px;margin:0 0 16px}
+.allgroups{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:14px}
+.mini{background:var(--bg-2);box-shadow:var(--ring-3);border-radius:var(--r-xl);padding:15px 16px}
+.mini h4{font-weight:600;margin:0 0 9px;font-size:14px}
+.mini ul{margin:0;padding-left:0;list-style:none}
+.mini li{font-size:13px;padding:3px 0;color:var(--tx-2)}
+.mini li b{color:var(--tx);font-weight:500}
+.mini .star{color:var(--brand-400)}
+.wa-note{margin-top:24px;color:var(--tx-2);font-size:13px;text-align:center}
+footer{margin-top:20px;color:var(--tx-3);font-size:12px;text-align:center;font-family:var(--mono);letter-spacing:.3px}
+footer a{color:inherit;text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="logo"><svg width="134" height="24" viewBox="0 0 134 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_1_219)">
+<path d="M89.9901 23.885V0H100.05C104.409 0 107.428 2.72971 107.428 6.48307C107.428 9.55398 105.751 11.8401 103.571 12.5225C106.254 12.5225 107.092 13.4779 107.092 15.8664V23.885H103.739V16.7195C103.739 14.8428 103.236 14.331 101.391 14.331H93.3434V23.885H89.9901ZM93.3434 11.26H99.5472C102.397 11.26 104.074 9.38339 104.074 6.99488C104.074 4.43579 102.397 3.07091 99.5472 3.07091H93.3434V11.26Z" fill="#171717"></path>
+<path d="M68.1147 23.885V0H85.2168V3.07091H71.4681V10.0658H83.2048V13.1367H71.4681V20.814H85.5522V23.885H68.1147Z" fill="#171717"></path>
+<path d="M52.7972 23.885V3.07091H44.4136V0H64.5337V3.07091H56.1503V23.885H52.7972Z" fill="#171717"></path>
+<path d="M21.8752 23.885V0H26.5699L37.4682 19.7563V0H40.8216V23.885H36.127L25.2286 4.1287V23.885H21.8752Z" fill="#171717"></path>
+<path d="M0 23.885V0H17.1021V3.07091H3.35334V10.0658H15.09V13.1367H3.35334V20.814H17.4374V23.885H0Z" fill="#171717"></path>
+<path d="M133.082 0H119.99C119.838 0 119.715 0.125671 119.715 0.280694V13.0561C119.715 13.2111 119.591 13.3368 119.439 13.3368H112.603C112.451 13.3368 112.327 13.4624 112.327 13.6175V23.6043C112.327 23.7593 112.451 23.8849 112.603 23.8849H133.082C133.234 23.8849 133.358 23.7593 133.358 23.6043V0.280694C133.358 0.125671 133.234 0 133.082 0Z" fill="#171717"></path>
+</g>
+<defs>
+<clipPath id="clip0_1_219">
+<rect width="133.565" height="24" fill="white"></rect>
+</clipPath>
+</defs>
+</svg></span>
+    <span class="eyebrow">Small Gatherings · Setembro/2026</span>
+  </header>
 
-      <section class="hero">
-        <h1>Ache seu grupo de Small Gathering do mês</h1>
-        <p>
-          Todos os meses a gente mistura o time da Enter para que mais pessoas
-          se conheçam para além do escritório. Aproveite esse momento para viver
-          uma experiência super legal e diferente (seja um jantar especial, um
-          novo hobbie, um esporte) e se integrar com pessoas novas!
-        </p>
-        <div class="searchbox">
-          <svg
-            class="ic"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <circle cx="11" cy="11" r="7" />
-            <path d="m21 21-4.3-4.3" />
-          </svg>
-          <input
-            id="q"
-            type="search"
-            placeholder="Busque seu nome aqui!"
-            autocomplete="off"
-            autofocus
-            aria-label="Buscar seu nome"
-          />
-        </div>
-      </section>
-
-      <div class="results" id="results"></div>
-
-      <details class="browse">
-        <summary><span class="tw">▸</span>Ver todos os grupos</summary>
-        <div class="allgroups" id="allgroups"></div>
-      </details>
-
-      <p class="wa-note">
-        Lembrem-se de sempre mandar suas fotos de small gathering em nosso grupo
-        do WhatsApp (Black Pearl)
-      </p>
-
-      <footer>
-        Dúvidas? fale com o time de People
-        <a
-          href="https://slack.com/app_redirect?channel=D0BT9B8SPRS"
-          target="_blank"
-          rel="noopener"
-          >@Gabriela Barbosa</a
-        >
-      </footer>
+  <section class="hero">
+    <h1>Ache seu grupo de Small Gathering do mês</h1>
+    <p>Todos os meses a gente mistura o time da Enter para que mais pessoas se conheçam para além do escritório. Aproveite esse momento para viver uma experiência super legal e diferente (seja um jantar especial, um novo hobbie, um esporte) e se integrar com pessoas novas!</p>
+    <div class="searchbox">
+      <svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="q" type="search" placeholder="Busque seu nome aqui!" autocomplete="off" autofocus aria-label="Buscar seu nome">
     </div>
+  </section>
 
-    <script>
-      const DATA = {
-        month: "Setembro/2026",
-        generated_at: "2026-09-09",
-        groups: [
-          [
-            {
-              id: "e043",
-              name: "Sara Bittencourt",
-              gender: "M",
-              team: "Engenharia",
-              department: "People",
-              seniority: "Lead",
-              is_leader: true,
-              tenure_label: "6 anos",
-            },
-            {
-              id: "e005",
-              name: "Felipe Costa",
-              gender: "Outro",
-              team: "People",
-              department: "People",
-              seniority: "Gerência",
-              is_leader: false,
-              tenure_label: "8 anos",
-            },
-            {
-              id: "e017",
-              name: "Rafael Pinto",
-              gender: "Outro",
-              team: "AID",
-              department: "Finance",
-              seniority: "Lead",
-              is_leader: false,
-              tenure_label: "6 anos",
-            },
-            {
-              id: "e032",
-              name: "Giovana Aragão",
-              gender: "F",
-              team: "Finance",
-              department: "Finance",
-              seniority: "Estágio",
-              is_leader: false,
-              tenure_label: "3 meses",
-            },
-            {
-              id: "e006",
-              name: "Gabriela Nunes",
-              gender: "M",
-              team: "Legal Strategy",
-              department: "Produto",
-              seniority: "Júnior",
-              is_leader: false,
-              tenure_label: "1 ano",
-            },
-            {
-              id: "e022",
-              name: "Wanda Luz",
-              gender: "M",
-              team: "Produto",
-              department: "GTM",
-              seniority: "Lead",
-              is_leader: false,
-              tenure_label: "6 anos",
-            },
-          ],
-          [
-            {
-              id: "e019",
-              name: "Thiago Braga",
-              gender: "F",
-              team: "GTM",
-              department: "AID",
-              seniority: "Lead",
-              is_leader: true,
-              tenure_label: "6 anos",
-            },
-            {
-              id: "e004",
-              name: "Elena Rocha",
-              gender: "M",
-              team: "Produto",
-              department: "People",
-              seniority: "Lead",
-              is_leader: false,
-              tenure_label: "6 anos",
-            },
-            {
-              id: "e031",
-              name: "Fábio Guedes",
-              gender: "F",
-              team: "AID",
-              department: "Engenharia",
-              seniority: "Estágio",
-              is_leader: false,
-              tenure_label: "3 meses",
-            },
-            {
-              id: "e036",
-              name: "Kelly Amaral",
-              gender: "F",
-              team: "People",
-              department: "People",
-              seniority: "Lead",
-              is_leader: false,
-              tenure_label: "6 anos",
-            },
-            {
-              id: "e028",
-              name: "Clara Viana",
-              gender: "F",
-              team: "Finance",
-              department: "Finance",
-              seniority: "Estágio",
-              is_leader: false,
-              tenure_label: "3 meses",
-            },
-            {
-              id: "e002",
-              name: "Carla Dias",
-              gender: "Outro",
-              team: "Engenharia",
-              department: "Finance",
-              seniority: "Estágio",
-              is_leader: false,
-              tenure_label: "3 meses",
-            },
-          ],
-          [
-            {
-              id: "e037",
-              name: "Leo Tavares",
-              gender: "F",
-              team: "Produto",
-              department: "GTM",
-              seniority: "Lead",
-              is_leader: true,
-              tenure_label: "6 anos",
-            },
-            {
-              id: "e041",
-              name: "Paula Nogueira",
-              gender: "Outro",
-              team: "AID",
-              department: "Finance",
-              seniority: "Pleno",
-              is_leader: false,
-              tenure_label: "2.5 anos",
-            },
-            {
-              id: "e009",
-              name: "João Vieira",
-              gender: "F",
-              team: "AID",
-              department: "GTM",
-              seniority: "Estágio",
-              is_leader: false,
-              tenure_label: "3 meses",
-            },
-            {
-              id: "e024",
-              name: "Yara Mendes",
-              gender: "F",
-              team: "GTM",
-              department: "Produto",
-              seniority: "Sênior",
-              is_leader: false,
-              tenure_label: "4 anos",
-            },
-            {
-              id: "e045",
-              name: "Vera Quintana",
-              gender: "M",
-              team: "People",
-              department: "AID",
-              seniority: "Gerência",
-              is_leader: false,
-              tenure_label: "8 anos",
-            },
-            {
-              id: "e034",
-              name: "Iris Camargo",
-              gender: "M",
-              team: "Legal Strategy",
-              department: "Produto",
-              seniority: "Estágio",
-              is_leader: false,
-              tenure_label: "3 meses",
-            },
-          ],
-          [
-            {
-              id: "e038",
-              name: "Mia Barbosa",
-              gender: "Outro",
-              team: "Engenharia",
-              department: "Finance",
-              seniority: "Lead",
-              is_leader: true,
-              tenure_label: "6 anos",
-            },
-            {
-              id: "e035",
-              name: "Júlio Farias",
-              gender: "M",
-              team: "AID",
-              department: "AID",
-              seniority: "Júnior",
-              is_leader: false,
-              tenure_label: "1 ano",
-            },
-            {
-              id: "e042",
-              name: "Rui Cardoso",
-              gender: "F",
-              team: "GTM",
-              department: "People",
-              seniority: "Lead",
-              is_leader: false,
-              tenure_label: "6 anos",
-            },
-            {
-              id: "e033",
-              name: "Hugo Bastos",
-              gender: "M",
-              team: "People",
-              department: "AID",
-              seniority: "Lead",
-              is_leader: false,
-              tenure_label: "6 anos",
-            },
-            {
-              id: "e020",
-              name: "Ursula Faria",
-              gender: "M",
-              team: "Produto",
-              department: "GTM",
-              seniority: "Pleno",
-              is_leader: false,
-              tenure_label: "2.5 anos",
-            },
-          ],
-          [
-            {
-              id: "e029",
-              name: "Davi Antunes",
-              gender: "F",
-              team: "Produto",
-              department: "Finance",
-              seniority: "Lead",
-              is_leader: true,
-              tenure_label: "6 anos",
-            },
-            {
-              id: "e021",
-              name: "Vitor Campos",
-              gender: "Outro",
-              team: "Finance",
-              department: "Finance",
-              seniority: "Estágio",
-              is_leader: false,
-              tenure_label: "3 meses",
-            },
-            {
-              id: "e008",
-              name: "Isabela Prado",
-              gender: "F",
-              team: "Legal Strategy",
-              department: "GTM",
-              seniority: "Lead",
-              is_leader: false,
-              tenure_label: "6 anos",
-            },
-            {
-              id: "e039",
-              name: "Nina Correia",
-              gender: "M",
-              team: "People",
-              department: "Produto",
-              seniority: "Gerência",
-              is_leader: false,
-              tenure_label: "8 anos",
-            },
-            {
-              id: "e003",
-              name: "Diego Alves",
-              gender: "F",
-              team: "AID",
-              department: "Finance",
-              seniority: "Júnior",
-              is_leader: false,
-              tenure_label: "1 ano",
-            },
-          ],
-          [
-            {
-              id: "e040",
-              name: "Otávio Freitas",
-              gender: "M",
-              team: "AID",
-              department: "People",
-              seniority: "Lead",
-              is_leader: true,
-              tenure_label: "6 anos",
-            },
-            {
-              id: "e011",
-              name: "Lucas Reis",
-              gender: "F",
-              team: "Produto",
-              department: "GTM",
-              seniority: "Sênior",
-              is_leader: false,
-              tenure_label: "4 anos",
-            },
-            {
-              id: "e000",
-              name: "Ana Souza",
-              gender: "M",
-              team: "Finance",
-              department: "Finance",
-              seniority: "Júnior",
-              is_leader: false,
-              tenure_label: "1 ano",
-            },
-            {
-              id: "e027",
-              name: "Breno Duarte",
-              gender: "F",
-              team: "GTM",
-              department: "People",
-              seniority: "Estágio",
-              is_leader: false,
-              tenure_label: "3 meses",
-            },
-            {
-              id: "e026",
-              name: "Alice Fonseca",
-              gender: "F",
-              team: "Legal Strategy",
-              department: "Engenharia",
-              seniority: "Pleno",
-              is_leader: false,
-              tenure_label: "2.5 anos",
-            },
-          ],
-          [
-            {
-              id: "e023",
-              name: "Xavier Nobre",
-              gender: "M",
-              team: "AID",
-              department: "Engenharia",
-              seniority: "Lead",
-              is_leader: true,
-              tenure_label: "6 anos",
-            },
-            {
-              id: "e007",
-              name: "Henrique Melo",
-              gender: "Outro",
-              team: "People",
-              department: "Produto",
-              seniority: "Estágio",
-              is_leader: false,
-              tenure_label: "3 meses",
-            },
-            {
-              id: "e047",
-              name: "Zoe Martins",
-              gender: "F",
-              team: "Engenharia",
-              department: "Finance",
-              seniority: "Estágio",
-              is_leader: false,
-              tenure_label: "3 meses",
-            },
-            {
-              id: "e018",
-              name: "Sofia Moraes",
-              gender: "F",
-              team: "Finance",
-              department: "Legal Strategy",
-              seniority: "Pleno",
-              is_leader: false,
-              tenure_label: "2.5 anos",
-            },
-            {
-              id: "e015",
-              name: "Pedro Ramos",
-              gender: "M",
-              team: "Produto",
-              department: "People",
-              seniority: "Gerência",
-              is_leader: false,
-              tenure_label: "8 anos",
-            },
-          ],
-          [
-            {
-              id: "e001",
-              name: "Bruno Lima",
-              gender: "M",
-              team: "Finance",
-              department: "People",
-              seniority: "Lead",
-              is_leader: true,
-              tenure_label: "6 anos",
-            },
-            {
-              id: "e010",
-              name: "Karina Sá",
-              gender: "M",
-              team: "People",
-              department: "Finance",
-              seniority: "Gerência",
-              is_leader: false,
-              tenure_label: "8 anos",
-            },
-            {
-              id: "e044",
-              name: "Tomás Aguiar",
-              gender: "Outro",
-              team: "Produto",
-              department: "Legal Strategy",
-              seniority: "Estágio",
-              is_leader: false,
-              tenure_label: "3 meses",
-            },
-            {
-              id: "e014",
-              name: "Olívia Castro",
-              gender: "F",
-              team: "Legal Strategy",
-              department: "People",
-              seniority: "Júnior",
-              is_leader: false,
-              tenure_label: "1 ano",
-            },
-            {
-              id: "e025",
-              name: "Zeca Pires",
-              gender: "F",
-              team: "AID",
-              department: "GTM",
-              seniority: "Estágio",
-              is_leader: false,
-              tenure_label: "3 meses",
-            },
-          ],
-          [
-            {
-              id: "e016",
-              name: "Queila Barros",
-              gender: "M",
-              team: "People",
-              department: "Finance",
-              seniority: "Lead",
-              is_leader: true,
-              tenure_label: "6 anos",
-            },
-            {
-              id: "e030",
-              name: "Erika Lopes",
-              gender: "Outro",
-              team: "AID",
-              department: "Finance",
-              seniority: "Júnior",
-              is_leader: false,
-              tenure_label: "1 ano",
-            },
-            {
-              id: "e046",
-              name: "William Sales",
-              gender: "M",
-              team: "Finance",
-              department: "Produto",
-              seniority: "Pleno",
-              is_leader: false,
-              tenure_label: "2.5 anos",
-            },
-            {
-              id: "e012",
-              name: "Marina Teixeira",
-              gender: "F",
-              team: "Produto",
-              department: "GTM",
-              seniority: "Lead",
-              is_leader: false,
-              tenure_label: "6 anos",
-            },
-            {
-              id: "e013",
-              name: "Nathan Gomes",
-              gender: "F",
-              team: "Legal Strategy",
-              department: "AID",
-              seniority: "Estágio",
-              is_leader: false,
-              tenure_label: "3 meses",
-            },
-          ],
-        ],
-      };
-      const HOTSPOTS = {
-        month: "Setembro/2026",
-        office_ref: "Região da Faria Lima / Itaim",
-        items: [
-          {
-            cat: "Café",
-            name: "Coffee Lab",
-            area: "Vila Madalena",
-            note: "Clássico do café de especialidade paulistano.",
-          },
-          {
-            cat: "Café",
-            name: "Santo Grão",
-            area: "Itaim / Oscar Freire",
-            note: "Perto do escritório, bom pra reunião curta.",
-          },
-          {
-            cat: "Almoço",
-            name: "Mercado de Pinheiros",
-            area: "Pinheiros",
-            note: "Várias opções num lugar só, funciona pra grupo grande.",
-          },
-          {
-            cat: "Almoço",
-            name: "Tan Tan",
-            area: "Vila Madalena",
-            note: "Asiático descontraído, bom pra dividir pratos.",
-          },
-          {
-            cat: "Happy hour",
-            name: "Boteco São Bento",
-            area: "Itaim",
-            note: "Depois do trabalho, a pé de vários pontos do Itaim.",
-          },
-          {
-            cat: "Happy hour",
-            name: "Empório Alto de Pinheiros",
-            area: "Alto de Pinheiros",
-            note: "Cervejas e petiscos num quarteirão animado.",
-          },
-          {
-            cat: "Cultura",
-            name: "Instituto Moreira Salles",
-            area: "Paulista",
-            note: "Exposições grátis + café com vista, ótimo pra sábado.",
-          },
-          {
-            cat: "Cultura",
-            name: "Beco do Batman",
-            area: "Vila Madalena",
-            note: "Rolê a céu aberto de grafite, combina com café antes.",
-          },
-          {
-            cat: "Ar livre",
-            name: "Parque do Povo",
-            area: "Itaim",
-            note: "Coladinho no escritório, bom pra um almoço ao ar livre.",
-          },
-        ],
-      };
-      const AV = [
-        "rgb(227,86,71)",
-        "rgb(80,179,49)",
-        "rgb(47,159,198)",
-        "rgb(148,114,194)",
-        "rgb(198,152,28)",
-        "rgb(227,141,31)",
-      ];
-      const norm = (s) =>
-        (s || "")
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
-          .toLowerCase()
-          .trim();
-      function initials(n) {
-        const p = n.trim().split(/\s+/);
-        return ((p[0] || "")[0] || "") + ((p[p.length - 1] || "")[0] || "");
-      }
-      function groupOf(id) {
-        return DATA.groups.find((g) => g.some((p) => p.id === id));
-      }
+  <div class="results" id="results"></div>
 
-      function renderGroup(group, meId) {
-        const leader = group.find((p) => p.is_leader) || group[0];
-        const members = group
-          .map((p) => {
-            const isMe = p.id === meId;
-            const av =
-              AV[
-                (p.name.charCodeAt(0) + (p.name.charCodeAt(1) || 0)) % AV.length
-              ];
-            return `<li class="member ${isMe ? "me" : ""}">
-      <div class="av" style="background:${av}">${initials(p.name).toUpperCase()}</div>
-      <div class="who"><div class="nm">${p.name}${isMe ? " · você" : ""}</div>
-      <div class="meta">${p.team || "—"} · ${p.tenure_label || "—"}</div></div>
-      ${p.is_leader ? '<span class="lead">líder</span>' : ""}
-    </li>`;
-          })
-          .join("");
-        const spots = (HOTSPOTS.items || [])
-          .map(
-            (s) => `<div class="spot">
-      <div class="c">${s.cat}</div><div class="n">${s.name}</div>
-      <div class="a">${s.area}</div>${s.note ? `<div class="no">${s.note}</div>` : ""}</div>`,
-          )
-          .join("");
-        return `<div class="groupcard">
-    <div class="gc-top"><div><p class="you">Seu Small Gathering de ${DATA.month}</p>
-      <h2>Capitão: ${leader.name.split(" ")[0]} · ${group.length} Pessoas</h2></div>
-      <span class="chip">${leader.name} é responsável por garantir que o Small Gathering vai sair do papel!</span></div>
-    <ul class="members">${members}</ul>
+  <div class="spots">
+    <div class="spots-head"><h3>Onde marcar</h3><span class="spots-count" id="spots-count"></span></div>
+    <div class="filters" id="filters"></div>
+    <div class="spotgrid" id="spotgrid"></div>
   </div>
-  <div class="spots"><h3>Onde marcar</h3>
-    <p class="sub">Sugestões perto de ${HOTSPOTS.office_ref || "São Paulo"} — ${HOTSPOTS.month || ""}</p>
-    <div class="spotgrid">${spots}</div></div>`;
-      }
 
-      const results = document.getElementById("results");
-      function show(id) {
-        results.innerHTML = renderGroup(groupOf(id), id);
-      }
-      function search(v) {
-        const q = norm(v);
-        if (q.length < 2) {
-          results.innerHTML = "";
-          return;
-        }
-        const all = DATA.groups.flat();
-        const hits = all.filter((p) => norm(p.name).includes(q));
-        if (hits.length === 0) {
-          results.innerHTML = `<p class="empty">Não achei ninguém com “${v}”. Confere a grafia ou tenta só o primeiro nome.</p>`;
-          return;
-        }
-        if (hits.length === 1) {
-          show(hits[0].id);
-          return;
-        }
-        results.innerHTML = `<p class="empty">Achei ${hits.length} pessoas. Qual é você?</p>
-    <div class="pick">${hits
-      .slice(0, 12)
-      .map(
-        (p) => `<button data-id="${p.id}">${p.name} · ${p.team || ""}</button>`,
-      )
-      .join("")}</div>`;
-        results
-          .querySelectorAll("button")
-          .forEach((b) => (b.onclick = () => show(b.dataset.id)));
-      }
-      let t;
-      document.getElementById("q").addEventListener("input", (e) => {
-        clearTimeout(t);
-        t = setTimeout(() => search(e.target.value), 120);
-      });
+  <div class="browse">
+    <h3>Todos os grupos</h3>
+    <div class="allgroups" id="allgroups"></div>
+    <div style="text-align:center;margin-top:16px"><button class="btn" id="more-groups">Ver todos os 9 grupos</button></div>
+  </div>
 
-      document.getElementById("allgroups").innerHTML = DATA.groups
-        .map((g, i) => {
-          return `<div class="mini"><h4>Grupo ${i + 1}</h4><ul>${g
-            .map(
-              (p) =>
-                `<li>${p.is_leader ? '<span class="star">★</span> ' : ""}<b>${p.name}</b> · ${p.team || ""}</li>`,
-            )
-            .join("")}</ul></div>`;
-        })
-        .join("");
-    </script>
-  </body>
+  <p class="wa-note">Lembrem-se de sempre mandar suas fotos de small gathering em nosso grupo do WhatsApp (Black Pearl)</p>
+
+  <footer>Dúvidas? fale com o time de People <a href="https://slack.com/app_redirect?channel=D0BT9B8SPRS" target="_blank" rel="noopener">@Gabriela Barbosa</a></footer>
+</div>
+
+<script>
+const DATA = {"month": "Setembro/2026", "generated_at": "2026-09-09", "groups": [[{"id": "e043", "name": "Sara Bittencourt", "gender": "M", "team": "Engenharia", "department": "People", "seniority": "Lead", "is_leader": true, "tenure_label": "6 anos"}, {"id": "e005", "name": "Felipe Costa", "gender": "Outro", "team": "People", "department": "People", "seniority": "Gerência", "is_leader": false, "tenure_label": "8 anos"}, {"id": "e017", "name": "Rafael Pinto", "gender": "Outro", "team": "AID", "department": "Finance", "seniority": "Lead", "is_leader": false, "tenure_label": "6 anos"}, {"id": "e032", "name": "Giovana Aragão", "gender": "F", "team": "Finance", "department": "Finance", "seniority": "Estágio", "is_leader": false, "tenure_label": "3 meses"}, {"id": "e006", "name": "Gabriela Nunes", "gender": "M", "team": "Legal Strategy", "department": "Produto", "seniority": "Júnior", "is_leader": false, "tenure_label": "1 ano"}, {"id": "e022", "name": "Wanda Luz", "gender": "M", "team": "Produto", "department": "GTM", "seniority": "Lead", "is_leader": false, "tenure_label": "6 anos"}], [{"id": "e019", "name": "Thiago Braga", "gender": "F", "team": "GTM", "department": "AID", "seniority": "Lead", "is_leader": true, "tenure_label": "6 anos"}, {"id": "e004", "name": "Elena Rocha", "gender": "M", "team": "Produto", "department": "People", "seniority": "Lead", "is_leader": false, "tenure_label": "6 anos"}, {"id": "e031", "name": "Fábio Guedes", "gender": "F", "team": "AID", "department": "Engenharia", "seniority": "Estágio", "is_leader": false, "tenure_label": "3 meses"}, {"id": "e036", "name": "Kelly Amaral", "gender": "F", "team": "People", "department": "People", "seniority": "Lead", "is_leader": false, "tenure_label": "6 anos"}, {"id": "e028", "name": "Clara Viana", "gender": "F", "team": "Finance", "department": "Finance", "seniority": "Estágio", "is_leader": false, "tenure_label": "3 meses"}, {"id": "e002", "name": "Carla Dias", "gender": "Outro", "team": "Engenharia", "department": "Finance", "seniority": "Estágio", "is_leader": false, "tenure_label": "3 meses"}], [{"id": "e037", "name": "Leo Tavares", "gender": "F", "team": "Produto", "department": "GTM", "seniority": "Lead", "is_leader": true, "tenure_label": "6 anos"}, {"id": "e041", "name": "Paula Nogueira", "gender": "Outro", "team": "AID", "department": "Finance", "seniority": "Pleno", "is_leader": false, "tenure_label": "2.5 anos"}, {"id": "e009", "name": "João Vieira", "gender": "F", "team": "AID", "department": "GTM", "seniority": "Estágio", "is_leader": false, "tenure_label": "3 meses"}, {"id": "e024", "name": "Yara Mendes", "gender": "F", "team": "GTM", "department": "Produto", "seniority": "Sênior", "is_leader": false, "tenure_label": "4 anos"}, {"id": "e045", "name": "Vera Quintana", "gender": "M", "team": "People", "department": "AID", "seniority": "Gerência", "is_leader": false, "tenure_label": "8 anos"}, {"id": "e034", "name": "Iris Camargo", "gender": "M", "team": "Legal Strategy", "department": "Produto", "seniority": "Estágio", "is_leader": false, "tenure_label": "3 meses"}], [{"id": "e038", "name": "Mia Barbosa", "gender": "Outro", "team": "Engenharia", "department": "Finance", "seniority": "Lead", "is_leader": true, "tenure_label": "6 anos"}, {"id": "e035", "name": "Júlio Farias", "gender": "M", "team": "AID", "department": "AID", "seniority": "Júnior", "is_leader": false, "tenure_label": "1 ano"}, {"id": "e042", "name": "Rui Cardoso", "gender": "F", "team": "GTM", "department": "People", "seniority": "Lead", "is_leader": false, "tenure_label": "6 anos"}, {"id": "e033", "name": "Hugo Bastos", "gender": "M", "team": "People", "department": "AID", "seniority": "Lead", "is_leader": false, "tenure_label": "6 anos"}, {"id": "e020", "name": "Ursula Faria", "gender": "M", "team": "Produto", "department": "GTM", "seniority": "Pleno", "is_leader": false, "tenure_label": "2.5 anos"}], [{"id": "e029", "name": "Davi Antunes", "gender": "F", "team": "Produto", "department": "Finance", "seniority": "Lead", "is_leader": true, "tenure_label": "6 anos"}, {"id": "e021", "name": "Vitor Campos", "gender": "Outro", "team": "Finance", "department": "Finance", "seniority": "Estágio", "is_leader": false, "tenure_label": "3 meses"}, {"id": "e008", "name": "Isabela Prado", "gender": "F", "team": "Legal Strategy", "department": "GTM", "seniority": "Lead", "is_leader": false, "tenure_label": "6 anos"}, {"id": "e039", "name": "Nina Correia", "gender": "M", "team": "People", "department": "Produto", "seniority": "Gerência", "is_leader": false, "tenure_label": "8 anos"}, {"id": "e003", "name": "Diego Alves", "gender": "F", "team": "AID", "department": "Finance", "seniority": "Júnior", "is_leader": false, "tenure_label": "1 ano"}], [{"id": "e040", "name": "Otávio Freitas", "gender": "M", "team": "AID", "department": "People", "seniority": "Lead", "is_leader": true, "tenure_label": "6 anos"}, {"id": "e011", "name": "Lucas Reis", "gender": "F", "team": "Produto", "department": "GTM", "seniority": "Sênior", "is_leader": false, "tenure_label": "4 anos"}, {"id": "e000", "name": "Ana Souza", "gender": "M", "team": "Finance", "department": "Finance", "seniority": "Júnior", "is_leader": false, "tenure_label": "1 ano"}, {"id": "e027", "name": "Breno Duarte", "gender": "F", "team": "GTM", "department": "People", "seniority": "Estágio", "is_leader": false, "tenure_label": "3 meses"}, {"id": "e026", "name": "Alice Fonseca", "gender": "F", "team": "Legal Strategy", "department": "Engenharia", "seniority": "Pleno", "is_leader": false, "tenure_label": "2.5 anos"}], [{"id": "e023", "name": "Xavier Nobre", "gender": "M", "team": "AID", "department": "Engenharia", "seniority": "Lead", "is_leader": true, "tenure_label": "6 anos"}, {"id": "e007", "name": "Henrique Melo", "gender": "Outro", "team": "People", "department": "Produto", "seniority": "Estágio", "is_leader": false, "tenure_label": "3 meses"}, {"id": "e047", "name": "Zoe Martins", "gender": "F", "team": "Engenharia", "department": "Finance", "seniority": "Estágio", "is_leader": false, "tenure_label": "3 meses"}, {"id": "e018", "name": "Sofia Moraes", "gender": "F", "team": "Finance", "department": "Legal Strategy", "seniority": "Pleno", "is_leader": false, "tenure_label": "2.5 anos"}, {"id": "e015", "name": "Pedro Ramos", "gender": "M", "team": "Produto", "department": "People", "seniority": "Gerência", "is_leader": false, "tenure_label": "8 anos"}], [{"id": "e001", "name": "Bruno Lima", "gender": "M", "team": "Finance", "department": "People", "seniority": "Lead", "is_leader": true, "tenure_label": "6 anos"}, {"id": "e010", "name": "Karina Sá", "gender": "M", "team": "People", "department": "Finance", "seniority": "Gerência", "is_leader": false, "tenure_label": "8 anos"}, {"id": "e044", "name": "Tomás Aguiar", "gender": "Outro", "team": "Produto", "department": "Legal Strategy", "seniority": "Estágio", "is_leader": false, "tenure_label": "3 meses"}, {"id": "e014", "name": "Olívia Castro", "gender": "F", "team": "Legal Strategy", "department": "People", "seniority": "Júnior", "is_leader": false, "tenure_label": "1 ano"}, {"id": "e025", "name": "Zeca Pires", "gender": "F", "team": "AID", "department": "GTM", "seniority": "Estágio", "is_leader": false, "tenure_label": "3 meses"}], [{"id": "e016", "name": "Queila Barros", "gender": "M", "team": "People", "department": "Finance", "seniority": "Lead", "is_leader": true, "tenure_label": "6 anos"}, {"id": "e030", "name": "Erika Lopes", "gender": "Outro", "team": "AID", "department": "Finance", "seniority": "Júnior", "is_leader": false, "tenure_label": "1 ano"}, {"id": "e046", "name": "William Sales", "gender": "M", "team": "Finance", "department": "Produto", "seniority": "Pleno", "is_leader": false, "tenure_label": "2.5 anos"}, {"id": "e012", "name": "Marina Teixeira", "gender": "F", "team": "Produto", "department": "GTM", "seniority": "Lead", "is_leader": false, "tenure_label": "6 anos"}, {"id": "e013", "name": "Nathan Gomes", "gender": "F", "team": "Legal Strategy", "department": "AID", "seniority": "Estágio", "is_leader": false, "tenure_label": "3 meses"}]]};
+const HOTSPOTS = {"month": "", "office_ref": "Rua Capote Valente, 839 - Pinheiros, São Paulo - SP, 05409-002", "items": [{"cat": "Almoço", "name": "Antonietta Cucina", "area": "R. Artur de Azevedo, 542 - Pinheiros", "note": "Italiano · 4,4★ (1.376 avaliações)", "maps_url": "https://maps.app.goo.gl/F7tqo8mXWHZ2NHWC8"}, {"cat": "Almoço", "name": "Levena SP", "area": "R. Artur de Azevedo, 495 - Cerqueira César", "note": "Brunch · 4,5★ (3.692 avaliações)", "maps_url": "https://maps.app.goo.gl/LqqE1f5JHaurNfTp6"}, {"cat": "Almoço", "name": "Make Hommus. Not war", "area": "R. Oscar Freire, 2270 - Pinheiros", "note": "Árabe · 4,5★ (1.094 avaliações)", "maps_url": "https://maps.app.goo.gl/75B1sfuixsnAFWhT7"}, {"cat": "Jantar", "name": "Bark n'Crust", "area": "R. Artur de Azevedo, 657 - Cerqueira César", "note": "4,6★ (1.797 avaliações)", "maps_url": "https://maps.app.goo.gl/DZigfJ68YAFgC6Er5"}, {"cat": "Jantar", "name": "Hirá Ramen Izakaya", "area": "R. Fradique Coutinho, 1240 - Pinheiros", "note": "Izakaya moderno · 4,5★ (3.883 avaliações)", "maps_url": "https://maps.app.goo.gl/iJFyqsnVsHr2bfEh6"}, {"cat": "Jantar", "name": "Quino Parrilla", "area": "Rua Cardeal Arcoverde, 201 - Jardim Paulista", "note": "Parrilla argentina · 4,9★ (53 avaliações)", "maps_url": "https://maps.app.goo.gl/z7c4JKJCBkfZAiG37"}, {"cat": "Barzinhos", "name": "TAN TAN", "area": "R. Fradique Coutinho, 153 - Pinheiros", "note": "Bar de cozinha oriental · 4,5★ (2.672 avaliações)", "maps_url": "https://maps.app.goo.gl/p4aiWv32LSTE3z2fA"}, {"cat": "Aulas", "name": "Shoyu Crafts Ateliê de Cerâmica", "area": "R. Capote Valente, 697 - Pinheiros", "note": "Aulas de cerâmica · 5,0★ (63 avaliações)", "maps_url": "https://maps.app.goo.gl/NvP1g8LtbQ5AtRNz9"}]};
+const AV = ["rgb(227,86,71)","rgb(80,179,49)","rgb(47,159,198)","rgb(148,114,194)","rgb(198,152,28)","rgb(227,141,31)"];
+const norm = s => (s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
+function initials(n){const p=n.trim().split(/\s+/);return ((p[0]||"")[0]||"")+((p[p.length-1]||"")[0]||"");}
+function groupOf(id){return DATA.groups.find(g=>g.some(p=>p.id===id));}
+
+function renderGroup(group, meId){
+  const leader = group.find(p=>p.is_leader) || group[0];
+  const members = group.map(p=>{
+    const isMe = p.id===meId;
+    const av = AV[(p.name.charCodeAt(0)+(p.name.charCodeAt(1)||0))%AV.length];
+    const meta = [p.team, p.tenure_label].filter(Boolean).join(' · ');
+    return `<li class="member ${isMe?'me':''}">
+      <div class="av" style="background:${av}">${initials(p.name).toUpperCase()}</div>
+      <div class="who"><div class="nm">${p.name}${isMe?' · você':''}</div>
+      <div class="meta">${meta}</div></div>
+      ${p.is_leader?'<span class="lead">capitão</span>':''}
+    </li>`;}).join("");
+  return `<div class="groupcard">
+    <div class="gc-top"><div><p class="you">Seu Small Gathering de ${DATA.month}</p>
+      <h2>${group.length} Pessoas</h2></div>
+      <span class="chip">${leader.name.split(' ')[0]} é responsável por garantir que o Small Gathering vai sair do papel!</span></div>
+    <ul class="members">${members}</ul>
+  </div>`;
+}
+
+const results = document.getElementById('results');
+function show(id){results.innerHTML = renderGroup(groupOf(id), id);}
+function search(v){
+  const q = norm(v);
+  if(q.length<2){results.innerHTML="";return;}
+  const all = DATA.groups.flat();
+  const hits = all.filter(p=>norm(p.name).includes(q));
+  if(hits.length===0){results.innerHTML=`<p class="empty">Não achei ninguém com “${v}”. Confere a grafia ou tenta só o primeiro nome.</p>`;return;}
+  if(hits.length===1){show(hits[0].id);return;}
+  results.innerHTML = `<p class="empty">Achei ${hits.length} pessoas</p>
+    <div class="pick">${hits.slice(0,12).map(p=>`<button data-id="${p.id}">${[p.name,p.team].filter(Boolean).join(' · ')}</button>`).join("")}</div>`;
+  results.querySelectorAll('button').forEach(b=>b.onclick=()=>show(b.dataset.id));
+}
+let t; document.getElementById('q').addEventListener('input',e=>{clearTimeout(t);t=setTimeout(()=>search(e.target.value),120);});
+
+const spotCats = [...new Set((HOTSPOTS.items||[]).map(s=>s.cat))];
+let activeCat = 'Todas';
+function renderFilters(){
+  document.getElementById('filters').innerHTML = ['Todas', ...spotCats].map(c=>
+    `<button class="filter-btn ${c===activeCat?'active':''}" data-cat="${c}">${c}</button>`
+  ).join("");
+  document.querySelectorAll('#filters .filter-btn').forEach(btn=>{
+    btn.onclick = ()=>{ activeCat = btn.dataset.cat; renderFilters(); renderSpots(); };
+  });
+}
+function renderSpots(){
+  const items = activeCat==='Todas' ? (HOTSPOTS.items||[]) : (HOTSPOTS.items||[]).filter(s=>s.cat===activeCat);
+  const grid = document.getElementById('spotgrid');
+  grid.innerHTML = items.length ? items.map(s=>{
+    const url = s.maps_url || ('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent((s.name||'')+' '+(s.area||'')));
+    return `<a class="spot" href="${url}" target="_blank" rel="noopener">
+      <div class="c">${s.cat}</div><div class="n">${s.name}</div>
+      <div class="a">${s.area}</div>${s.note?`<div class="no">${s.note}</div>`:''}</a>`;
+  }).join("") : `<p class="spots-empty">Sem sugestões nessa categoria ainda.</p>`;
+  document.getElementById('spots-count').textContent = items.length + (items.length===1?' sugestão':' sugestões');
+}
+renderFilters();
+renderSpots();
+
+function renderMini(list){
+  return list.map((g,i)=>`<div class="mini"><h4>Grupo ${i+1}</h4><ul>${
+    g.map(p=>`<li>${p.is_leader?'<span class="star">★</span> ':''}<b>${p.name}</b>${p.team?' · '+p.team:''}</li>`).join("")}</ul></div>`).join("");
+}
+document.getElementById('allgroups').innerHTML = renderMini(DATA.groups.slice(0,3));
+const moreBtn = document.getElementById('more-groups');
+if(DATA.groups.length<=3){ moreBtn.remove(); }
+else{
+  moreBtn.onclick = function(){
+    document.getElementById('allgroups').innerHTML = renderMini(DATA.groups);
+    this.remove();
+  };
+}
+</script>
+</body>
 </html>
