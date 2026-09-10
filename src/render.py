@@ -145,7 +145,7 @@ footer a{color:inherit;text-decoration:underline}
   <div class="results" id="results"></div>
 
   <div class="spots">
-    <div class="spots-head"><h3>Onde marcar</h3><span class="spots-count" id="spots-count"></span></div>
+    <div class="spots-head"><h3>Sugestões de Onde Marcar</h3><span class="spots-count" id="spots-count"></span></div>
     <div class="filters" id="filters"></div>
     <div class="spotgrid" id="spotgrid"></div>
   </div>
