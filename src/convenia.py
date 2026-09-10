@@ -86,33 +86,39 @@ def _in_reference_month(hiring_date: str | None, ref: dt.date) -> bool:
 
 
 def fetch_eligible(token: str, ref_month: dt.date | None = None,
-                   enrich: bool = True) -> list[dict]:
+                   enrich: bool = True, max_workers: int = 12) -> list[dict]:
     """
     Retorna dicts normalizados: id, name, gender, team, department,
     seniority, job, hiring_date, active, email(if any).
     Inclui ATIVOS + admitidos no mês de referência.
+    O enriquecimento (1 chamada por pessoa) é feito em paralelo p/ não estourar timeout.
     """
     ref = ref_month or dt.date.today()
     raw = _iter_all_employees(token)
-    people = []
+    eligible = []
     for e in raw:
-        eid = str(e.get("id") or e.get("employee_id") or e.get("uuid"))
         summary = _normalize(e)
-        # decide elegibilidade sem enriquecer, quando possível
-        active = summary["active"]
-        this_month = _in_reference_month(summary["hiring_date"], ref)
-        if not (active or this_month):
-            continue
-        if enrich:
-            try:
-                detail = _get(f"/employees/{eid}", token=token)
-                d = detail.get("data", detail)
-                summary.update({k: v for k, v in _normalize(d).items() if v not in (None, "", "?")})
-                time.sleep(0.1)
-            except requests.HTTPError:
-                pass
-        people.append(summary)
-    return people
+        if summary["active"] or _in_reference_month(summary["hiring_date"], ref):
+            eligible.append(summary)
+
+    if not enrich:
+        return eligible
+
+    def _enrich(summary):
+        try:
+            detail = _get(f"/employees/{summary['id']}", token=token)
+            d = detail.get("data", detail)
+            for k, v in _normalize(d).items():
+                if v not in (None, "", "?"):
+                    summary[k] = v
+        except requests.RequestException:
+            pass
+        return summary
+
+    from concurrent.futures import ThreadPoolExecutor
+    with ThreadPoolExecutor(max_workers=max_workers) as ex:
+        eligible = list(ex.map(_enrich, eligible))
+    return eligible
 
 
 def _normalize(e: dict[str, Any]) -> dict:

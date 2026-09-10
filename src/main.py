@@ -88,7 +88,7 @@ def run(send: bool):
 def diagnose() -> dict:
     """Diagnóstico read-only: por que os líderes não bateram? Não envia nada."""
     ref = dt.date.today()
-    people = convenia.fetch_eligible(os.environ["CONVENIA_TOKEN"], ref)
+    people = convenia.fetch_eligible(os.environ["CONVENIA_TOKEN"], ref, enrich=False)
     leaders = sheets.read_leaders_csv(os.environ["LEADERS_CSV_URL"])
     matches = sheets.match_leaders(people, leaders)
     ok = [n for n, m in matches.items() if m["status"] == "ok"]
