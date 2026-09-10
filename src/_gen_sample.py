@@ -27,10 +27,10 @@ for idx in rng.sample(range(len(people)),9):
 # histórico simulado
 history=[]
 for r in range(2):
-    g,_=make_groups(people,history,Config(target_size=5,seed=r+5))
+    g,_=make_groups(people,history,Config(seed=r+5))
     history.append([[p.id for p in grp] for grp in g])
 
-groups,score=make_groups(people,history,Config(target_size=5,seed=42,restarts=60))
+groups,score=make_groups(people,history,Config(seed=42,restarts=60))
 
 # serializa para o artefato
 def pdict(p):

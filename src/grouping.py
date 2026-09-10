@@ -32,9 +32,6 @@ class Person:
 
 @dataclass
 class Config:
-    target_size: int = 5           # tamanho alvo (usado se size_min/max não definirem melhor)
-    size_min: int = 4              # faixa aceitável de tamanho de grupo (headcount-adaptativo)
-    size_max: int = 6
     min_women: int = 0             # mínimo de mulheres por grupo (0 = sem restrição)
     female_token: str = "F"        # valor de gender que conta como mulher (bucketizado)
     # pesos das dimensões de diversidade (quanto maior, mais importa misturar)
@@ -104,28 +101,20 @@ def total_score(groups: list[list[Person]], cfg: Config, pair_pen: dict[frozense
 # ----------------------------------------------------------------------------
 # Construção e otimização
 # ----------------------------------------------------------------------------
-def choose_group_count(n: int, n_leaders: int, cfg: Config) -> int:
+def choose_group_count(n_leaders: int) -> int:
     """
-    Escolhe o nº de grupos de forma adaptativa ao headcount:
-      - tamanhos de grupo dentro da faixa [size_min, size_max];
-      - no máximo 1 grupo por líder (cada grupo precisa de >=1 líder);
-      - entre as opções válidas, prefere a que deixa os tamanhos mais próximos
-        de target_size (mais equilibrados).
+    Nº de grupos = nº de líderes disponíveis (1 grupo por líder). O tamanho de
+    cada grupo sai automaticamente balanceado por `_capacities` (pessoas / nº
+    de grupos, distribuindo o resto o mais uniformemente possível).
     """
     if n_leaders == 0:
         raise ValueError("Nenhum líder na lista de ativos — impossível garantir 1 líder por grupo.")
-    lo = max(1, (n + cfg.size_max - 1) // cfg.size_max)   # menos grupos => grupos maiores
-    hi = max(1, n // cfg.size_min)                        # mais grupos  => grupos menores
-    hi = min(hi, n_leaders)                               # não exceder nº de líderes
-    if lo > hi:                                           # faixa impossível (poucos líderes p/ a faixa)
-        return max(1, min(n_leaders, round(n / cfg.target_size)) or 1)
-    # dentre [lo, hi], escolhe g cujo tamanho médio fica mais perto de target_size
-    return min(range(lo, hi + 1), key=lambda g: abs((n / g) - cfg.target_size))
+    return n_leaders
 
 
 def _n_groups(people: list[Person], cfg: Config) -> int:
     leaders = [p for p in people if p.is_leader]
-    return choose_group_count(len(people), len(leaders), cfg)
+    return choose_group_count(len(leaders))
 
 
 def _women_count(group: list[Person], token: str) -> int:

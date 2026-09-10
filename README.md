@@ -46,17 +46,15 @@ O @ dos NÃO-líderes vem do match automático com o diretório do Slack
 (`users.list`), por e-mail e nome. A planilha só precisa conter as EXCEÇÕES
 que o match não resolver (aparecem em `unresolved`).
 
-## Tamanho de grupo (adaptativo ao headcount)
-Escolhe o nº de grupos p/ manter tamanhos na faixa [GROUP_MIN, GROUP_MAX]
-(default 4–6), o mais equilibrado possível, com no máx. 1 grupo por líder.
-Regra de bolso: nº de líderes ≈ headcount/6 (grupos de 6) a headcount/4
-(grupos de 4–5). Com poucos líderes, os grupos incham — o campo `score` e os
-tamanhos no retorno ajudam a monitorar.
+## Tamanho de grupo (sempre balanceado)
+Nº de grupos (fora o do Mateus) = nº de líderes disponíveis (1 grupo por líder);
+o tamanho de cada grupo é `(headcount - grupo do Mateus) / (nº de líderes - Mateus)`,
+distribuído o mais uniformemente possível. Não há mais tamanho fixo configurável.
 
 ## Variáveis de ambiente (Railway)
     CONVENIA_TOKEN, SLACK_BOT_TOKEN, LEADERS_CSV_URL, ARTIFACT_URL,
     SLACK_GENERAL_CHANNEL, SLACK_LEADERS_CHANNEL, RUN_KEY,
-    GROUP_SIZE=5, GROUP_MIN=4, GROUP_MAX=6, EMAIL_DOMAIN=getenter.ai
+    GROUP_MIN_WOMEN=2, EMAIL_DOMAIN=getenter.ai
 
 Scopes do bot Slack: chat:write, users:read, users:read.email.
 

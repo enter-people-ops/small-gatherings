@@ -117,10 +117,8 @@ def _parse_date(s):
             continue
     return None
 
-# aniversário de casa: 6 meses, depois QUALQUER aniversário anual (sem teto)
+# aniversário de casa: a partir de 1 ano, QUALQUER aniversário anual (sem teto)
 def _anniversary_label(months: int) -> str | None:
-    if months == 6:
-        return "6 meses"
     if months >= 12 and months % 12 == 0:
         anos = months // 12
         return f"{anos} ano" if anos == 1 else f"{anos} anos"
@@ -180,8 +178,11 @@ def build_groups(persons: list, history, cfg, special_leader_id: str | None,
     rest = [p for p in persons if p.id not in reserved]
 
     special_group = [special] + aniv
-    # completa até o tamanho alvo, se ficou pequeno, com quem aumenta diversidade
-    need = cfg.target_size - len(special_group)
+    # tamanho-alvo do grupo do Mateus = média balanceada dos demais grupos
+    # (colaboradores restantes / líderes restantes), pra ficar parecido em tamanho
+    rest_leaders = [p for p in rest if p.is_leader]
+    avg_size = round(len(rest) / len(rest_leaders)) if rest_leaders else len(special_group)
+    need = avg_size - len(special_group)
     if need > 0:
         non_leaders = [p for p in rest if not p.is_leader]
         extra = _diversity_pick(non_leaders, special_group, need)
@@ -210,10 +211,7 @@ def run_api(send: bool) -> dict:
 
     persons = [to_person(p) for p in people]
     history = sheets.load_history()
-    cfg = Config(target_size=int(os.environ.get("GROUP_SIZE","5")),
-                 size_min=int(os.environ.get("GROUP_MIN","4")),
-                 size_max=int(os.environ.get("GROUP_MAX","6")),
-                 min_women=int(os.environ.get("GROUP_MIN_WOMEN","2")),
+    cfg = Config(min_women=int(os.environ.get("GROUP_MIN_WOMEN","2")),
                  female_token="F")
     groups, score = build_groups(persons, history, cfg, special_id, set(anniversaries))
 
@@ -247,8 +245,9 @@ def run_api(send: bool) -> dict:
 
 
 def _send(msgs: dict, test_mode: bool = True):
-    """Envia no Slack. Em TEST_MODE, geral/líderes/DMs vão para o canal de teste
-    (com rótulo), em vez de irem para a empresa e para as DMs reais.
+    """Envia no Slack. Em TEST_MODE: geral vai para TEST_GENERAL_CHANNEL (rotulada),
+    líderes vai para o canal real de líderes, e as DMs vão para TEST_CHANNEL
+    (rotuladas). Fora de TEST_MODE, tudo vai para os canais/DMs reais.
     O relatório sempre vai para o canal de relatório."""
     import requests
     tok = os.environ["SLACK_BOT_TOKEN"]
@@ -261,10 +260,13 @@ def _send(msgs: dict, test_mode: bool = True):
     leaders_ch = os.environ.get("SLACK_LEADERS_CHANNEL", general_ch)
     report_ch = os.environ.get("REPORT_CHANNEL", "C0C0WJTSYLE")
     test_ch = os.environ.get("TEST_CHANNEL", "C0C0V7FHLHJ")
+    test_general_ch = os.environ.get("TEST_GENERAL_CHANNEL", "C0C0A6B9J2K")
 
     if test_mode:
-        post(test_ch, ":test_tube: *[TESTE] Mensagem GERAL (iria para o canal da empresa)*\n\n" + msgs["geral"])
-        post(test_ch, ":test_tube: *[TESTE] Mensagem de LÍDERES (iria para o canal de líderes)*\n\n" + msgs["lideres"])
+        # geral: canal de teste dedicado. líderes: canal real de líderes (não é sandboxed).
+        # DMs: canal de teste (test_ch fica exclusivo para as DMs dos líderes).
+        post(test_general_ch, ":test_tube: *[TESTE] Mensagem GERAL (iria para o canal da empresa)*\n\n" + msgs["geral"])
+        post(leaders_ch, msgs["lideres"])
         for dm in msgs["dms"]:
             quem = dm["leader"]["name"]
             post(test_ch, f":test_tube: *[TESTE] DM que iria para {quem}*\n\n" + dm["text"])

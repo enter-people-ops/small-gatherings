@@ -22,13 +22,17 @@ agendada pelo Make (dia 1º às 09:00). Base: ~229 pessoas ativas.
 - Minimiza repetição de pares vs histórico (novidade).
 - **Grupo do Mateus** (líder por e-mail `ANNIVERSARY_LEADER_EMAIL`, default
   `mateus@getenter.ai`) é SEMPRE o primeiro e reúne os **aniversariantes de casa
-  do mês** (6 meses e depois qualquer aniversário anual, sem teto).
+  do mês a partir de 1 ano** (qualquer múltiplo de 12 meses, sem teto — não há
+  mais a marca de 6 meses).
 - **Líderes que fazem aniversário continuam liderando** seus grupos — NÃO são
   puxados para o grupo do Mateus (só não-líderes vão).
 - **>=2 mulheres por grupo**, EXCETO o grupo do Mateus (`GROUP_MIN_WOMEN`, default 2).
-- Tamanho de grupo adaptativo ao headcount (faixa `GROUP_MIN`..`GROUP_MAX`, 4–6).
-  Regra de bolso: nº de líderes ≈ headcount/6 (grupos de 6) a headcount/4 (de 4–5).
-  Hoje há ~22 líderes p/ 229 pessoas → grupos de ~10.
+- **Grupos sempre balanceados** (não há mais `GROUP_SIZE`/`GROUP_MIN`/`GROUP_MAX`):
+  o nº de grupos fora o do Mateus = nº de líderes - 1 (1 grupo por líder), e o
+  tamanho de cada um é `(headcount - grupo do Mateus) / (nº de líderes - Mateus)`,
+  distribuído o mais uniformemente possível. O grupo do Mateus é completado até
+  essa mesma média (com pessoas que mais aumentam a diversidade), pra ficar do
+  mesmo tamanho que os demais.
 
 ## 3. Particularidades dos dados do Convenia (aprendidas na prática)
 - **E-mail corporativo NÃO vem do Convenia** — casar Slack usa `users.list`
@@ -80,12 +84,10 @@ RUN_KEY=small-gatherings-2026   # senha do header X-Run-Key
 SLACK_GENERAL_CHANNEL=C0C0A6B9J2K
 SLACK_LEADERS_CHANNEL=C0C0RG4EX3L
 REPORT_CHANNEL=C0C0WJTSYLE       # recebe o relatório (sempre)
-TEST_MODE=true                   # true = tudo vai p/ TEST_CHANNEL
-TEST_CHANNEL=C0C0V7FHLHJ
+TEST_MODE=true                   # true = geral/DMs sandboxed (ver seção 8)
+TEST_CHANNEL=C0C0V7FHLHJ         # só DMs de líderes em modo TESTE
+TEST_GENERAL_CHANNEL=C0C0A6B9J2K # msg GERAL em modo TESTE
 ANNIVERSARY_LEADER_EMAIL=mateus@getenter.ai
-GROUP_SIZE=5
-GROUP_MIN=4
-GROUP_MAX=6
 GROUP_MIN_WOMEN=2
 INFER_GENDER=true
 EMAIL_DOMAIN=getenter.ai
@@ -100,9 +102,16 @@ curto casa com >1 pessoa), acrescente sobrenome; se `not_found`, corrija a grafi
 ou ponha o slack_id.
 
 ## 8. Modo TESTE
-Com `TEST_MODE=true`: msg geral + líderes + todas as DMs vão para o `TEST_CHANNEL`
-(rotuladas `[TESTE]`), sem tocar a empresa; o relatório sempre vai para o
-`REPORT_CHANNEL`. Virar `TEST_MODE=false` só quando for para produção.
+Com `TEST_MODE=true`:
+- msg **GERAL** vai para `TEST_GENERAL_CHANNEL` (rotulada `[TESTE]`), não para
+  a empresa;
+- msg de **LÍDERES** (broadcast) vai para o canal **real** `SLACK_LEADERS_CHANNEL`
+  — não é sandboxed;
+- **DMs** de líderes vão para `TEST_CHANNEL` (rotuladas `[TESTE]`);
+- o **relatório** sempre vai para o `REPORT_CHANNEL`.
+
+Virar `TEST_MODE=false` só quando for para produção (aí geral/líderes/DMs vão
+todos para os canais/pessoas reais).
 
 ## 9. Setup do zero (passo a passo)
 1. Suba este repositório no GitHub e conecte no Railway (New Project > Deploy

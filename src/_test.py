@@ -45,14 +45,13 @@ print(f"Pessoas: {len(people)} | Líderes: {sum(p.is_leader for p in people)}")
 
 # --- simula 3 rodadas históricas anteriores + a nova ---
 history = []
-cfg = Config(target_size=5, seed=1)
 for r in range(3):
-    cfg = Config(target_size=5, seed=r+10)
+    cfg = Config(seed=r+10)
     groups, _ = make_groups(people, history, cfg)
     history.append([[p.id for p in g] for g in groups])
 
 # rodada nova, considerando as 3 anteriores
-cfg = Config(target_size=5, seed=99, restarts=60, iterations=5000)
+cfg = Config(seed=99, restarts=60, iterations=5000)
 groups, score = make_groups(people, history, cfg)
 
 print(f"\nGrupos formados: {len(groups)} | tamanhos: {[len(g) for g in groups]}")
