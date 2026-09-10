@@ -120,11 +120,11 @@ footer{margin-top:60px;color:var(--tx-3);font-size:12px;text-align:center;font-f
   </header>
 
   <section class="hero">
-    <h1>Ache seu grupo do mês.</h1>
-    <p>Todo mês a gente remixa a empresa em grupos pequenos pra misturar times e senioridades. Digite seu nome pra ver quem caiu com você — e onde marcar.</p>
+    <h1>Ache seu grupo de Small Gathering do mês</h1>
+    <p>Todos os meses a gente mistura o time da Enter para que mais pessoas se conheçam para além do escritório. Aproveite esse momento para viver uma experiência super legal e diferente (seja um jantar especial, um novo hobbie, um esporte) e se integrar com pessoas novas!</p>
     <div class="searchbox">
       <svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-      <input id="q" type="search" placeholder="Seu nome…" autocomplete="off" autofocus aria-label="Buscar seu nome">
+      <input id="q" type="search" placeholder="Busque seu nome aqui!" autocomplete="off" autofocus aria-label="Buscar seu nome">
     </div>
     <div class="hint">Ex.: primeiro nome ou sobrenome. Acentos não importam.</div>
   </section>
@@ -136,7 +136,7 @@ footer{margin-top:60px;color:var(--tx-3);font-size:12px;text-align:center;font-f
     <div class="allgroups" id="allgroups"></div>
   </details>
 
-  <footer>Gerado em __GENERATED__ · Formação automática mensal · Dúvidas? fale com o time de People.</footer>
+  <footer>Dúvidas? fale com o time de People @Gabriela Barbosa</footer>
 </div>
 
 <script>
