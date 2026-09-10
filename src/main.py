@@ -90,20 +90,21 @@ def diagnose() -> dict:
     ref = dt.date.today()
     people = convenia.fetch_eligible(os.environ["CONVENIA_TOKEN"], ref)
     leaders = sheets.read_leaders_csv(os.environ["LEADERS_CSV_URL"])
-    conv_norm = {sheets._norm(p["name"]) for p in people}
-    sheet_names = [l["name"] for l in leaders]
-    matched = [n for n in sheet_names if sheets._norm(n) in conv_norm]
-    unmatched = [n for n in sheet_names if sheets._norm(n) not in conv_norm]
+    matches = sheets.match_leaders(people, leaders)
+    ok = [n for n, m in matches.items() if m["status"] == "ok"]
+    via_email = sum(1 for m in matches.values() if m["status"] == "ok" and m.get("via") == "email")
+    ambiguous = {n: m.get("candidates") for n, m in matches.items() if m["status"] == "ambiguous"}
+    not_found = [n for n, m in matches.items() if m["status"] == "not_found"]
     return {
         "convenia_count": len(people),
-        "convenia_sample": [p["name"] for p in people[:15]],
         "sheet_leaders_count": len(leaders),
-        "sheet_leaders_sample": sheet_names[:15],
-        "matched_leaders": len(matched),
-        "unmatched_sheet_names": unmatched[:30],
-        "hint": ("Se convenia_count=0, cheque CONVENIA_TOKEN. "
-                 "Se sheet_leaders_count=0, a planilha nao foi lida como CSV ou nao tem coluna 'nome'. "
-                 "Se ha nomes em unmatched_sheet_names, ajuste-os para bater EXATAMENTE com convenia_sample."),
+        "matched_leaders": len(ok),
+        "matched_via_email": via_email,
+        "matched_via_name": len(ok) - via_email,
+        "ambiguous": ambiguous,          # nome/email que bate com >1 pessoa -> desambiguar
+        "not_found": not_found,          # não bate com ninguém -> corrigir grafia/apelido
+        "hint": ("ok = casados (por email ou nome). ambiguous = adicione sobrenome na planilha. "
+                 "not_found = grafia/apelido nao bate com nenhum ativo do Convenia."),
     }
 
 
