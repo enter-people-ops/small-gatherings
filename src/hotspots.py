@@ -12,16 +12,59 @@ Overpass é compartilhado e enfileira/derruba requisições em sequência rápid
 vindas do mesmo cliente, então todas as categorias vão numa única query
 (múltiplos blocos `(...);out N;` na mesma consulta), em vez de uma chamada
 por categoria.
+
+O Overpass `around:5000,lat,lon` filtra corretamente por raio, mas **não**
+devolve os resultados ordenados por distância — a ordem é a ordem interna do
+banco dele. Por isso pedimos um pool bem maior que o necessário por
+categoria (`_POOL_N`) e ordenamos localmente por distância real (haversine),
+senão os 3-6 primeiros que sobrevivem ao corte do Overpass podem estar bem
+na borda do círculo de 5km em vez de serem os mais pertinho. Também
+recalculamos e re-filtramos a distância aqui (defensivo: a distância do
+Overpass usa o centro geométrico de ways/relations, que pode ficar um pouco
+fora do raio mesmo com parte do polígono dentro).
+
+Como o OSM não tem nota/avaliação, usamos como proxy de "lugar estabelecido"
+(não um cadastro vazio/abandonado no mapa) a presença de tags de contato
+(`website`, `phone`, `opening_hours`, ...) — ver `_QUALITY_TAGS`. Lugares com
+pelo menos um desses sinais entram primeiro (ordenados por distância entre
+si); só usamos os sem nenhum sinal para completar a cota se faltar opção.
 """
 from __future__ import annotations
+from math import radians, sin, cos, sqrt, atan2
 import urllib.parse
 import requests
 
 RADIUS_M = 5000
+_POOL_N = {"restaurant": 40, "bar_pub": 25, "arts": 25}
+_QUALITY_TAGS = ("website", "contact:website", "phone", "contact:phone", "opening_hours")
 USER_AGENT = "small-gatherings-enter/1.0 (People team, getenter.ai)"
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 OVERPASS_URL = "https://overpass-api.de/api/interpreter"
 OVERPASS_TIMEOUT_S = 50
+
+
+def _haversine_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    r = 6371000.0
+    p1, p2 = radians(lat1), radians(lat2)
+    dphi = radians(lat2 - lat1)
+    dlambda = radians(lon2 - lon1)
+    a = sin(dphi / 2) ** 2 + cos(p1) * cos(p2) * sin(dlambda / 2) ** 2
+    return 2 * r * atan2(sqrt(a), sqrt(1 - a))
+
+
+def _coords(el: dict) -> tuple[float, float] | None:
+    """Nós têm lat/lon direto; ways/relations vêm com `center` (pedido via
+    `out center`)."""
+    if "lat" in el and "lon" in el:
+        return el["lat"], el["lon"]
+    center = el.get("center")
+    if center:
+        return center["lat"], center["lon"]
+    return None
+
+
+def _quality_score(tags: dict) -> int:
+    return sum(1 for k in _QUALITY_TAGS if tags.get(k))
 
 
 def _geocode(address: str) -> tuple[float, float] | None:
@@ -40,14 +83,16 @@ def _build_query(lat: float, lon: float) -> str:
     # `name` obriga o Overpass a varrer o texto de TODO mundo na área (lento
     # e costuma dar timeout no servidor público) — por isso "Aulas" usa as
     # tags de artesanato/arte do OSM em vez de busca por nome.
+    # Pedimos um pool bem maior que o exibido (`_POOL_N`) porque o Overpass
+    # não ordena por distância — cortamos localmente pelos mais próximos.
     blocks = [
-        (f'nwr["amenity"="restaurant"]({around});', 10),
-        (f'nwr["amenity"~"^(bar|pub)$"]({around});', 6),
+        (f'nwr["amenity"="restaurant"]({around});', _POOL_N["restaurant"]),
+        (f'nwr["amenity"~"^(bar|pub)$"]({around});', _POOL_N["bar_pub"]),
         (
             f'nwr["amenity"="arts_centre"]({around});'
             f'nwr["craft"~"^(pottery|sculptor|scupture)$"]({around});'
             f'nwr["shop"="art"]({around});',
-            6,
+            _POOL_N["arts"],
         ),
     ]
     parts = [f"({stmt});out center tags {n};" for stmt, n in blocks]
@@ -74,18 +119,31 @@ def _maps_url(name: str, area: str) -> str:
     return f"https://www.google.com/maps/search/?api=1&query={q}"
 
 
+def _distance_label(distance_m: float) -> str:
+    km = distance_m / 1000
+    return f"a {km:.1f} km do escritório" if km >= 1 else f"a {int(distance_m)} m do escritório"
+
+
 def _item(cat: str, el: dict) -> dict:
     tags = el.get("tags") or {}
     name = tags["name"]
     area = _address_from_tags(tags)
-    return {"cat": cat, "name": name, "area": area, "note": area, "maps_url": _maps_url(name, area)}
+    note = _distance_label(el["_distance_m"])
+    return {"cat": cat, "name": name, "area": area, "note": note, "maps_url": _maps_url(name, area)}
 
 
-def _categorize(elements: list[dict]) -> tuple[list, list, list]:
+def _categorize(elements: list[dict], lat: float, lon: float) -> tuple[list, list, list]:
     """Separa os elementos vindos da query combinada em (restaurantes, bares,
     aulas), deduplicando por (type, id). Restaurantes/bares vêm da tag
     `amenity`; "aulas" vem de `amenity=arts_centre` / `craft` de
-    cerâmica-escultura / `shop=art` (ateliês e centros de arte)."""
+    cerâmica-escultura / `shop=art` (ateliês e centros de arte).
+
+    Cada lugar recebe a distância real até o escritório (`_distance_m`) e um
+    score de "estabelecido" (`_quality_score`, via tags de contato/horário).
+    Cada categoria é ordenada com os lugares "estabelecidos" primeiro
+    (mais próximos entre si primeiro) e só depois os sem nenhum sinal de
+    contato — sempre dentro do raio real de `RADIUS_M`, o que o Overpass já
+    filtra pelo centro, mas conferimos de novo aqui por segurança."""
     seen: set[tuple] = set()
     restaurants, bars, classes = [], [], []
     for el in elements:
@@ -94,7 +152,15 @@ def _categorize(elements: list[dict]) -> tuple[list, list, list]:
         name = tags.get("name")
         if not name or key in seen:
             continue
+        coords = _coords(el)
+        if not coords:
+            continue
+        distance_m = _haversine_m(lat, lon, *coords)
+        if distance_m > RADIUS_M:
+            continue
         seen.add(key)
+        el["_distance_m"] = distance_m
+        el["_quality"] = _quality_score(tags)
         amenity = tags.get("amenity", "")
         if amenity == "restaurant":
             restaurants.append(el)
@@ -103,6 +169,10 @@ def _categorize(elements: list[dict]) -> tuple[list, list, list]:
         elif amenity == "arts_centre" or tags.get("shop") == "art" \
                 or tags.get("craft") in ("pottery", "sculptor", "scupture"):
             classes.append(el)
+    rank = lambda el: (0 if el["_quality"] > 0 else 1, el["_distance_m"])
+    restaurants.sort(key=rank)
+    bars.sort(key=rank)
+    classes.sort(key=rank)
     return restaurants, bars, classes
 
 
@@ -116,7 +186,7 @@ def fetch_hotspots(office_address: str, month_label: str = "") -> dict | None:
         if not loc:
             return None
         elements = _overpass(*loc)
-        restaurants, bars, classes = _categorize(elements)
+        restaurants, bars, classes = _categorize(elements, *loc)
         items = (
             [_item("Almoço", el) for el in restaurants[:3]]
             + [_item("Jantar", el) for el in restaurants[3:6]]

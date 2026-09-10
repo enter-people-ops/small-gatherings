@@ -159,7 +159,7 @@ def msg_geral(artifact_url: str, month_label: str) -> str:
         f"marcarem <{artifact_url}|aqui>.\n\n"
         f"Lembrem-se de sempre mandar suas fotos de small gathering em nosso grupo de "
         f"whatsapp (Black Pearl). Bons encontros!\n\n"
-        f"Qualquer dúvida, falem com o time de {PEOPLE_MENTION}."
+        f"Qualquer dúvida, falem com o time de People {PEOPLE_MENTION}."
     )
 
 
@@ -173,7 +173,7 @@ def msg_lideres(artifact_url: str, month_label: str) -> str:
         f"2. Proponham 2–3 opções de data/horário e *fechem um encontro* (café, almoço, happy hour…).\n\n"
         f"Lembrem-se de sempre mandar suas fotos de small gathering em nosso grupo de "
         f"whatsapp (Black Pearl). Bons encontros!\n\n"
-        f"Qualquer dúvida, falem com o time de {PEOPLE_MENTION}."
+        f"Qualquer dúvida, falem com o time de People {PEOPLE_MENTION}."
     )
 
 
@@ -189,7 +189,7 @@ def msg_dm_lider(lider: dict, membros: list[dict], ids: dict[str, str | None],
     return (
         f"Oi {mention(lider, ids)}! :wave: Você é o capitão de um small gathering em {month_label}\n\n"
         f"{linhas}\n\n"
-        f"Qualquer dúvida, fale com o time de {PEOPLE_MENTION}."
+        f"Qualquer dúvida, fale com o time de People {PEOPLE_MENTION}."
     )
 
 
