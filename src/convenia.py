@@ -272,12 +272,20 @@ def _normalize(e: dict[str, Any]) -> dict:
 
     name = " ".join(filter(None, [_as_text(g("name")), _as_text(g("last_name"))])) \
         or _as_text(g("social_name")) or "—"
+    job_txt = _as_text(g("job.name", "job", "role"))
+    hiring = _as_text(g("hiring_date", "admission_date", "start_date")) or None
     status = _as_text(g("status", "situation", default="")).lower()
     active = g("active", default=None)
     if active is None:
         active = status in ("", "ativo", "active", "trabalhando") or "ativo" in status
-    job_txt = _as_text(g("job.name", "job", "role"))
-    hiring = _as_text(g("hiring_date", "admission_date", "start_date")) or None
+    # `status` vem sempre vazio no Convenia (nunca sinaliza quem está em
+    # admissão), então o default acima marcaria como "ativo" até quem ainda
+    # não começou. `hiring_date` no futuro é o único sinal confiável disso —
+    # essas pessoas só devem entrar no mês em que a data de início cai
+    # (checado depois via `_in_reference_month`), não no mês corrente.
+    hiring_parsed = _parse_hiring_date(hiring)
+    if hiring_parsed and hiring_parsed > dt.date.today():
+        active = False
     gender_raw = _as_text(g("gender.name", "gender", "gender_identity.name", "gender_identity")) or "?"
     if os.environ.get("INFER_GENDER", "true").lower() == "true":
         import gender_infer
