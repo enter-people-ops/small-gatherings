@@ -49,7 +49,12 @@ header .logo{height:22px;width:auto;display:block}
 /* hero */
 .hero h1{font-weight:600;font-size:clamp(30px,7vw,48px);line-height:1.05;
   letter-spacing:-.4px;margin:0 0 14px}
-.hero p{margin:0 0 28px;color:var(--tx-2);font-size:clamp(15px,2.4vw,17px)}
+.hero p{margin:0 0 20px;color:var(--tx-2);font-size:clamp(15px,2.4vw,17px)}
+.stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px}
+.stat{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.3px;
+  color:var(--tx-2);background:var(--bg-2);box-shadow:var(--ring-3);border-radius:var(--r-full);
+  padding:7px 14px}
+.stat b{color:var(--tx);font-weight:600}
 .searchbox{position:relative;max-width:560px}
 #q{width:100%;font-family:var(--font);font-size:18px;font-weight:400;height:56px;
   padding:0 18px 0 50px;border:0;border-radius:var(--r-xl);background:var(--bg);
@@ -88,12 +93,15 @@ header .logo{height:22px;width:auto;display:block}
 .member.me{background:var(--brand-100);box-shadow:var(--ring-brand)}
 /* hotspots — superfície inversa oficial */
 .spots{margin-top:20px;background:var(--inverse);color:var(--tx-inv);border-radius:var(--r-2xl);padding:24px}
-.spots-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.spots-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:16px}
 .spots h3{font-weight:600;margin:0;font-size:19px;letter-spacing:-.4px}
-.spots .btn{background:rgba(255,255,255,.08);color:var(--tx-inv);box-shadow:var(--ring-dark)}
-.spots .btn:hover{background:rgba(255,255,255,.14)}
-.spots-body{margin-top:18px}
-.spots .sub{margin:0 0 18px;color:rgba(250,250,250,.65);font-size:13px}
+.spots-count{font-family:var(--mono);font-size:12px;color:rgba(250,250,250,.5)}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.filter-btn{font:inherit;font-size:13px;font-weight:500;color:rgba(250,250,250,.75);
+  background:rgba(255,255,255,.06);box-shadow:var(--ring-dark);border:0;border-radius:var(--r-full);
+  padding:8px 15px;cursor:pointer;transition:background var(--dur) var(--ease),color var(--dur) var(--ease)}
+.filter-btn:hover{background:rgba(255,255,255,.12)}
+.filter-btn.active{background:var(--brand);color:var(--on-brand);box-shadow:none;font-weight:600}
 .spotgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:12px}
 .spot{display:block;background:rgba(255,255,255,.05);box-shadow:var(--ring-dark);border-radius:var(--r-xl);
   padding:14px 16px;color:inherit;text-decoration:none;transition:background var(--dur) var(--ease)}
@@ -102,16 +110,16 @@ header .logo{height:22px;width:auto;display:block}
 .spot .n{font-weight:500;margin:6px 0 2px;font-size:15px}
 .spot .a{font-size:13px;color:rgba(250,250,250,.7)}
 .spot .no{font-size:12px;color:rgba(250,250,250,.55);margin-top:6px;line-height:1.45}
-/* botões (toggle "ver todos os grupos" / "ver sugestões") */
+.spots-empty{color:rgba(250,250,250,.55);font-size:14px;padding:8px 0}
+/* botão "ver todos os grupos" */
 .btn{display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:14px;font-weight:500;
   background:var(--bg);border:0;box-shadow:var(--ring-2);border-radius:var(--r-full);
-  padding:10px 18px;cursor:pointer;color:var(--tx);transition:box-shadow var(--dur) var(--ease);
-  list-style:none}
-.btn::-webkit-details-marker{display:none}
+  padding:10px 18px;cursor:pointer;color:var(--tx);transition:box-shadow var(--dur) var(--ease)}
 .btn:hover{box-shadow:var(--ring)}
 /* browse */
 .browse{margin-top:56px;box-shadow:inset 0 1px 0 rgba(0,0,0,.05);padding-top:28px}
-.allgroups{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:14px;margin-top:20px}
+.browse h3{font-weight:600;font-size:16px;margin:0 0 16px}
+.allgroups{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:14px}
 .mini{background:var(--bg-2);box-shadow:var(--ring-3);border-radius:var(--r-xl);padding:15px 16px}
 .mini h4{font-weight:600;margin:0 0 9px;font-size:14px}
 .mini ul{margin:0;padding-left:0;list-style:none}
@@ -133,6 +141,11 @@ footer a{color:inherit;text-decoration:underline}
   <section class="hero">
     <h1>Ache seu grupo de Small Gathering do mês</h1>
     <p>Todos os meses a gente mistura o time da Enter para que mais pessoas se conheçam para além do escritório. Aproveite esse momento para viver uma experiência super legal e diferente (seja um jantar especial, um novo hobbie, um esporte) e se integrar com pessoas novas!</p>
+    <div class="stats">
+      <span class="stat"><b>__NGROUPS__</b> grupos formados</span>
+      <span class="stat"><b>__NPEOPLE__</b> pessoas participando</span>
+      <span class="stat"><b>__NLEADERS__</b> capitães</span>
+    </div>
     <div class="searchbox">
       <svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
       <input id="q" type="search" placeholder="Busque seu nome aqui!" autocomplete="off" autofocus aria-label="Buscar seu nome">
@@ -142,19 +155,16 @@ footer a{color:inherit;text-decoration:underline}
   <div class="results" id="results"></div>
 
   <div class="spots">
-    <div class="spots-head"><h3>Onde marcar</h3>
-      <button class="btn" onclick="const el=this.closest('.spots').querySelector('.spots-body'); el.hidden=!el.hidden; this.textContent=el.hidden?'Ver sugestões':'Ocultar sugestões';">Ver sugestões</button>
-    </div>
-    <div class="spots-body" hidden>
-      <p class="sub" id="spots-sub"></p>
-      <div class="spotgrid" id="spotgrid"></div>
-    </div>
+    <div class="spots-head"><h3>Onde marcar</h3><span class="spots-count" id="spots-count"></span></div>
+    <div class="filters" id="filters"></div>
+    <div class="spotgrid" id="spotgrid"></div>
   </div>
 
-  <details class="browse">
-    <summary class="btn">Ver todos os grupos</summary>
+  <div class="browse">
+    <h3>Todos os grupos</h3>
     <div class="allgroups" id="allgroups"></div>
-  </details>
+    <div style="text-align:center;margin-top:16px"><button class="btn" id="more-groups">Ver todos os __NGROUPS__ grupos</button></div>
+  </div>
 
   <p class="wa-note">Lembrem-se de sempre mandar suas fotos de small gathering em nosso grupo do WhatsApp (Black Pearl)</p>
 
@@ -204,18 +214,43 @@ function search(v){
 }
 let t; document.getElementById('q').addEventListener('input',e=>{clearTimeout(t);t=setTimeout(()=>search(e.target.value),120);});
 
-document.getElementById('spots-sub').textContent = `Sugestões perto de ${HOTSPOTS.office_ref||'São Paulo'} — ${HOTSPOTS.month||''}`;
-document.getElementById('spotgrid').innerHTML = (HOTSPOTS.items||[]).map(s=>{
-  const url = s.maps_url || ('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent((s.name||'')+' '+(s.area||'')));
-  return `<a class="spot" href="${url}" target="_blank" rel="noopener">
-    <div class="c">${s.cat}</div><div class="n">${s.name}</div>
-    <div class="a">${s.area}</div>${s.note?`<div class="no">${s.note}</div>`:''}</a>`;
-}).join("");
+const spotCats = [...new Set((HOTSPOTS.items||[]).map(s=>s.cat))];
+let activeCat = 'Todas';
+function renderFilters(){
+  document.getElementById('filters').innerHTML = ['Todas', ...spotCats].map(c=>
+    `<button class="filter-btn ${c===activeCat?'active':''}" data-cat="${c}">${c}</button>`
+  ).join("");
+  document.querySelectorAll('#filters .filter-btn').forEach(btn=>{
+    btn.onclick = ()=>{ activeCat = btn.dataset.cat; renderFilters(); renderSpots(); };
+  });
+}
+function renderSpots(){
+  const items = activeCat==='Todas' ? (HOTSPOTS.items||[]) : (HOTSPOTS.items||[]).filter(s=>s.cat===activeCat);
+  const grid = document.getElementById('spotgrid');
+  grid.innerHTML = items.length ? items.map(s=>{
+    const url = s.maps_url || ('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent((s.name||'')+' '+(s.area||'')));
+    return `<a class="spot" href="${url}" target="_blank" rel="noopener">
+      <div class="c">${s.cat}</div><div class="n">${s.name}</div>
+      <div class="a">${s.area}</div>${s.note?`<div class="no">${s.note}</div>`:''}</a>`;
+  }).join("") : `<p class="spots-empty">Sem sugestões nessa categoria ainda.</p>`;
+  document.getElementById('spots-count').textContent = items.length + (items.length===1?' sugestão':' sugestões');
+}
+renderFilters();
+renderSpots();
 
-document.getElementById('allgroups').innerHTML = DATA.groups.map((g,i)=>{
-  return `<div class="mini"><h4>Grupo ${i+1}</h4><ul>${
-    g.map(p=>`<li>${p.is_leader?'<span class="star">★</span> ':''}<b>${p.name}</b>${p.team?' · '+p.team:''}</li>`).join("")}</ul></div>`;
-}).join("");
+function renderMini(list){
+  return list.map((g,i)=>`<div class="mini"><h4>Grupo ${i+1}</h4><ul>${
+    g.map(p=>`<li>${p.is_leader?'<span class="star">★</span> ':''}<b>${p.name}</b>${p.team?' · '+p.team:''}</li>`).join("")}</ul></div>`).join("");
+}
+document.getElementById('allgroups').innerHTML = renderMini(DATA.groups.slice(0,3));
+const moreBtn = document.getElementById('more-groups');
+if(DATA.groups.length<=3){ moreBtn.remove(); }
+else{
+  moreBtn.onclick = function(){
+    document.getElementById('allgroups').innerHTML = renderMini(DATA.groups);
+    this.remove();
+  };
+}
 </script>
 </body>
 </html>"""
@@ -223,10 +258,16 @@ document.getElementById('allgroups').innerHTML = DATA.groups.map((g,i)=>{
 def main(groups_path, hotspots_path, out_path):
     data = json.load(open(groups_path, encoding="utf-8"))
     hot = json.load(open(hotspots_path, encoding="utf-8"))
+    n_groups = len(data.get("groups", []))
+    n_people = sum(len(g) for g in data.get("groups", []))
+    n_leaders = sum(1 for g in data.get("groups", []) for p in g if p.get("is_leader"))
     out = (TEMPLATE
         .replace("__LOGO__", LOGO)
         .replace("__MONTH__", html.escape(data.get("month","")))
         .replace("__GENERATED__", html.escape(data.get("generated_at", dt.date.today().isoformat())))
+        .replace("__NGROUPS__", str(n_groups))
+        .replace("__NPEOPLE__", str(n_people))
+        .replace("__NLEADERS__", str(n_leaders))
         .replace("__DATA__", json.dumps(data, ensure_ascii=False))
         .replace("__HOTSPOTS__", json.dumps(hot, ensure_ascii=False)))
     open(out_path, "w", encoding="utf-8").write(out)
