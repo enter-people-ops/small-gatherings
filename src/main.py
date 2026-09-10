@@ -43,13 +43,25 @@ MONTHS_PT = ["", "Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho",
 def month_label(d: dt.date) -> str:
     return f"{MONTHS_PT[d.month]}/{d.year}"
 
+def _gbucket(g: str) -> str:
+    import unicodedata
+    s = "".join(c for c in unicodedata.normalize("NFKD", str(g or "")) if not unicodedata.combining(c)).lower()
+    if not s or s in ("?", "n/d"):
+        return "?"
+    if s == "f" or "fem" in s or "mulher" in s:
+        return "F"
+    if s == "m" or "masc" in s or "homem" in s:
+        return "M"
+    return "Outro"
+
+
 def to_person(p: dict) -> Person:
     def s(v, default="?"):
         if v is None or v == "":
             return default
         return v if isinstance(v, str) else str(v)
     return Person(id=str(p.get("id","")), name=s(p.get("name"), "—"),
-                  gender=s(p.get("gender")), team=s(p.get("team")),
+                  gender=_gbucket(p.get("gender")), team=s(p.get("team")),
                   department=s(p.get("department")), seniority=s(p.get("seniority")),
                   is_leader=bool(p.get("is_leader", False)))
 
@@ -200,7 +212,9 @@ def run_api(send: bool) -> dict:
     history = sheets.load_history()
     cfg = Config(target_size=int(os.environ.get("GROUP_SIZE","5")),
                  size_min=int(os.environ.get("GROUP_MIN","4")),
-                 size_max=int(os.environ.get("GROUP_MAX","6")))
+                 size_max=int(os.environ.get("GROUP_MAX","6")),
+                 min_women=int(os.environ.get("GROUP_MIN_WOMEN","2")),
+                 female_token="F")
     groups, score = build_groups(persons, history, cfg, special_id, set(anniversaries))
 
     groups_d = [[{**by_id[p.id], "is_leader": p.is_leader} for p in g] for g in groups]

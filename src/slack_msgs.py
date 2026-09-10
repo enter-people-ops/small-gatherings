@@ -197,6 +197,13 @@ def msg_relatorio(groups: list[list[dict]], anniversaries: dict, month_label: st
     avg_teams = sum(_distinct(p.get("team","?") for p in g) for g in groups)/n if n else 0
     avg_sen = sum(_distinct(p.get("seniority","?") for p in g) for g in groups)/n if n else 0
 
+    # conformidade da regra "≥2 mulheres" (exceto grupo do Mateus)
+    others = [g for g in groups if g is not special_group]
+    def _wc(g):
+        return sum(1 for p in g if _gender_bucket(p.get("gender","")) == "F")
+    ok_women = sum(1 for g in others if _wc(g) >= 2)
+    women_line = f"\n• Grupos com ≥2 mulheres (exceto o do Mateus): *{ok_women}* de *{len(others)}*"
+
     aniv_lines = ""
     grp = special_group if special_group is not None else (groups[0] if groups else [])
     aniv = [(p, anniversaries[p["id"]]) for p in grp if p["id"] in anniversaries]
@@ -212,7 +219,8 @@ def msg_relatorio(groups: list[list[dict]], anniversaries: dict, month_label: st
         f"• Gênero — média por grupo: *{avg_m:.1f}* homens / *{avg_f:.1f}* mulheres "
         f"(proporção geral H:M = *{ratio}*)\n"
         f"• Times distintos por grupo (média): *{avg_teams:.1f}*\n"
-        f"• Faixas de tempo de casa distintas por grupo (média): *{avg_sen:.1f}*\n"
+        f"• Faixas de tempo de casa distintas por grupo (média): *{avg_sen:.1f}*"
+        f"{women_line}\n"
         f"• Aniversariantes de casa (grupo do Mateus):\n{aniv_lines}"
         f"\n\n_Obs.: gênero parcialmente inferido pelo primeiro nome quando ausente no Convenia._"
     )

@@ -35,6 +35,8 @@ class Config:
     target_size: int = 5           # tamanho alvo (usado se size_min/max não definirem melhor)
     size_min: int = 4              # faixa aceitável de tamanho de grupo (headcount-adaptativo)
     size_max: int = 6
+    min_women: int = 0             # mínimo de mulheres por grupo (0 = sem restrição)
+    female_token: str = "F"        # valor de gender que conta como mulher (bucketizado)
     # pesos das dimensões de diversidade (quanto maior, mais importa misturar)
     w_gender: float = 1.0
     w_team: float = 1.4
@@ -126,17 +128,35 @@ def _n_groups(people: list[Person], cfg: Config) -> int:
     return choose_group_count(len(people), len(leaders), cfg)
 
 
-def _seed(people: list[Person], g: int, rng: random.Random) -> list[list[Person]]:
+def _women_count(group: list[Person], token: str) -> int:
+    return sum(1 for p in group if p.gender == token)
+
+
+def _seed(people: list[Person], g: int, rng: random.Random, cfg: Config) -> list[list[Person]]:
     leaders = [p for p in people if p.is_leader]
     others = [p for p in people if not p.is_leader]
     rng.shuffle(leaders)
     rng.shuffle(others)
     groups: list[list[Person]] = [[leaders[i]] for i in range(g)]
-    # líderes excedentes viram membros normais no pool
+    caps = _capacities(len(people), g)
     pool = leaders[g:] + others
     rng.shuffle(pool)
-    # preenchimento guloso: cada pessoa vai ao grupo (com vaga) que mais ganha score
-    caps = _capacities(len(people), g)
+
+    # 1) distribui MULHERES primeiro para garantir min_women por grupo (best-effort)
+    if cfg.min_women > 0:
+        women = [p for p in pool if p.gender == cfg.female_token]
+        pool = [p for p in pool if p.gender != cfg.female_token]
+        for w in women:
+            # grupo com menos mulheres que ainda tem vaga e não atingiu o mínimo
+            need = [i for i in range(g)
+                    if len(groups[i]) < caps[i] and _women_count(groups[i], cfg.female_token) < cfg.min_women]
+            target = need or [i for i in range(g) if len(groups[i]) < caps[i]]
+            if not target:
+                pool.append(w); continue
+            best = min(target, key=lambda i: _women_count(groups[i], cfg.female_token))
+            groups[best].append(w)
+
+    # 2) preenche o resto por ganho de diversidade
     for person in pool:
         best_i, best_gain = None, float("-inf")
         for i, grp in enumerate(groups):
@@ -145,7 +165,7 @@ def _seed(people: list[Person], g: int, rng: random.Random) -> list[list[Person]
             gain = _marginal_gain(grp, person)
             if gain > best_gain:
                 best_gain, best_i = gain, i
-        if best_i is None:  # todos cheios (fallback): abre vaga no menor
+        if best_i is None:
             best_i = min(range(g), key=lambda i: len(groups[i]))
         groups[best_i].append(person)
     return groups
@@ -177,20 +197,27 @@ def optimize(people: list[Person], cfg: Config) -> tuple[list[list[Person]], flo
     best_groups, best_val = None, float("-inf")
 
     for _ in range(cfg.restarts):
-        groups = _seed(people, g, rng)
+        groups = _seed(people, g, rng, cfg)
         val = total_score(groups, cfg, history)
-        # busca local: trocas entre dois grupos, aceitas se melhoram e preservam >=1 líder
+        # busca local: trocas entre dois grupos, aceitas se melhoram e preservam
+        # >=1 líder e (se aplicável) o mínimo de mulheres já atingido por grupo
         for _ in range(cfg.iterations):
             i, j = rng.randrange(g), rng.randrange(g)
             if i == j or not groups[i] or not groups[j]:
                 continue
             pi, pj = rng.randrange(len(groups[i])), rng.randrange(len(groups[j]))
             a, b = groups[i][pi], groups[j][pj]
-            # simula troca
-            groups[i][pi], groups[j][pj] = b, a
+            # nº de mulheres antes (para não quebrar grupos que já cumprem o mínimo)
+            wi0, wj0 = _women_count(groups[i], cfg.female_token), _women_count(groups[j], cfg.female_token)
+            groups[i][pi], groups[j][pj] = b, a  # simula troca
             if not (_has_leader(groups[i]) and _has_leader(groups[j])):
-                groups[i][pi], groups[j][pj] = a, b  # desfaz
-                continue
+                groups[i][pi], groups[j][pj] = a, b; continue
+            if cfg.min_women > 0:
+                wi1, wj1 = _women_count(groups[i], cfg.female_token), _women_count(groups[j], cfg.female_token)
+                broke_i = wi0 >= cfg.min_women and wi1 < cfg.min_women
+                broke_j = wj0 >= cfg.min_women and wj1 < cfg.min_women
+                if broke_i or broke_j:
+                    groups[i][pi], groups[j][pj] = a, b; continue
             new_val = total_score(groups, cfg, history)
             if new_val >= val:
                 val = new_val
