@@ -230,8 +230,7 @@ def run_api(send: bool) -> dict:
 
     render.main("../data/groups.json","../data/hotspots.json","../data/index.html")
     artifact_url = os.environ.get("ARTIFACT_URL","")
-    msgs = S.build_all(groups_d, artifact_url, label, token=os.environ.get("SLACK_BOT_TOKEN",""),
-                       anniversaries=anniversaries, special_leader_id=special_id)
+    msgs = S.build_all(groups_d, artifact_url, label, token=os.environ.get("SLACK_BOT_TOKEN",""))
 
     test_mode = os.environ.get("TEST_MODE", "true").lower() == "true"
     from collections import Counter

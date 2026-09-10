@@ -70,7 +70,7 @@ header .logo{height:22px;width:auto;display:block}
 @keyframes rise{to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.groupcard{animation:none;opacity:1;transform:none}}
 .gc-top{padding:22px 24px;box-shadow:inset 0 -1px 0 rgba(0,0,0,.05);
-  display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+  display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap}
 .gc-top .you{font-family:var(--mono);font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:var(--tx-3);margin:0 0 6px}
 .gc-top h2{font-weight:600;font-size:22px;margin:0;letter-spacing:-.4px}
 .chip{font-size:13px;font-weight:500;padding:7px 13px;border-radius:var(--r-full);
@@ -141,6 +141,16 @@ footer a{color:inherit;text-decoration:underline}
 
   <div class="results" id="results"></div>
 
+  <div class="spots">
+    <div class="spots-head"><h3>Onde marcar</h3>
+      <button class="btn" onclick="const el=this.closest('.spots').querySelector('.spots-body'); el.hidden=!el.hidden; this.textContent=el.hidden?'Ver sugestões':'Ocultar sugestões';">Ver sugestões</button>
+    </div>
+    <div class="spots-body" hidden>
+      <p class="sub" id="spots-sub"></p>
+      <div class="spotgrid" id="spotgrid"></div>
+    </div>
+  </div>
+
   <details class="browse">
     <summary class="btn">Ver todos os grupos</summary>
     <div class="allgroups" id="allgroups"></div>
@@ -164,32 +174,18 @@ function renderGroup(group, meId){
   const members = group.map(p=>{
     const isMe = p.id===meId;
     const av = AV[(p.name.charCodeAt(0)+(p.name.charCodeAt(1)||0))%AV.length];
+    const meta = [p.team, p.tenure_label].filter(Boolean).join(' · ');
     return `<li class="member ${isMe?'me':''}">
       <div class="av" style="background:${av}">${initials(p.name).toUpperCase()}</div>
       <div class="who"><div class="nm">${p.name}${isMe?' · você':''}</div>
-      <div class="meta">${p.team||'—'} · ${p.tenure_label||'—'}</div></div>
+      <div class="meta">${meta}</div></div>
       ${p.is_leader?'<span class="lead">capitão</span>':''}
     </li>`;}).join("");
-  const spots = (HOTSPOTS.items||[]).map(s=>{
-    const url = s.maps_url || ('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent((s.name||'')+' '+(s.area||'')));
-    return `<a class="spot" href="${url}" target="_blank" rel="noopener">
-      <div class="c">${s.cat}</div><div class="n">${s.name}</div>
-      <div class="a">${s.area}</div>${s.note?`<div class="no">${s.note}</div>`:''}</a>`;
-  }).join("");
   return `<div class="groupcard">
     <div class="gc-top"><div><p class="you">Seu Small Gathering de ${DATA.month}</p>
       <h2>${group.length} Pessoas</h2></div>
-      <span class="chip">${leader.name} é responsável por garantir que o Small Gathering vai sair do papel!</span></div>
+      <span class="chip">${leader.name.split(' ')[0]} é responsável por garantir que o Small Gathering vai sair do papel!</span></div>
     <ul class="members">${members}</ul>
-  </div>
-  <div class="spots">
-    <div class="spots-head"><h3>Onde marcar</h3>
-      <button class="btn" onclick="const el=this.closest('.spots').querySelector('.spots-body'); el.hidden=!el.hidden; this.textContent=el.hidden?'Ver sugestões':'Ocultar sugestões';">Ver sugestões</button>
-    </div>
-    <div class="spots-body" hidden>
-      <p class="sub">Sugestões perto de ${HOTSPOTS.office_ref||'São Paulo'} — ${HOTSPOTS.month||''}</p>
-      <div class="spotgrid">${spots}</div>
-    </div>
   </div>`;
 }
 
@@ -203,14 +199,22 @@ function search(v){
   if(hits.length===0){results.innerHTML=`<p class="empty">Não achei ninguém com “${v}”. Confere a grafia ou tenta só o primeiro nome.</p>`;return;}
   if(hits.length===1){show(hits[0].id);return;}
   results.innerHTML = `<p class="empty">Achei ${hits.length} pessoas</p>
-    <div class="pick">${hits.slice(0,12).map(p=>`<button data-id="${p.id}">${p.name} · ${p.team||''}</button>`).join("")}</div>`;
+    <div class="pick">${hits.slice(0,12).map(p=>`<button data-id="${p.id}">${[p.name,p.team].filter(Boolean).join(' · ')}</button>`).join("")}</div>`;
   results.querySelectorAll('button').forEach(b=>b.onclick=()=>show(b.dataset.id));
 }
 let t; document.getElementById('q').addEventListener('input',e=>{clearTimeout(t);t=setTimeout(()=>search(e.target.value),120);});
 
+document.getElementById('spots-sub').textContent = `Sugestões perto de ${HOTSPOTS.office_ref||'São Paulo'} — ${HOTSPOTS.month||''}`;
+document.getElementById('spotgrid').innerHTML = (HOTSPOTS.items||[]).map(s=>{
+  const url = s.maps_url || ('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent((s.name||'')+' '+(s.area||'')));
+  return `<a class="spot" href="${url}" target="_blank" rel="noopener">
+    <div class="c">${s.cat}</div><div class="n">${s.name}</div>
+    <div class="a">${s.area}</div>${s.note?`<div class="no">${s.note}</div>`:''}</a>`;
+}).join("");
+
 document.getElementById('allgroups').innerHTML = DATA.groups.map((g,i)=>{
   return `<div class="mini"><h4>Grupo ${i+1}</h4><ul>${
-    g.map(p=>`<li>${p.is_leader?'<span class="star">★</span> ':''}<b>${p.name}</b> · ${p.team||''}</li>`).join("")}</ul></div>`;
+    g.map(p=>`<li>${p.is_leader?'<span class="star">★</span> ':''}<b>${p.name}</b>${p.team?' · '+p.team:''}</li>`).join("")}</ul></div>`;
 }).join("");
 </script>
 </body>

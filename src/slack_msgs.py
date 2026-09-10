@@ -122,6 +122,9 @@ def resolve_ids(people: list[dict], token: str = SLACK_TOKEN,
     return out
 
 
+PEOPLE_MENTION = "<@U0AMR8525DE>"  # Gabriela Barbosa (contato do time de People)
+
+
 def mention(p: dict, ids: dict[str, str | None]) -> str:
     sid = ids.get(p["id"])
     return f"<@{sid}>" if sid else f"*{p['name']}*"
@@ -132,40 +135,43 @@ def mention(p: dict, ids: dict[str, str | None]) -> str:
 # ---------------------------------------------------------------------------
 def msg_geral(artifact_url: str, month_label: str) -> str:
     return (
-        f":coffee: *Grupos de {month_label} estão no ar!*\n"
-        f"Todo mês formamos grupos novos pra galera se misturar entre times e senioridades. "
-        f"Descubra o seu grupo, quem são os colegas e sugestões de rolê pra marcarem:\n"
-        f":point_right: {artifact_url}\n\n"
-        f"É só pesquisar seu nome. Bom encontro! :sparkles:"
+        f":coffee: *Small Gatherings de {month_label} estão no ar!*\n"
+        f"Todos os meses a gente mistura o time da Enter para que mais pessoas se conheçam "
+        f"para além do escritório. Descubra o seu grupo e sugestões de encontros para "
+        f"marcarem <{artifact_url}|aqui>.\n\n"
+        f"Lembrem-se de sempre mandar suas fotos de small gathering em nosso grupo de "
+        f"whatsapp (Black Pearl). Bons encontros!\n\n"
+        f"Qualquer dúvida, falem com o time de {PEOPLE_MENTION}."
     )
 
 
 def msg_lideres(artifact_url: str, month_label: str) -> str:
     return (
-        f":busts_in_silhouette: *Líderes de {month_label} — vocês conduzem o encontro deste mês!*\n"
-        f"Cada um de vocês recebeu (na DM) a lista do seu grupo com os @ de todos. Passo a passo:\n"
-        f"1. Crie um *canal ou grupo no Slack* com as pessoas do seu grupo.\n"
-        f"2. Proponham 2–3 opções de data/horário e *fechem um encontro* (café, almoço, happy hour…).\n"
-        f"3. Precisando de ideias de lugar, tem sugestões no artefato: {artifact_url}\n\n"
-        f"Meta: todo mundo reunido pelo menos uma vez até o fim do mês. Valeu! :rocket:"
+        f":busts_in_silhouette: *Capitães, os Small Gatherings de {month_label} estão no ar!*\n"
+        f"Cada um de vocês recebeu (na DM) a lista do seu grupo com os @ de todos. Vocês "
+        f"também podem descobrir o seu grupo e ver sugestões de encontros para marcarem "
+        f"<{artifact_url}|aqui>.\n\n"
+        f"1. Crie um *canal no Slack* com as pessoas do seu small gathering.\n"
+        f"2. Proponham 2–3 opções de data/horário e *fechem um encontro* (café, almoço, happy hour…).\n\n"
+        f"Lembrem-se de sempre mandar suas fotos de small gathering em nosso grupo de "
+        f"whatsapp (Black Pearl). Bons encontros!\n\n"
+        f"Qualquer dúvida, falem com o time de {PEOPLE_MENTION}."
     )
 
 
+def _member_line(idx: int, m: dict, ids: dict[str, str | None]) -> str:
+    meta = " • ".join(p for p in (m.get("team") or "", m.get("tenure_label") or "") if p)
+    line = f"{idx}. {mention(m, ids)}"
+    return f"{line} — {meta}" if meta else line
+
+
 def msg_dm_lider(lider: dict, membros: list[dict], ids: dict[str, str | None],
-                 month_label: str, anniversaries: dict | None = None) -> str:
-    linhas = "\n".join(f"• {mention(m, ids)} — {m.get('team','?')} / {m.get('seniority','?')}"
-                       for m in membros)
-    extra = ""
-    if anniversaries:
-        aniv = "\n".join(f"• {mention(m, ids)} — *{anniversaries[m['id']]}* de casa :tada:"
-                         for m in membros if m["id"] in anniversaries)
-        if aniv:
-            extra = ("\n\n:birthday: *Aniversariantes de casa neste mês* (o propósito do seu grupo!):\n"
-                     f"{aniv}\nDá um parabéns especial pra elas no encontro.")
+                 month_label: str) -> str:
+    linhas = "\n".join(_member_line(i, m, ids) for i, m in enumerate(membros, 1))
     return (
-        f"Oi {mention(lider, ids)}! :wave: Você é o líder de um grupo em *{month_label}*.\n"
-        f"Seu grupo:\n{linhas}{extra}\n\n"
-        f"Sugestão: cria um grupo no Slack com todo mundo e propõe um encontro. Qualquer dúvida, chama o People. :coffee:"
+        f"Oi {mention(lider, ids)}! :wave: Você é o capitão de um small gathering em {month_label}\n\n"
+        f"{linhas}\n\n"
+        f"Qualquer dúvida, fale com o time de {PEOPLE_MENTION}."
     )
 
 
@@ -185,8 +191,7 @@ def _distinct(vals):
     return len(set(v))
 
 
-def msg_relatorio(groups: list[list[dict]], anniversaries: dict, month_label: str,
-                  ids: dict | None = None, special_group: list[dict] | None = None) -> str:
+def msg_relatorio(groups: list[list[dict]], month_label: str) -> str:
     n = len(groups); total = sum(len(g) for g in groups)
     men = [sum(1 for p in g if _gender_bucket(p.get("gender","")) == "M") for g in groups]
     women = [sum(1 for p in g if _gender_bucket(p.get("gender","")) == "F") for g in groups]
@@ -197,56 +202,32 @@ def msg_relatorio(groups: list[list[dict]], anniversaries: dict, month_label: st
     avg_teams = sum(_distinct(p.get("team","?") for p in g) for g in groups)/n if n else 0
     avg_sen = sum(_distinct(p.get("seniority","?") for p in g) for g in groups)/n if n else 0
 
-    # conformidade da regra "≥2 mulheres" (exceto grupo do Mateus)
-    others = [g for g in groups if g is not special_group]
-    def _wc(g):
-        return sum(1 for p in g if _gender_bucket(p.get("gender","")) == "F")
-    ok_women = sum(1 for g in others if _wc(g) >= 2)
-    women_line = f"\n• Grupos com ≥2 mulheres (exceto o do Mateus): *{ok_women}* de *{len(others)}*"
-
-    aniv_lines = ""
-    grp = special_group if special_group is not None else (groups[0] if groups else [])
-    aniv = [(p, anniversaries[p["id"]]) for p in grp if p["id"] in anniversaries]
-    if aniv:
-        aniv_lines = "\n".join(f"   • {p['name']} — {lbl} de casa" for p, lbl in aniv)
-    else:
-        aniv_lines = "   • ninguém neste mês"
-
     return (
         f":bar_chart: *Relatório dos grupos — {month_label}*\n"
         f"Grupos: *{n}* · Pessoas: *{total}*\n\n"
-        f"*Resultados das regras:*\n"
-        f"• Gênero — média por grupo: *{avg_m:.1f}* homens / *{avg_f:.1f}* mulheres "
+        f"• *Gênero* — média por grupo: *{avg_m:.1f}* homens / *{avg_f:.1f}* mulheres "
         f"(proporção geral H:M = *{ratio}*)\n"
-        f"• Times distintos por grupo (média): *{avg_teams:.1f}*\n"
-        f"• Faixas de tempo de casa distintas por grupo (média): *{avg_sen:.1f}*"
-        f"{women_line}\n"
-        f"• Aniversariantes de casa (grupo do Mateus):\n{aniv_lines}"
-        f"\n\n_Obs.: gênero parcialmente inferido pelo primeiro nome quando ausente no Convenia._"
+        f"• *Times distintos* por grupo (média): *{avg_teams:.1f}*\n"
+        f"• *Faixas de tempo de casa* distintas por grupo (média): *{avg_sen:.1f}*\n\n"
+        f"_Obs.: gênero parcialmente inferido pelo primeiro nome quando ausente no Convenia._"
     )
 
 
 def build_all(groups: list[list[dict]], artifact_url: str, month_label: str,
-              token: str = SLACK_TOKEN, anniversaries: dict | None = None,
-              special_leader_id: str | None = None) -> dict:
+              token: str = SLACK_TOKEN) -> dict:
     """Retorna estrutura pronta para envio (sem enviar nada)."""
-    anniversaries = anniversaries or {}
     flat = [p for g in groups for p in g]
     ids = resolve_ids(flat, token)
     dms = []
     for g in groups:
         leader = next((p for p in g if p.get("is_leader")), g[0])
         members = [p for p in g if p["id"] != leader["id"]]
-        is_special = special_leader_id is not None and leader["id"] == special_leader_id
         dms.append({"leader": leader, "slack_id": ids.get(leader["id"]),
-                    "text": msg_dm_lider(leader, members, ids, month_label,
-                                         anniversaries if is_special else None)})
-    special_group = next((g for g in groups
-                          if any(p["id"] == special_leader_id for p in g)), None)
+                    "text": msg_dm_lider(leader, members, ids, month_label)})
     return {
         "geral": msg_geral(artifact_url, month_label),
         "lideres": msg_lideres(artifact_url, month_label),
         "dms": dms,
-        "relatorio": msg_relatorio(groups, anniversaries, month_label, ids, special_group),
+        "relatorio": msg_relatorio(groups, month_label),
         "unresolved": [p["name"] for p in flat if ids.get(p["id"]) is None],
     }

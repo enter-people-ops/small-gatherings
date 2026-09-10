@@ -216,7 +216,7 @@ def _normalize(e: dict[str, Any]) -> dict:
         "name": name.strip(),
         "email": _as_text(g("email", "corporate_email", "work_email")) or None,
         "gender": gender_raw or "?",
-        "team": _as_text(g("team.name", "team")) or "?",
+        "team": _as_text(g("team.name", "team")) or job_txt or "",  # fallback: cargo; por último, em branco
         "department": _as_text(g("department.name", "department")) or "?",
         "job": job_txt,
         "seniority": classify_tenure(hiring),   # senioridade = faixa de tempo de casa
