@@ -48,8 +48,8 @@ header .logo{height:22px;width:auto;display:block}
   text-transform:uppercase;color:var(--tx-3)}
 /* hero */
 .hero h1{font-weight:600;font-size:clamp(30px,7vw,48px);line-height:1.05;
-  letter-spacing:-.4px;margin:0 0 14px;max-width:18ch}
-.hero p{margin:0 0 28px;color:var(--tx-2);max-width:56ch;font-size:clamp(15px,2.4vw,17px)}
+  letter-spacing:-.4px;margin:0 0 14px}
+.hero p{margin:0 0 28px;color:var(--tx-2);font-size:clamp(15px,2.4vw,17px)}
 .searchbox{position:relative;max-width:560px}
 #q{width:100%;font-family:var(--font);font-size:18px;font-weight:400;height:56px;
   padding:0 18px 0 50px;border:0;border-radius:var(--r-xl);background:var(--bg);
@@ -57,7 +57,6 @@ header .logo{height:22px;width:auto;display:block}
 #q::placeholder{color:var(--tx-3)}
 #q:focus{box-shadow:var(--ring-focus)}
 .searchbox svg.ic{position:absolute;left:17px;top:50%;transform:translateY(-50%);color:var(--tx-3)}
-.hint{margin-top:10px;color:var(--tx-3);font-size:13px}
 .results{margin-top:36px}
 .empty{color:var(--tx-2);margin-top:24px;font-size:15px}
 .pick{display:flex;flex-direction:column;gap:8px;margin-top:14px}
@@ -109,7 +108,9 @@ header .logo{height:22px;width:auto;display:block}
 .mini li{font-size:13px;padding:3px 0;color:var(--tx-2)}
 .mini li b{color:var(--tx);font-weight:500}
 .mini .star{color:var(--brand-400)}
-footer{margin-top:60px;color:var(--tx-3);font-size:12px;text-align:center;font-family:var(--mono);letter-spacing:.3px}
+.wa-note{margin-top:24px;color:var(--tx-2);font-size:13px;text-align:center}
+footer{margin-top:20px;color:var(--tx-3);font-size:12px;text-align:center;font-family:var(--mono);letter-spacing:.3px}
+footer a{color:inherit;text-decoration:underline}
 </style>
 </head>
 <body>
@@ -126,7 +127,6 @@ footer{margin-top:60px;color:var(--tx-3);font-size:12px;text-align:center;font-f
       <svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
       <input id="q" type="search" placeholder="Busque seu nome aqui!" autocomplete="off" autofocus aria-label="Buscar seu nome">
     </div>
-    <div class="hint">Ex.: primeiro nome ou sobrenome. Acentos não importam.</div>
   </section>
 
   <div class="results" id="results"></div>
@@ -136,7 +136,9 @@ footer{margin-top:60px;color:var(--tx-3);font-size:12px;text-align:center;font-f
     <div class="allgroups" id="allgroups"></div>
   </details>
 
-  <footer>Dúvidas? fale com o time de People @Gabriela Barbosa</footer>
+  <p class="wa-note">Lembrem-se de sempre mandar suas fotos de small gathering em nosso grupo do WhatsApp (Black Pearl)</p>
+
+  <footer>Dúvidas? fale com o time de People <a href="https://slack.com/app_redirect?channel=D0BT9B8SPRS" target="_blank" rel="noopener">@Gabriela Barbosa</a></footer>
 </div>
 
 <script>
@@ -155,16 +157,16 @@ function renderGroup(group, meId){
     return `<li class="member ${isMe?'me':''}">
       <div class="av" style="background:${av}">${initials(p.name).toUpperCase()}</div>
       <div class="who"><div class="nm">${p.name}${isMe?' · você':''}</div>
-      <div class="meta">${p.team||'—'} · ${p.seniority||'—'}</div></div>
+      <div class="meta">${p.team||'—'} · ${p.tenure_label||'—'}</div></div>
       ${p.is_leader?'<span class="lead">líder</span>':''}
     </li>`;}).join("");
   const spots = (HOTSPOTS.items||[]).map(s=>`<div class="spot">
       <div class="c">${s.cat}</div><div class="n">${s.name}</div>
       <div class="a">${s.area}</div>${s.note?`<div class="no">${s.note}</div>`:''}</div>`).join("");
   return `<div class="groupcard">
-    <div class="gc-top"><div><p class="you">Seu grupo de ${DATA.month}</p>
-      <h2>${group.length} pessoas · líder ${leader.name.split(' ')[0]}</h2></div>
-      <span class="chip">${leader.name} conduz o encontro</span></div>
+    <div class="gc-top"><div><p class="you">Seu Small Gathering de ${DATA.month}</p>
+      <h2>Capitão: ${leader.name.split(' ')[0]} · ${group.length} Pessoas</h2></div>
+      <span class="chip">${leader.name} é responsável por garantir que o Small Gathering vai sair do papel!</span></div>
     <ul class="members">${members}</ul>
   </div>
   <div class="spots"><h3>Onde marcar</h3>

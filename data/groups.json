@@ -10,7 +10,8 @@
         "team": "Engenharia",
         "department": "People",
         "seniority": "Lead",
-        "is_leader": true
+        "is_leader": true,
+        "tenure_label": "6 anos"
       },
       {
         "id": "e005",
@@ -19,7 +20,8 @@
         "team": "People",
         "department": "People",
         "seniority": "Gerência",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "8 anos"
       },
       {
         "id": "e017",
@@ -28,7 +30,8 @@
         "team": "AID",
         "department": "Finance",
         "seniority": "Lead",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "6 anos"
       },
       {
         "id": "e032",
@@ -37,7 +40,8 @@
         "team": "Finance",
         "department": "Finance",
         "seniority": "Estágio",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "3 meses"
       },
       {
         "id": "e006",
@@ -46,7 +50,8 @@
         "team": "Legal Strategy",
         "department": "Produto",
         "seniority": "Júnior",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "1 ano"
       },
       {
         "id": "e022",
@@ -55,7 +60,8 @@
         "team": "Produto",
         "department": "GTM",
         "seniority": "Lead",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "6 anos"
       }
     ],
     [
@@ -66,7 +72,8 @@
         "team": "GTM",
         "department": "AID",
         "seniority": "Lead",
-        "is_leader": true
+        "is_leader": true,
+        "tenure_label": "6 anos"
       },
       {
         "id": "e004",
@@ -75,7 +82,8 @@
         "team": "Produto",
         "department": "People",
         "seniority": "Lead",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "6 anos"
       },
       {
         "id": "e031",
@@ -84,7 +92,8 @@
         "team": "AID",
         "department": "Engenharia",
         "seniority": "Estágio",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "3 meses"
       },
       {
         "id": "e036",
@@ -93,7 +102,8 @@
         "team": "People",
         "department": "People",
         "seniority": "Lead",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "6 anos"
       },
       {
         "id": "e028",
@@ -102,7 +112,8 @@
         "team": "Finance",
         "department": "Finance",
         "seniority": "Estágio",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "3 meses"
       },
       {
         "id": "e002",
@@ -111,7 +122,8 @@
         "team": "Engenharia",
         "department": "Finance",
         "seniority": "Estágio",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "3 meses"
       }
     ],
     [
@@ -122,7 +134,8 @@
         "team": "Produto",
         "department": "GTM",
         "seniority": "Lead",
-        "is_leader": true
+        "is_leader": true,
+        "tenure_label": "6 anos"
       },
       {
         "id": "e041",
@@ -131,7 +144,8 @@
         "team": "AID",
         "department": "Finance",
         "seniority": "Pleno",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "2.5 anos"
       },
       {
         "id": "e009",
@@ -140,7 +154,8 @@
         "team": "AID",
         "department": "GTM",
         "seniority": "Estágio",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "3 meses"
       },
       {
         "id": "e024",
@@ -149,7 +164,8 @@
         "team": "GTM",
         "department": "Produto",
         "seniority": "Sênior",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "4 anos"
       },
       {
         "id": "e045",
@@ -158,7 +174,8 @@
         "team": "People",
         "department": "AID",
         "seniority": "Gerência",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "8 anos"
       },
       {
         "id": "e034",
@@ -167,7 +184,8 @@
         "team": "Legal Strategy",
         "department": "Produto",
         "seniority": "Estágio",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "3 meses"
       }
     ],
     [
@@ -178,7 +196,8 @@
         "team": "Engenharia",
         "department": "Finance",
         "seniority": "Lead",
-        "is_leader": true
+        "is_leader": true,
+        "tenure_label": "6 anos"
       },
       {
         "id": "e035",
@@ -187,7 +206,8 @@
         "team": "AID",
         "department": "AID",
         "seniority": "Júnior",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "1 ano"
       },
       {
         "id": "e042",
@@ -196,7 +216,8 @@
         "team": "GTM",
         "department": "People",
         "seniority": "Lead",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "6 anos"
       },
       {
         "id": "e033",
@@ -205,7 +226,8 @@
         "team": "People",
         "department": "AID",
         "seniority": "Lead",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "6 anos"
       },
       {
         "id": "e020",
@@ -214,7 +236,8 @@
         "team": "Produto",
         "department": "GTM",
         "seniority": "Pleno",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "2.5 anos"
       }
     ],
     [
@@ -225,7 +248,8 @@
         "team": "Produto",
         "department": "Finance",
         "seniority": "Lead",
-        "is_leader": true
+        "is_leader": true,
+        "tenure_label": "6 anos"
       },
       {
         "id": "e021",
@@ -234,7 +258,8 @@
         "team": "Finance",
         "department": "Finance",
         "seniority": "Estágio",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "3 meses"
       },
       {
         "id": "e008",
@@ -243,7 +268,8 @@
         "team": "Legal Strategy",
         "department": "GTM",
         "seniority": "Lead",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "6 anos"
       },
       {
         "id": "e039",
@@ -252,7 +278,8 @@
         "team": "People",
         "department": "Produto",
         "seniority": "Gerência",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "8 anos"
       },
       {
         "id": "e003",
@@ -261,7 +288,8 @@
         "team": "AID",
         "department": "Finance",
         "seniority": "Júnior",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "1 ano"
       }
     ],
     [
@@ -272,7 +300,8 @@
         "team": "AID",
         "department": "People",
         "seniority": "Lead",
-        "is_leader": true
+        "is_leader": true,
+        "tenure_label": "6 anos"
       },
       {
         "id": "e011",
@@ -281,7 +310,8 @@
         "team": "Produto",
         "department": "GTM",
         "seniority": "Sênior",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "4 anos"
       },
       {
         "id": "e000",
@@ -290,7 +320,8 @@
         "team": "Finance",
         "department": "Finance",
         "seniority": "Júnior",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "1 ano"
       },
       {
         "id": "e027",
@@ -299,7 +330,8 @@
         "team": "GTM",
         "department": "People",
         "seniority": "Estágio",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "3 meses"
       },
       {
         "id": "e026",
@@ -308,7 +340,8 @@
         "team": "Legal Strategy",
         "department": "Engenharia",
         "seniority": "Pleno",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "2.5 anos"
       }
     ],
     [
@@ -319,7 +352,8 @@
         "team": "AID",
         "department": "Engenharia",
         "seniority": "Lead",
-        "is_leader": true
+        "is_leader": true,
+        "tenure_label": "6 anos"
       },
       {
         "id": "e007",
@@ -328,7 +362,8 @@
         "team": "People",
         "department": "Produto",
         "seniority": "Estágio",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "3 meses"
       },
       {
         "id": "e047",
@@ -337,7 +372,8 @@
         "team": "Engenharia",
         "department": "Finance",
         "seniority": "Estágio",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "3 meses"
       },
       {
         "id": "e018",
@@ -346,7 +382,8 @@
         "team": "Finance",
         "department": "Legal Strategy",
         "seniority": "Pleno",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "2.5 anos"
       },
       {
         "id": "e015",
@@ -355,7 +392,8 @@
         "team": "Produto",
         "department": "People",
         "seniority": "Gerência",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "8 anos"
       }
     ],
     [
@@ -366,7 +404,8 @@
         "team": "Finance",
         "department": "People",
         "seniority": "Lead",
-        "is_leader": true
+        "is_leader": true,
+        "tenure_label": "6 anos"
       },
       {
         "id": "e010",
@@ -375,7 +414,8 @@
         "team": "People",
         "department": "Finance",
         "seniority": "Gerência",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "8 anos"
       },
       {
         "id": "e044",
@@ -384,7 +424,8 @@
         "team": "Produto",
         "department": "Legal Strategy",
         "seniority": "Estágio",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "3 meses"
       },
       {
         "id": "e014",
@@ -393,7 +434,8 @@
         "team": "Legal Strategy",
         "department": "People",
         "seniority": "Júnior",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "1 ano"
       },
       {
         "id": "e025",
@@ -402,7 +444,8 @@
         "team": "AID",
         "department": "GTM",
         "seniority": "Estágio",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "3 meses"
       }
     ],
     [
@@ -413,7 +456,8 @@
         "team": "People",
         "department": "Finance",
         "seniority": "Lead",
-        "is_leader": true
+        "is_leader": true,
+        "tenure_label": "6 anos"
       },
       {
         "id": "e030",
@@ -422,7 +466,8 @@
         "team": "AID",
         "department": "Finance",
         "seniority": "Júnior",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "1 ano"
       },
       {
         "id": "e046",
@@ -431,7 +476,8 @@
         "team": "Finance",
         "department": "Produto",
         "seniority": "Pleno",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "2.5 anos"
       },
       {
         "id": "e012",
@@ -440,7 +486,8 @@
         "team": "Produto",
         "department": "GTM",
         "seniority": "Lead",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "6 anos"
       },
       {
         "id": "e013",
@@ -449,7 +496,8 @@
         "team": "Legal Strategy",
         "department": "AID",
         "seniority": "Estágio",
-        "is_leader": false
+        "is_leader": false,
+        "tenure_label": "3 meses"
       }
     ]
   ]

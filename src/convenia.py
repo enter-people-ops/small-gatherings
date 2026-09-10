@@ -31,25 +31,51 @@ _SENIORITY_RULES = [
     ("Estágio",    r"\b(estagi[áa]rio|intern|trainee|aprendiz)\b"),
 ]
 
+def _parse_hiring_date(hiring_date):
+    import datetime as _dt
+    for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%Y-%m-%dT%H:%M:%S"):
+        try:
+            return _dt.datetime.strptime(str(hiring_date)[:19], fmt).date()
+        except (ValueError, TypeError):
+            continue
+    return None
+
+
+def _tenure_months(hiring_date, ref=None) -> int | None:
+    import datetime as _dt
+    ref = ref or _dt.date.today()
+    d = _parse_hiring_date(hiring_date)
+    if not d:
+        return None
+    return (ref.year - d.year) * 12 + (ref.month - d.month)
+
+
 def classify_tenure(hiring_date, ref=None) -> str:
     """Faixa de tempo de casa a partir da data de admissão (substitui a senioridade
     por cargo, que vinha quase toda 'N/D'). Usada na formação e no relatório."""
-    import datetime as _dt
-    ref = ref or _dt.date.today()
-    d = None
-    for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%Y-%m-%dT%H:%M:%S"):
-        try:
-            d = _dt.datetime.strptime(str(hiring_date)[:19], fmt).date(); break
-        except (ValueError, TypeError):
-            continue
-    if not d:
+    months = _tenure_months(hiring_date, ref)
+    if months is None:
         return "N/D"
-    months = (ref.year - d.year) * 12 + (ref.month - d.month)
     if months < 6:   return "Novato"      # < 6 meses
     if months < 12:  return "Recente"     # 6m–1a
     if months < 24:  return "Casa"        # 1–2a
     if months < 48:  return "Veterano"    # 2–4a
     return "Antigo"                        # 4a+
+
+
+def tenure_label(hiring_date, ref=None) -> str:
+    """Tempo de casa em texto legível pro artefato (ex.: '3 meses', '1 ano', '1.5 anos')."""
+    months = _tenure_months(hiring_date, ref)
+    if months is None:
+        return "—"
+    if months < 12:
+        m = max(months, 1)
+        return f"{m} {'mês' if m == 1 else 'meses'}"
+    years = months / 12
+    if years == int(years):
+        y = int(years)
+        return f"{y} ano" if y == 1 else f"{y} anos"
+    return f"{round(years, 1)} anos"
 
 
 def classify_seniority(job_name: str | None) -> str:
@@ -194,6 +220,7 @@ def _normalize(e: dict[str, Any]) -> dict:
         "department": _as_text(g("department.name", "department")) or "?",
         "job": job_txt,
         "seniority": classify_tenure(hiring),   # senioridade = faixa de tempo de casa
+        "tenure_label": tenure_label(hiring),    # tempo de casa em texto (artefato)
         "hiring_date": hiring,
         "active": bool(active),
     }
