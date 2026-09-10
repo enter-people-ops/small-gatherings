@@ -76,6 +76,7 @@ src/main.py         run_api (pipeline), build_groups (grupo do Mateus),
                     _send (roteamento TESTE), diagnose, work_anniversaries
 src/server.py       Flask: GET / (artefato), GET /fonts, POST /run, GET /debug, GET /health
 data/hotspots.json  sugestões de rolê ("Onde marcar") — lista fixa, editada à mão
+data/team_overrides.json  correção manual de `team` (Convenia errado/desatualizado)
 data/fonts/         Geist (auto-hospedada, identidade Enter)
 data/logo-enter.svg logo oficial
 Procfile            gunicorn (timeout 300, threads 4)
@@ -246,6 +247,20 @@ Sem Volume, `data/index.html` (e `groups.json`/`hotspots.json`) vêm do que
 está commitado no repo até que `/run` rode de novo (ver seção 10) — então
 mudanças de copy/design só aparecem no artefato ao vivo depois de chamar
 `POST /run?send=false` (ou `send=true`) uma vez após o deploy.
+
+## 16b. Overrides manuais de `team` (Convenia errado/desatualizado)
+Quando o `team.name`/cargo do Convenia está errado ou desatualizado pra alguém
+(e não dá pra esperar a correção lá), edite `data/team_overrides.json` — dict
+`{"apelido ou nome": "Time novo"}`. O casamento é por **prefixo de token**
+(mesma família de heurística da planilha de líderes): cada palavra da chave
+precisa ser prefixo de alguma palavra do nome completo no Convenia (`"Isa
+Neno"` casa `"Isabela Neno Silva"`; `"Dai"` casa `"Daiane ..."`). Aplicado em
+`convenia.apply_team_overrides()`, chamado logo após `fetch_eligible` em
+`main.py`. Candidato **ambíguo ou não encontrado não altera ninguém** (só
+aparece em `team_overrides.ambiguous`/`not_found` no retorno do `/run`, pra
+não arriscar aplicar na pessoa errada) — confira esses campos após editar o
+arquivo. Como os demais arquivos de `data/`, só tem efeito no artefato/relatório
+depois de rodar `POST /run?send=false` (ou `send=true`) uma vez (ver seção 15).
 
 ## 16. Sugestões de rolê ("Onde marcar")
 Lista **fixa**, curada à mão em `data/hotspots.json` — não há mais busca

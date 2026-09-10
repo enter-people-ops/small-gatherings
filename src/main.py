@@ -206,6 +206,15 @@ def run_api(send: bool) -> dict:
     Se send=True, envia pelo Slack aqui mesmo. Se False, o Make envia."""
     ref = dt.date.today(); label = month_label(ref)
     people = convenia.fetch_eligible(os.environ["CONVENIA_TOKEN"], ref)
+
+    # correções manuais de `team` (Convenia errado/desatualizado) — ver
+    # data/team_overrides.json, editado à mão (mesmo espírito do hotspots.json)
+    team_overrides_path = "../data/team_overrides.json"
+    team_overrides = {}
+    if os.path.exists(team_overrides_path):
+        team_overrides = json.load(open(team_overrides_path, encoding="utf-8"))
+    team_overrides_result = convenia.apply_team_overrides(people, team_overrides)
+
     leaders = sheets.read_leaders_csv(os.environ["LEADERS_CSV_URL"])
     people = sheets.mark_leaders(people, leaders)
     by_id = {p["id"]: p for p in people}
@@ -250,6 +259,7 @@ def run_api(send: bool) -> dict:
               "anniversaries_this_month": len(anniversaries),
               "special_leader": (special["name"] if special else None),
               "gender_distribution": dict(gender_dist.most_common()),
+              "team_overrides": team_overrides_result,
               "general_channel": os.environ.get("CANAL_TESTE_GERAL") if test_mode else os.environ.get("CANAL_GERAL"),
               "leaders_channel": os.environ.get("CANAL_TESTE_LIDERES") if test_mode else os.environ.get("CANAL_LIDERES"),
               "report_target": os.environ.get("CANAL_TESTE_RELATORIO") if test_mode else os.environ.get("DM_RELATORIO"),

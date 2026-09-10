@@ -239,6 +239,39 @@ def raw_report(token: str, ref_month: dt.date | None = None, name_filter: str | 
     }
 
 
+def _name_tokens(name: str) -> set:
+    """Tokens normalizados do nome (hífen/ponto contam como separador)."""
+    import unicodedata
+    n = "".join(c for c in unicodedata.normalize("NFKD", str(name or ""))
+                if not unicodedata.combining(c)).lower()
+    n = n.replace("-", " ").replace(".", " ")
+    return {t for t in n.split() if t}
+
+
+def apply_team_overrides(people: list[dict], overrides: dict[str, str]) -> dict:
+    """Aplica correções manuais de `team` (ex.: data/team_overrides.json) por
+    casamento de apelido: cada token da chave do override precisa ser prefixo
+    de algum token do nome completo do Convenia (ex.: 'Isa' casa 'Isabela',
+    'Dai' casa 'Daiane'). Só aplica em caso de candidato único; ambíguo/não
+    encontrado só é reportado (não altera ninguém), para não arriscar aplicar
+    no funcionário errado."""
+    applied, ambiguous, not_found = [], [], []
+    for query, team in (overrides or {}).items():
+        qtoks = _name_tokens(query)
+        if not qtoks:
+            continue
+        cands = [p for p in people
+                 if all(any(nt.startswith(qt) for nt in _name_tokens(p["name"])) for qt in qtoks)]
+        if len(cands) == 1:
+            cands[0]["team"] = team
+            applied.append({"query": query, "name": cands[0]["name"], "team": team})
+        elif len(cands) > 1:
+            ambiguous.append({"query": query, "candidates": [c["name"] for c in cands][:5]})
+        else:
+            not_found.append(query)
+    return {"applied": applied, "ambiguous": ambiguous, "not_found": not_found}
+
+
 def _as_text(v) -> str:
     """Converte qualquer valor (str, dict aninhado, lista) em texto simples."""
     if v is None:
