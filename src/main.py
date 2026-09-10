@@ -160,7 +160,10 @@ def build_groups(persons: list, history, cfg, special_leader_id: str | None,
     if special is None:
         return make_groups(persons, history, cfg)  # sem líder especial: fluxo normal
 
-    aniv = [p for p in persons if p.id in anniversary_ids and p.id != special.id]
+    # aniversariantes vão pro grupo do Mateus, MAS líderes continuam liderando
+    # seus próprios grupos (não são puxados) — exceto o próprio Mateus.
+    aniv = [p for p in persons
+            if p.id in anniversary_ids and p.id != special.id and not p.is_leader]
     reserved = {special.id} | {p.id for p in aniv}
     rest = [p for p in persons if p.id not in reserved]
 
@@ -209,10 +212,13 @@ def run_api(send: bool) -> dict:
                        anniversaries=anniversaries, special_leader_id=special_id)
 
     test_mode = os.environ.get("TEST_MODE", "true").lower() == "true"
+    from collections import Counter
+    gender_dist = Counter((p.get("gender") or "(vazio)") for p in people)
     result = {"month": label, "n_groups": len(groups), "score": round(score,2),
               "test_mode": test_mode, "artifact_url": artifact_url,
               "anniversaries_this_month": len(anniversaries),
               "special_leader": (special["name"] if special else None),
+              "gender_distribution": dict(gender_dist.most_common()),
               "general_channel": os.environ.get("SLACK_GENERAL_CHANNEL"),
               "leaders_channel": os.environ.get("SLACK_LEADERS_CHANNEL") or os.environ.get("SLACK_GENERAL_CHANNEL"),
               "report_channel": os.environ.get("REPORT_CHANNEL", "C0C0WJTSYLE"),
