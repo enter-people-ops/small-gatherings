@@ -91,7 +91,9 @@ header .logo{height:22px;width:auto;display:block}
 .spots h3{font-weight:600;margin:0 0 4px;font-size:19px;letter-spacing:-.4px}
 .spots .sub{margin:0 0 18px;color:rgba(250,250,250,.65);font-size:13px}
 .spotgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:12px}
-.spot{background:rgba(255,255,255,.05);box-shadow:var(--ring-dark);border-radius:var(--r-xl);padding:14px 16px}
+.spot{display:block;background:rgba(255,255,255,.05);box-shadow:var(--ring-dark);border-radius:var(--r-xl);
+  padding:14px 16px;color:inherit;text-decoration:none;transition:background var(--dur) var(--ease)}
+.spot:hover{background:rgba(255,255,255,.1)}
 .spot .c{font-family:var(--mono);font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--brand)}
 .spot .n{font-weight:500;margin:6px 0 2px;font-size:15px}
 .spot .a{font-size:13px;color:rgba(250,250,250,.7)}
@@ -160,9 +162,12 @@ function renderGroup(group, meId){
       <div class="meta">${p.team||'—'} · ${p.tenure_label||'—'}</div></div>
       ${p.is_leader?'<span class="lead">líder</span>':''}
     </li>`;}).join("");
-  const spots = (HOTSPOTS.items||[]).map(s=>`<div class="spot">
+  const spots = (HOTSPOTS.items||[]).map(s=>{
+    const url = s.maps_url || ('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent((s.name||'')+' '+(s.area||'')));
+    return `<a class="spot" href="${url}" target="_blank" rel="noopener">
       <div class="c">${s.cat}</div><div class="n">${s.name}</div>
-      <div class="a">${s.area}</div>${s.note?`<div class="no">${s.note}</div>`:''}</div>`).join("");
+      <div class="a">${s.area}</div>${s.note?`<div class="no">${s.note}</div>`:''}</a>`;
+  }).join("");
   return `<div class="groupcard">
     <div class="gc-top"><div><p class="you">Seu Small Gathering de ${DATA.month}</p>
       <h2>Capitão: ${leader.name.split(' ')[0]} · ${group.length} Pessoas</h2></div>

@@ -20,8 +20,10 @@ Uso:
 from __future__ import annotations
 import os, sys, json, argparse, datetime as dt
 
-import convenia, sheets, render, slack_msgs as S
+import convenia, sheets, render, hotspots, slack_msgs as S
 from grouping import Person, Config, make_groups
+
+DEFAULT_OFFICE_ADDRESS = "Rua Capote Valente, 839 - Pinheiros, São Paulo - SP, 05409-002"
 
 def _load_env(path: str = "../.env"):
     """Carrega um .env simples (KEY=VALUE) para os.environ, se existir.
@@ -218,6 +220,14 @@ def run_api(send: bool) -> dict:
     groups_d = [[{**by_id[p.id], "is_leader": p.is_leader} for p in g] for g in groups]
     payload = {"month": label, "generated_at": ref.isoformat(), "groups": groups_d}
     json.dump(payload, open("../data/groups.json","w",encoding="utf-8"), ensure_ascii=False, indent=2)
+
+    # sugestões de rolê via OpenStreetMap (raio de 5km do escritório); se a
+    # busca falhar, mantém o hotspots.json existente
+    fresh_hotspots = hotspots.fetch_hotspots(
+        os.environ.get("OFFICE_ADDRESS", DEFAULT_OFFICE_ADDRESS), label)
+    if fresh_hotspots:
+        json.dump(fresh_hotspots, open("../data/hotspots.json","w",encoding="utf-8"), ensure_ascii=False, indent=2)
+
     render.main("../data/groups.json","../data/hotspots.json","../data/index.html")
     artifact_url = os.environ.get("ARTIFACT_URL","")
     msgs = S.build_all(groups_d, artifact_url, label, token=os.environ.get("SLACK_BOT_TOKEN",""),

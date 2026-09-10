@@ -3,7 +3,8 @@
 Todo dia 1º do mês: busca elegíveis no Convenia (ativos + admitidos no mês),
 lê a planilha de líderes, forma grupos (diversidade de gênero/time/senioridade
 + evita repetir pares do histórico, sempre ≥1 líder por grupo), gera um artefato
-HTML pesquisável (com sugestões de rolê em SP) e envia 3 mensagens no Slack.
+HTML pesquisável (com sugestões de rolê reais do OpenStreetMap, num raio de
+5km do escritório — almoço/jantar/barzinhos/aulas) e envia 3 mensagens no Slack.
 
 ## Arquitetura (Make.com + Railway)
 
@@ -54,9 +55,17 @@ distribuído o mais uniformemente possível. Não há mais tamanho fixo configur
 ## Variáveis de ambiente (Railway)
     CONVENIA_TOKEN, SLACK_BOT_TOKEN, LEADERS_CSV_URL, ARTIFACT_URL,
     SLACK_GENERAL_CHANNEL, SLACK_LEADERS_CHANNEL, RUN_KEY,
-    GROUP_MIN_WOMEN=2, EMAIL_DOMAIN=getenter.ai
+    GROUP_MIN_WOMEN=2, EMAIL_DOMAIN=getenter.ai,
+    OFFICE_ADDRESS
 
 Scopes do bot Slack: chat:write, users:read, users:read.email.
+
+## Sugestões de rolê (OpenStreetMap)
+`src/hotspots.py` busca lugares reais (Nominatim + Overpass API, gratuitos,
+sem key/conta/faturamento) num raio de 5km do `OFFICE_ADDRESS`, sempre
+cobrindo Almoço/Jantar/Barzinhos/Aulas, e escreve em `data/hotspots.json` com
+link direto pro Google Maps (busca por nome). Se a busca falhar, mantém o
+hotspots.json existente (não quebra o pipeline). Detalhes: `CLAUDE.md` seção 16.
 
 ## Persistência do histórico
 `data/history.json` é append-only com janela deslizante. No Railway, use um
