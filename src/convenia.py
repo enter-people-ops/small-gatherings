@@ -94,16 +94,19 @@ def _get(path: str, params: dict | None = None, token: str | None = None) -> dic
     return r.json()
 
 
-def _iter_all_employees(token: str) -> list[dict]:
-    """Percorre todas as páginas de /employees. Convenia costuma paginar com ?page="""
-    out, page = [], 1
+def _iter_all_employees_traced(token: str) -> tuple[list[dict], list[dict]]:
+    """Como _iter_all_employees, mas também devolve um rastro por página
+    (nº de linhas e o `meta`/`metadata` cru devolvido), pra diagnosticar
+    se a paginação está parando antes da hora."""
+    out, page, trace = [], 1, []
     while True:
         data = _get("/employees", {"page": page}, token)
         rows = data.get("data", data if isinstance(data, list) else [])
+        meta = data.get("meta") or data.get("metadata") or {}
+        trace.append({"page": page, "rows": len(rows), "meta": meta})
         if not rows:
             break
         out.extend(rows)
-        meta = data.get("meta") or data.get("metadata") or {}
         last = meta.get("last_page") or meta.get("total_pages")
         if last and page >= last:
             break
@@ -113,7 +116,12 @@ def _iter_all_employees(token: str) -> list[dict]:
         if page > 200:  # trava de segurança
             break
         time.sleep(0.15)
-    return out
+    return out, trace
+
+
+def _iter_all_employees(token: str) -> list[dict]:
+    """Percorre todas as páginas de /employees. Convenia costuma paginar com ?page="""
+    return _iter_all_employees_traced(token)[0]
 
 
 def _first_day_of_month(ref: dt.date) -> dt.date:
@@ -174,7 +182,7 @@ def raw_report(token: str, ref_month: dt.date | None = None) -> dict:
     painel do Convenia (ex.: gente em admissão/desligamento não capturada)."""
     from collections import Counter
     ref = ref_month or dt.date.today()
-    raw = _iter_all_employees(token)
+    raw, page_trace = _iter_all_employees_traced(token)
     status_counts = Counter()
     nao_ativos = []
     for e in raw:
@@ -186,10 +194,26 @@ def raw_report(token: str, ref_month: dt.date | None = None) -> dict:
                 "hiring_date": summary["hiring_date"],
                 "elegivel_pelo_mes_de_admissao": _in_reference_month(summary["hiring_date"], ref),
             })
+
+    # amostra crua (sem normalizar) pra ver os nomes de campo que o Convenia
+    # realmente usa na listagem vs no detalhe de 1 funcionário
+    sample_list_row = raw[0] if raw else None
+    sample_detail = None
+    if raw:
+        try:
+            sample_id = _normalize(raw[0])["id"]
+            detail = _get(f"/employees/{sample_id}", token=token)
+            sample_detail = detail.get("data", detail)
+        except requests.RequestException as e:
+            sample_detail = {"erro_ao_buscar_detalhe": str(e)}
+
     return {
         "total_raw_da_api": len(raw),
+        "paginas": page_trace,
         "status_counts": dict(status_counts.most_common()),
         "nao_ativos": nao_ativos,
+        "amostra_linha_da_listagem": sample_list_row,
+        "amostra_detalhe_do_funcionario": sample_detail,
     }
 
 
