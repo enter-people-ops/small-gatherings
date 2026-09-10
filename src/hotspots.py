@@ -176,15 +176,22 @@ def _categorize(elements: list[dict], lat: float, lon: float) -> tuple[list, lis
     return restaurants, bars, classes
 
 
-def fetch_hotspots(office_address: str, month_label: str = "") -> dict | None:
+def fetch_hotspots(office_address: str, month_label: str = "") -> tuple[dict | None, str | None]:
     """Busca sugestões reais no OpenStreetMap num raio de 5km do escritório
-    (almoço, jantar, barzinhos, aulas). Retorna None se a geocodificação ou a
-    busca falharem (rede, timeout, servidor indisponível) ou nenhum resultado
-    vier — nesses casos o chamador mantém o hotspots.json existente."""
+    (almoço, jantar, barzinhos, aulas). Retorna `(dados, None)` no sucesso ou
+    `(None, motivo)` se a geocodificação/busca falharem (rede, timeout,
+    servidor indisponível) ou nenhum resultado vier — nesses casos o chamador
+    mantém o hotspots.json existente. O motivo é sempre também impresso
+    (stdout), pra aparecer nos logs do deploy no Railway: essa falha era
+    engolida em silêncio antes, o que tornava impossível saber por que o
+    fetch funcionava local mas não a partir do Railway (suspeita: Nominatim
+    limita/bloqueia tráfego de IPs de datacenter/cloud)."""
     try:
         loc = _geocode(office_address)
         if not loc:
-            return None
+            reason = f"geocoding não retornou coordenadas para {office_address!r}"
+            print(f"[hotspots] {reason}")
+            return None, reason
         elements = _overpass(*loc)
         restaurants, bars, classes = _categorize(elements, *loc)
         items = (
@@ -193,8 +200,16 @@ def fetch_hotspots(office_address: str, month_label: str = "") -> dict | None:
             + [_item("Barzinhos", el) for el in bars[:3]]
             + [_item("Aulas", el) for el in classes[:3]]
         )
-    except (requests.RequestException, ValueError, KeyError):
-        return None
+    except requests.RequestException as e:
+        reason = f"request falhou ({type(e).__name__}): {e}"
+        print(f"[hotspots] {reason}")
+        return None, reason
+    except (ValueError, KeyError) as e:
+        reason = f"parsing falhou ({type(e).__name__}): {e}"
+        print(f"[hotspots] {reason}")
+        return None, reason
     if not items:
-        return None
-    return {"month": month_label, "office_ref": office_address, "items": items}
+        reason = "geocodificou e consultou o Overpass, mas nenhum lugar sobrou dentro do raio"
+        print(f"[hotspots] {reason}")
+        return None, reason
+    return {"month": month_label, "office_ref": office_address, "items": items}, None

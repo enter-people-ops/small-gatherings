@@ -239,7 +239,7 @@ def run_api(send: bool) -> dict:
 
     # sugestões de rolê via OpenStreetMap (raio de 5km do escritório); se a
     # busca falhar, mantém o hotspots.json existente
-    fresh_hotspots = hotspots.fetch_hotspots(
+    fresh_hotspots, hotspots_error = hotspots.fetch_hotspots(
         os.environ.get("OFFICE_ADDRESS", DEFAULT_OFFICE_ADDRESS), label)
     if fresh_hotspots:
         json.dump(fresh_hotspots, open("../data/hotspots.json","w",encoding="utf-8"), ensure_ascii=False, indent=2)
@@ -259,6 +259,7 @@ def run_api(send: bool) -> dict:
               "general_channel": os.environ.get("SLACK_GENERAL_CHANNEL"),
               "leaders_channel": os.environ.get("SLACK_LEADERS_CHANNEL") or os.environ.get("SLACK_GENERAL_CHANNEL"),
               "report_channel": os.environ.get("REPORT_CHANNEL", "C0C0WJTSYLE"),
+              "hotspots_updated": bool(fresh_hotspots), "hotspots_error": hotspots_error,
               "general_msg": msgs["geral"], "leaders_msg": msgs["lideres"],
               "report_msg": msgs["relatorio"],
               "dms": [{"slack_id": d["slack_id"], "name": d["leader"]["name"], "text": d["text"]} for d in msgs["dms"]],
