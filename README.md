@@ -54,7 +54,9 @@ distribuído o mais uniformemente possível. Não há mais tamanho fixo configur
 
 ## Variáveis de ambiente (Railway)
     CONVENIA_TOKEN, SLACK_BOT_TOKEN, LEADERS_CSV_URL, ARTIFACT_URL,
-    SLACK_GENERAL_CHANNEL, SLACK_LEADERS_CHANNEL, RUN_KEY,
+    RUN_KEY, TEST_MODE,
+    CANAL_TESTE_GERAL, CANAL_TESTE_LIDERES, CANAL_TESTE_DM_LIDERES, CANAL_TESTE_RELATORIO,
+    CANAL_GERAL, CANAL_LIDERES, DM_RELATORIO,
     GROUP_MIN_WOMEN=2, EMAIL_DOMAIN=getenter.ai,
     OFFICE_ADDRESS
 
@@ -75,7 +77,7 @@ gravar o histórico numa aba da própria planilha / no Drive (conectores já ati
 ## Rodar local
     pip install -r requirements.txt
     export CONVENIA_TOKEN=... SLACK_BOT_TOKEN=... LEADERS_CSV_URL=... ARTIFACT_URL=...
-    export SLACK_GENERAL_CHANNEL=C123 SLACK_LEADERS_CHANNEL=C456
+    export TEST_MODE=true CANAL_TESTE_GERAL=C123 CANAL_TESTE_LIDERES=C456 CANAL_TESTE_DM_LIDERES=C789 CANAL_TESTE_RELATORIO=C000
     cd src && python main.py --dry-run   # gera artefato + preview das mensagens
     cd src && python main.py --send      # envia de fato e grava histórico
 

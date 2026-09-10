@@ -43,7 +43,7 @@ MONTHS_PT = ["", "Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho",
              "Agosto","Setembro","Outubro","Novembro","Dezembro"]
 
 def month_label(d: dt.date) -> str:
-    return f"{MONTHS_PT[d.month]}/{d.year}"
+    return MONTHS_PT[d.month]
 
 def _gbucket(g: str) -> str:
     import unicodedata
@@ -256,9 +256,9 @@ def run_api(send: bool) -> dict:
               "anniversaries_this_month": len(anniversaries),
               "special_leader": (special["name"] if special else None),
               "gender_distribution": dict(gender_dist.most_common()),
-              "general_channel": os.environ.get("SLACK_GENERAL_CHANNEL"),
-              "leaders_channel": os.environ.get("SLACK_LEADERS_CHANNEL") or os.environ.get("SLACK_GENERAL_CHANNEL"),
-              "report_channel": os.environ.get("REPORT_CHANNEL", "C0C0WJTSYLE"),
+              "general_channel": os.environ.get("CANAL_TESTE_GERAL") if test_mode else os.environ.get("CANAL_GERAL"),
+              "leaders_channel": os.environ.get("CANAL_TESTE_LIDERES") if test_mode else os.environ.get("CANAL_LIDERES"),
+              "report_target": os.environ.get("CANAL_TESTE_RELATORIO") if test_mode else os.environ.get("DM_RELATORIO"),
               "hotspots_updated": bool(fresh_hotspots), "hotspots_error": hotspots_error,
               "general_msg": msgs["geral"], "leaders_msg": msgs["lideres"],
               "report_msg": msgs["relatorio"],
@@ -271,10 +271,12 @@ def run_api(send: bool) -> dict:
 
 
 def _send(msgs: dict, test_mode: bool = True):
-    """Envia no Slack. Em TEST_MODE: geral vai para TEST_GENERAL_CHANNEL (rotulada),
-    líderes vai para o canal real de líderes, e as DMs vão para TEST_CHANNEL
-    (rotuladas). Fora de TEST_MODE, tudo vai para os canais/DMs reais.
-    O relatório sempre vai para o canal de relatório."""
+    """Envia no Slack. Em TEST_MODE=true: tudo vai pros canais de teste
+    (CANAL_TESTE_GERAL, CANAL_TESTE_LIDERES, CANAL_TESTE_DM_LIDERES,
+    CANAL_TESTE_RELATORIO), rotulado. Em TEST_MODE=false: geral e líderes vão
+    pros canais reais (CANAL_GERAL, CANAL_LIDERES), as DMs vão de fato pro
+    Slack ID de cada líder, e o relatório vai como DM pro Slack ID em
+    DM_RELATORIO (não um canal)."""
     import requests
     tok = os.environ["SLACK_BOT_TOKEN"]
     hdr = {"Authorization": f"Bearer {tok}", "Content-Type": "application/json; charset=utf-8"}
@@ -282,29 +284,26 @@ def _send(msgs: dict, test_mode: bool = True):
         return requests.post("https://slack.com/api/chat.postMessage", headers=hdr,
                              json={"channel": channel, "text": text}).json()
 
-    general_ch = os.environ["SLACK_GENERAL_CHANNEL"]
-    leaders_ch = os.environ.get("SLACK_LEADERS_CHANNEL", general_ch)
-    report_ch = os.environ.get("REPORT_CHANNEL", "C0C0WJTSYLE")
-    test_ch = os.environ.get("TEST_CHANNEL", "C0C0V7FHLHJ")
-    test_general_ch = os.environ.get("TEST_GENERAL_CHANNEL", "C0C0A6B9J2K")
+    def env(name):
+        val = os.environ.get(name)
+        if not val:
+            raise ValueError(f"Variável de ambiente '{name}' não configurada (necessária para enviar no Slack).")
+        return val
 
     if test_mode:
-        # geral: canal de teste dedicado. líderes: canal real de líderes (não é sandboxed).
-        # DMs: canal de teste (test_ch fica exclusivo para as DMs dos líderes).
-        post(test_general_ch, ":test_tube: *[TESTE] Mensagem GERAL (iria para o canal da empresa)*\n\n" + msgs["geral"])
-        post(leaders_ch, msgs["lideres"])
+        post(env("CANAL_TESTE_GERAL"), msgs["geral"])
+        post(env("CANAL_TESTE_LIDERES"), msgs["lideres"])
+        test_dm_ch = env("CANAL_TESTE_DM_LIDERES")
         for dm in msgs["dms"]:
-            quem = dm["leader"]["name"]
-            post(test_ch, f":test_tube: *[TESTE] DM que iria para {quem}*\n\n" + dm["text"])
+            post(test_dm_ch, dm["text"])
+        post(env("CANAL_TESTE_RELATORIO"), msgs["relatorio"])
     else:
-        post(general_ch, msgs["geral"])
-        post(leaders_ch, msgs["lideres"])
+        post(env("CANAL_GERAL"), msgs["geral"])
+        post(env("CANAL_LIDERES"), msgs["lideres"])
         for dm in msgs["dms"]:
             if dm["slack_id"]:
                 post(dm["slack_id"], dm["text"])
-
-    # relatório sempre para o canal de relatório
-    post(report_ch, msgs["relatorio"])
+        post(env("DM_RELATORIO"), msgs["relatorio"])
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()

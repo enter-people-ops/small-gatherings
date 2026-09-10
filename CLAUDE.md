@@ -101,12 +101,21 @@ SLACK_BOT_TOKEN=          # api.slack.com/apps > OAuth > Bot token (xoxb-)
 LEADERS_CSV_URL=          # Sheets > Publicar na web > CSV
 ARTIFACT_URL=            # URL pública do Railway (definir após 1º deploy)
 RUN_KEY=small-gatherings-2026   # senha do header X-Run-Key
-SLACK_GENERAL_CHANNEL=C0C0A6B9J2K
-SLACK_LEADERS_CHANNEL=C0C0RG4EX3L
-REPORT_CHANNEL=C0C0WJTSYLE       # recebe o relatório (sempre)
-TEST_MODE=true                   # true = geral/DMs sandboxed (ver seção 8)
-TEST_CHANNEL=C0C0V7FHLHJ         # só DMs de líderes em modo TESTE
-TEST_GENERAL_CHANNEL=C0C0A6B9J2K # msg GERAL em modo TESTE
+TEST_MODE=true                   # true = tudo cai nos canais de TESTE (ver seção 8)
+
+# --- canais de TESTE (usados quando TEST_MODE=true) ---
+CANAL_TESTE_GERAL=C0C0A6B9J2K     # msg GERAL em modo TESTE
+CANAL_TESTE_LIDERES=C0C0RG4EX3L   # msg de LÍDERES (broadcast) em modo TESTE
+CANAL_TESTE_DM_LIDERES=C0C0V7FHLHJ # DMs de líderes em modo TESTE (tudo nesse canal)
+CANAL_TESTE_RELATORIO=C0C0WJTSYLE  # relatório em modo TESTE
+
+# --- canais/DM reais (usados quando TEST_MODE=false, ou seja, "pra valer") ---
+CANAL_GERAL=              # msg GERAL de verdade (empresa toda)
+CANAL_LIDERES=            # msg de LÍDERES (broadcast) de verdade
+DM_RELATORIO=             # Slack ID de quem recebe o relatório por DM (não é canal)
+# DMs de líderes "pra valer" não têm variável própria: vão direto pro slack_id
+# de cada líder, resolvido automaticamente (users.list / planilha).
+
 ANNIVERSARY_LEADER_EMAIL=mateus@getenter.ai
 GROUP_MIN_WOMEN=2
 INFER_GENDER=true
@@ -123,16 +132,22 @@ curto casa com >1 pessoa), acrescente sobrenome; se `not_found`, corrija a grafi
 ou ponha o slack_id.
 
 ## 8. Modo TESTE
-Com `TEST_MODE=true`:
-- msg **GERAL** vai para `TEST_GENERAL_CHANNEL` (rotulada `[TESTE]`), não para
-  a empresa;
-- msg de **LÍDERES** (broadcast) vai para o canal **real** `SLACK_LEADERS_CHANNEL`
-  — não é sandboxed;
-- **DMs** de líderes vão para `TEST_CHANNEL` (rotuladas `[TESTE]`);
-- o **relatório** sempre vai para o `REPORT_CHANNEL`.
+Com `TEST_MODE=true` (tudo sandboxed, rotulado `[TESTE]`):
+- msg **GERAL** vai para `CANAL_TESTE_GERAL`;
+- msg de **LÍDERES** (broadcast) vai para `CANAL_TESTE_LIDERES`;
+- **DMs** de líderes vão todas para `CANAL_TESTE_DM_LIDERES` (um canal só,
+  não DM de verdade);
+- o **relatório** vai para `CANAL_TESTE_RELATORIO`.
 
-Virar `TEST_MODE=false` só quando for para produção (aí geral/líderes/DMs vão
-todos para os canais/pessoas reais).
+Com `TEST_MODE=false` ("pra valer"):
+- msg **GERAL** vai para `CANAL_GERAL`;
+- msg de **LÍDERES** (broadcast) vai para `CANAL_LIDERES`;
+- **DMs** de líderes vão de verdade, uma por líder, pro `slack_id` de cada um;
+- o **relatório** vai como **DM** (não canal) pro Slack ID em `DM_RELATORIO`.
+
+Virar `TEST_MODE=false` só quando for para produção. Se alguma das variáveis
+do modo ativo não estiver setada no Railway, o envio falha com erro claro
+dizendo qual variável falta (não há fallback silencioso entre modos).
 
 ## 9. Setup do zero (passo a passo)
 1. Suba este repositório no GitHub e conecte no Railway (New Project > Deploy
