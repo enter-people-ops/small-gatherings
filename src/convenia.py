@@ -176,10 +176,14 @@ def fetch_eligible(token: str, ref_month: dt.date | None = None,
     return eligible
 
 
-def raw_report(token: str, ref_month: dt.date | None = None) -> dict:
+def raw_report(token: str, ref_month: dt.date | None = None, name_filter: str | None = None) -> dict:
     """Diagnóstico (NÃO filtra elegibilidade): resume o que a API /employees do
     Convenia realmente devolve, pra investigar divergência de headcount com o
-    painel do Convenia (ex.: gente em admissão/desligamento não capturada)."""
+    painel do Convenia (ex.: gente em admissão/desligamento não capturada).
+
+    Se `name_filter` for passado, além da amostra aleatória de sempre, busca
+    (case-insensitive, substring) por nome entre os funcionários crus e
+    devolve o detalhe completo de cada um que bater, em `busca_nome`."""
     from collections import Counter
     ref = ref_month or dt.date.today()
     raw, page_trace = _iter_all_employees_traced(token)
@@ -207,6 +211,23 @@ def raw_report(token: str, ref_month: dt.date | None = None) -> dict:
         except requests.RequestException as e:
             sample_detail = {"erro_ao_buscar_detalhe": str(e)}
 
+    busca_nome = None
+    if name_filter:
+        needle = name_filter.strip().lower()
+        busca_nome = []
+        for e in raw:
+            summary = _normalize(e)
+            if needle in summary["name"].lower():
+                try:
+                    detail = _get(f"/employees/{summary['id']}", token=token)
+                    detalhe = detail.get("data", detail)
+                except requests.RequestException as err:
+                    detalhe = {"erro_ao_buscar_detalhe": str(err)}
+                busca_nome.append({
+                    "linha_da_listagem": e,
+                    "detalhe_do_funcionario": detalhe,
+                })
+
     return {
         "total_raw_da_api": len(raw),
         "paginas": page_trace,
@@ -214,6 +235,7 @@ def raw_report(token: str, ref_month: dt.date | None = None) -> dict:
         "nao_ativos": nao_ativos,
         "amostra_linha_da_listagem": sample_list_row,
         "amostra_detalhe_do_funcionario": sample_detail,
+        "busca_nome": busca_nome,
     }
 
 

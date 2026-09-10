@@ -63,7 +63,7 @@ def debug_convenia():
     if os.environ.get("RUN_KEY") and request.headers.get("X-Run-Key") != os.environ["RUN_KEY"]:
         abort(401)
     try:
-        return jsonify(pipeline.convenia_report())
+        return jsonify(pipeline.convenia_report(name_filter=request.args.get("nome")))
     except Exception as e:
         import traceback
         return jsonify({"error": type(e).__name__, "message": str(e),

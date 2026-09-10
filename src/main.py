@@ -107,11 +107,12 @@ def diagnose() -> dict:
     }
 
 
-def convenia_report() -> dict:
+def convenia_report(name_filter: str | None = None) -> dict:
     """Diagnóstico read-only: o que a API do Convenia realmente devolve (sem
     filtrar elegibilidade) — pra investigar divergência de headcount com o
-    painel do Convenia."""
-    return convenia.raw_report(os.environ["CONVENIA_TOKEN"], dt.date.today())
+    painel do Convenia. `name_filter` busca o detalhe completo de quem bater
+    o nome (substring, case-insensitive)."""
+    return convenia.raw_report(os.environ["CONVENIA_TOKEN"], dt.date.today(), name_filter)
 
 
 def _parse_date(s):
