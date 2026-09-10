@@ -181,11 +181,15 @@ def _normalize(e: dict[str, Any]) -> dict:
         active = status in ("", "ativo", "active", "trabalhando") or "ativo" in status
     job_txt = _as_text(g("job.name", "job", "role"))
     hiring = _as_text(g("hiring_date", "admission_date", "start_date")) or None
+    gender_raw = _as_text(g("gender.name", "gender", "gender_identity.name", "gender_identity")) or "?"
+    if os.environ.get("INFER_GENDER", "true").lower() == "true":
+        import gender_infer
+        gender_raw = gender_infer.fill_gender(gender_raw, name)
     return {
         "id": str(g("id", "employee_id", "uuid", default="")),
         "name": name.strip(),
         "email": _as_text(g("email", "corporate_email", "work_email")) or None,
-        "gender": _as_text(g("gender.name", "gender", "gender_identity.name", "gender_identity")) or "?",
+        "gender": gender_raw or "?",
         "team": _as_text(g("team.name", "team")) or "?",
         "department": _as_text(g("department.name", "department")) or "?",
         "job": job_txt,

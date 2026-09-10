@@ -214,6 +214,7 @@ def msg_relatorio(groups: list[list[dict]], anniversaries: dict, month_label: st
         f"• Times distintos por grupo (média): *{avg_teams:.1f}*\n"
         f"• Faixas de tempo de casa distintas por grupo (média): *{avg_sen:.1f}*\n"
         f"• Aniversariantes de casa (grupo do Mateus):\n{aniv_lines}"
+        f"\n\n_Obs.: gênero parcialmente inferido pelo primeiro nome quando ausente no Convenia._"
     )
 
 
