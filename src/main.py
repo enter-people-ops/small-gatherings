@@ -44,9 +44,14 @@ def month_label(d: dt.date) -> str:
     return f"{MONTHS_PT[d.month]}/{d.year}"
 
 def to_person(p: dict) -> Person:
-    return Person(id=p["id"], name=p["name"], gender=p.get("gender","?"),
-                  team=p.get("team","?"), department=p.get("department","?"),
-                  seniority=p.get("seniority","?"), is_leader=p.get("is_leader", False))
+    def s(v, default="?"):
+        if v is None or v == "":
+            return default
+        return v if isinstance(v, str) else str(v)
+    return Person(id=str(p.get("id","")), name=s(p.get("name"), "—"),
+                  gender=s(p.get("gender")), team=s(p.get("team")),
+                  department=s(p.get("department")), seniority=s(p.get("seniority")),
+                  is_leader=bool(p.get("is_leader", False)))
 
 def run(send: bool):
     ref = dt.date.today()

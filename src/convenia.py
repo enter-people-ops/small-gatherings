@@ -121,6 +121,23 @@ def fetch_eligible(token: str, ref_month: dt.date | None = None,
     return eligible
 
 
+def _as_text(v) -> str:
+    """Converte qualquer valor (str, dict aninhado, lista) em texto simples."""
+    if v is None:
+        return ""
+    if isinstance(v, str):
+        return v.strip()
+    if isinstance(v, dict):
+        for k in ("name", "title", "label", "value", "description", "text"):
+            if v.get(k):
+                return _as_text(v[k])
+        return ""
+    if isinstance(v, (list, tuple)):
+        parts = [_as_text(x) for x in v]
+        return ", ".join(p for p in parts if p)
+    return str(v)
+
+
 def _normalize(e: dict[str, Any]) -> dict:
     def g(*keys, default=None):
         for k in keys:
@@ -135,20 +152,22 @@ def _normalize(e: dict[str, Any]) -> dict:
                 return v
         return default
 
-    name = " ".join(filter(None, [g("name"), g("last_name")])) or g("social_name") or "—"
-    status = (g("status", "situation", default="") or "").lower()
+    name = " ".join(filter(None, [_as_text(g("name")), _as_text(g("last_name"))])) \
+        or _as_text(g("social_name")) or "—"
+    status = _as_text(g("status", "situation", default="")).lower()
     active = g("active", default=None)
     if active is None:
         active = status in ("", "ativo", "active", "trabalhando") or "ativo" in status
+    job_txt = _as_text(g("job.name", "job", "role"))
     return {
         "id": str(g("id", "employee_id", "uuid", default="")),
         "name": name.strip(),
-        "email": g("email", "corporate_email", "work_email"),  # normalmente ausente
-        "gender": (g("gender", "gender_identity.name") or "?"),
-        "team": (g("team.name", "team") or "?"),
-        "department": (g("department.name", "department") or "?"),
-        "job": g("job.name", "job", "role") or "",
-        "seniority": classify_seniority(g("job.name", "job", "role")),
-        "hiring_date": g("hiring_date", "admission_date", "start_date"),
+        "email": _as_text(g("email", "corporate_email", "work_email")) or None,
+        "gender": _as_text(g("gender.name", "gender", "gender_identity.name", "gender_identity")) or "?",
+        "team": _as_text(g("team.name", "team")) or "?",
+        "department": _as_text(g("department.name", "department")) or "?",
+        "job": job_txt,
+        "seniority": classify_seniority(job_txt),
+        "hiring_date": _as_text(g("hiring_date", "admission_date", "start_date")) or None,
         "active": bool(active),
     }
