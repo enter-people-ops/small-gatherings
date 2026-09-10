@@ -168,6 +168,31 @@ def fetch_eligible(token: str, ref_month: dt.date | None = None,
     return eligible
 
 
+def raw_report(token: str, ref_month: dt.date | None = None) -> dict:
+    """Diagnóstico (NÃO filtra elegibilidade): resume o que a API /employees do
+    Convenia realmente devolve, pra investigar divergência de headcount com o
+    painel do Convenia (ex.: gente em admissão/desligamento não capturada)."""
+    from collections import Counter
+    ref = ref_month or dt.date.today()
+    raw = _iter_all_employees(token)
+    status_counts = Counter()
+    nao_ativos = []
+    for e in raw:
+        summary = _normalize(e)
+        status_counts[summary["status_raw"] or "(vazio)"] += 1
+        if not summary["active"]:
+            nao_ativos.append({
+                "name": summary["name"], "status_raw": summary["status_raw"],
+                "hiring_date": summary["hiring_date"],
+                "elegivel_pelo_mes_de_admissao": _in_reference_month(summary["hiring_date"], ref),
+            })
+    return {
+        "total_raw_da_api": len(raw),
+        "status_counts": dict(status_counts.most_common()),
+        "nao_ativos": nao_ativos,
+    }
+
+
 def _as_text(v) -> str:
     """Converte qualquer valor (str, dict aninhado, lista) em texto simples."""
     if v is None:
@@ -223,4 +248,5 @@ def _normalize(e: dict[str, Any]) -> dict:
         "tenure_label": tenure_label(hiring),    # tempo de casa em texto (artefato)
         "hiring_date": hiring,
         "active": bool(active),
+        "status_raw": status,  # texto cru do status vindo do Convenia (diagnóstico)
     }

@@ -56,5 +56,18 @@ def debug():
         return jsonify({"error": type(e).__name__, "message": str(e),
                         "trace": traceback.format_exc().splitlines()[-6:]}), 200
 
+@app.get("/debug/convenia")
+def debug_convenia():
+    """Diagnóstico do que a API do Convenia realmente devolve (sem filtrar
+    elegibilidade) — pra investigar divergência de headcount com o painel."""
+    if os.environ.get("RUN_KEY") and request.headers.get("X-Run-Key") != os.environ["RUN_KEY"]:
+        abort(401)
+    try:
+        return jsonify(pipeline.convenia_report())
+    except Exception as e:
+        import traceback
+        return jsonify({"error": type(e).__name__, "message": str(e),
+                        "trace": traceback.format_exc().splitlines()[-6:]}), 200
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", "8080")))

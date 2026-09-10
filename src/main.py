@@ -109,6 +109,13 @@ def diagnose() -> dict:
     }
 
 
+def convenia_report() -> dict:
+    """Diagnóstico read-only: o que a API do Convenia realmente devolve (sem
+    filtrar elegibilidade) — pra investigar divergência de headcount com o
+    painel do Convenia."""
+    return convenia.raw_report(os.environ["CONVENIA_TOKEN"], dt.date.today())
+
+
 def _parse_date(s):
     if not s:
         return None
@@ -218,6 +225,15 @@ def run_api(send: bool) -> dict:
     groups, score = build_groups(persons, history, cfg, special_id, set(anniversaries))
 
     groups_d = [[{**by_id[p.id], "is_leader": p.is_leader} for p in g] for g in groups]
+
+    # resolve slack_id/nome ANTES de gerar o artefato, pra exibir o nome do
+    # Slack (não o nome completo do Convenia) no artefato e nas mensagens
+    flat_for_slack = [p for g in groups_d for p in g]
+    slack_ids, slack_names = S.resolve_ids_and_names(flat_for_slack, token=os.environ.get("SLACK_BOT_TOKEN",""))
+    for p in flat_for_slack:
+        if slack_names.get(p["id"]):
+            p["name"] = slack_names[p["id"]]
+
     payload = {"month": label, "generated_at": ref.isoformat(), "groups": groups_d}
     json.dump(payload, open("../data/groups.json","w",encoding="utf-8"), ensure_ascii=False, indent=2)
 
@@ -230,7 +246,7 @@ def run_api(send: bool) -> dict:
 
     render.main("../data/groups.json","../data/hotspots.json","../data/index.html")
     artifact_url = os.environ.get("ARTIFACT_URL","")
-    msgs = S.build_all(groups_d, artifact_url, label, token=os.environ.get("SLACK_BOT_TOKEN",""))
+    msgs = S.build_all(groups_d, artifact_url, label, token=os.environ.get("SLACK_BOT_TOKEN",""), ids=slack_ids)
 
     test_mode = os.environ.get("TEST_MODE", "true").lower() == "true"
     from collections import Counter

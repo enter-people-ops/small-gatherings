@@ -113,13 +113,31 @@ def resolve_ids(people: list[dict], token: str = SLACK_TOKEN,
                 (2) match automático pelo diretório do Slack (users.list) por
                     e-mail/nome. Assim a planilha só precisa das exceções.
     """
+    return resolve_ids_and_names(people, token, directory)[0]
+
+
+def resolve_ids_and_names(people: list[dict], token: str = SLACK_TOKEN,
+                          directory: list[dict] | None = None
+                          ) -> tuple[dict[str, str | None], dict[str, str | None]]:
+    """
+    Um único fetch do diretório do Slack pra resolver, por pessoa:
+      - slack_id (mesma prioridade de resolve_ids: planilha > match automático)
+      - nome de exibição do Slack (display_name > real_name), pra usar no
+        lugar do nome completo do Convenia no artefato/mensagens.
+    Retorna (ids, slack_names), ambos id_convenia -> valor (ou None).
+    """
     if directory is None and token:
         directory = fetch_slack_directory(token)
-    auto = match_by_name(people, directory or [])
-    out = {}
+    directory = directory or []
+    by_slack_id = {u["id"]: u for u in directory}
+    auto = match_by_name(people, directory)
+    ids, names = {}, {}
     for p in people:
-        out[p["id"]] = p.get("slack_id") or auto.get(p["id"])
-    return out
+        sid = p.get("slack_id") or auto.get(p["id"])
+        ids[p["id"]] = sid
+        u = by_slack_id.get(sid) if sid else None
+        names[p["id"]] = (u.get("display_name") or u.get("real_name")) if u else None
+    return ids, names
 
 
 PEOPLE_MENTION = "<@U0AMR8525DE>"  # Gabriela Barbosa (contato do time de People)
@@ -214,10 +232,13 @@ def msg_relatorio(groups: list[list[dict]], month_label: str) -> str:
 
 
 def build_all(groups: list[list[dict]], artifact_url: str, month_label: str,
-              token: str = SLACK_TOKEN) -> dict:
-    """Retorna estrutura pronta para envio (sem enviar nada)."""
+              token: str = SLACK_TOKEN, ids: dict[str, str | None] | None = None) -> dict:
+    """Retorna estrutura pronta para envio (sem enviar nada). Se `ids` (id_convenia
+    -> slack_id) já tiver sido resolvido antes (ex.: pra também trocar os nomes
+    exibidos no artefato), passe-o aqui pra evitar um novo fetch do diretório."""
     flat = [p for g in groups for p in g]
-    ids = resolve_ids(flat, token)
+    if ids is None:
+        ids = resolve_ids(flat, token)
     dms = []
     for g in groups:
         leader = next((p for p in g if p.get("is_leader")), g[0])

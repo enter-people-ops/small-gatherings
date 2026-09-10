@@ -209,6 +209,12 @@ Cenário: **"Enter · Encontros — mensal (dia 1º)"**, id **6227802**.
 Repositório ligado ao Railway (auto-deploy no push da branch `main`).
 Toda mudança em `src/` dispara redeploy automático.
 
+**Atenção:** o redeploy sozinho NÃO atualiza o artefato servido em `GET /`.
+Sem Volume, `data/index.html` (e `groups.json`/`hotspots.json`) vêm do que
+está commitado no repo até que `/run` rode de novo (ver seção 10) — então
+mudanças de copy/design só aparecem no artefato ao vivo depois de chamar
+`POST /run?send=false` (ou `send=true`) uma vez após o deploy.
+
 ## 16. Sugestões de rolê (OpenStreetMap — sem API key)
 `src/hotspots.py` busca, todo mês, lugares reais num raio de 5km do
 `OFFICE_ADDRESS` (Nominatim pra geocodificar + Overpass API pra achar
