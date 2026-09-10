@@ -170,7 +170,7 @@ def msg_lideres(artifact_url: str, month_label: str) -> str:
         f"também podem descobrir o seu grupo e ver sugestões de encontros para marcarem "
         f"<{artifact_url}|aqui>.\n\n"
         f"1. Crie um *canal no Slack* com as pessoas do seu small gathering.\n"
-        f"2. Proponham 2–3 opções de data/horário e *fechem um encontro* (café, almoço, happy hour…).\n\n"
+        f"2. Proponham 2-3 opções de data/horário e *fechem um encontro* (café, almoço, happy hour…).\n\n"
         f"Lembrem-se de sempre mandar suas fotos de small gathering em nosso grupo de "
         f"whatsapp (Black Pearl). Bons encontros!\n\n"
         f"Qualquer dúvida, falem com o time de People {PEOPLE_MENTION}."
@@ -178,7 +178,7 @@ def msg_lideres(artifact_url: str, month_label: str) -> str:
 
 
 def _member_line(idx: int, m: dict, ids: dict[str, str | None]) -> str:
-    meta = " • ".join(p for p in (m.get("team") or "", m.get("tenure_label") or "") if p)
+    meta = ", ".join(p for p in (m.get("team") or "", m.get("tenure_label") or "") if p)
     line = f"{idx}. {mention(m, ids)}"
     return f"{line} — {meta}" if meta else line
 
@@ -187,7 +187,7 @@ def msg_dm_lider(lider: dict, membros: list[dict], ids: dict[str, str | None],
                  month_label: str) -> str:
     linhas = "\n".join(_member_line(i, m, ids) for i, m in enumerate(membros, 1))
     return (
-        f"Oi {mention(lider, ids)}! :wave: Você é o capitão de um small gathering em {month_label}\n\n"
+        f"Oi {lider['name']}! :wave: Você é o capitão de um small gathering em {month_label}\n\n"
         f"{linhas}\n\n"
         f"Qualquer dúvida, fale com o time de People {PEOPLE_MENTION}."
     )
@@ -227,7 +227,6 @@ def msg_relatorio(groups: list[list[dict]], month_label: str) -> str:
         f"(proporção geral H:M = *{ratio}*)\n"
         f"• *Times distintos* por grupo (média): *{avg_teams:.1f}*\n"
         f"• *Faixas de tempo de casa* distintas por grupo (média): *{avg_sen:.1f}*\n\n"
-        f"_Obs.: gênero parcialmente inferido pelo primeiro nome quando ausente no Convenia._"
     )
 
 

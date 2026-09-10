@@ -9,7 +9,7 @@ TEMPLATE = r"""<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Encontros — Enter</title>
+<title> Enter — Small Gatherings</title>
 <style>
 /* ── Geist (auto-hospedado, como o Design System da Enter) ── */
 @font-face{font-family:"Geist";src:url("fonts/Geist-Regular.ttf") format("truetype");font-weight:400;font-display:swap}
@@ -49,12 +49,7 @@ header .logo{height:22px;width:auto;display:block}
 /* hero */
 .hero h1{font-weight:600;font-size:clamp(30px,7vw,48px);line-height:1.05;
   letter-spacing:-.4px;margin:0 0 14px}
-.hero p{margin:0 0 20px;color:var(--tx-2);font-size:clamp(15px,2.4vw,17px)}
-.stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px}
-.stat{font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.3px;
-  color:var(--tx-2);background:var(--bg-2);box-shadow:var(--ring-3);border-radius:var(--r-full);
-  padding:7px 14px}
-.stat b{color:var(--tx);font-weight:600}
+.hero p{margin:0 0 28px;color:var(--tx-2);font-size:clamp(15px,2.4vw,17px)}
 .searchbox{position:relative;max-width:560px}
 #q{width:100%;font-family:var(--font);font-size:18px;font-weight:400;height:56px;
   padding:0 18px 0 50px;border:0;border-radius:var(--r-xl);background:var(--bg);
@@ -141,11 +136,6 @@ footer a{color:inherit;text-decoration:underline}
   <section class="hero">
     <h1>Ache seu grupo de Small Gathering do mês</h1>
     <p>Todos os meses a gente mistura o time da Enter para que mais pessoas se conheçam para além do escritório. Aproveite esse momento para viver uma experiência super legal e diferente (seja um jantar especial, um novo hobbie, um esporte) e se integrar com pessoas novas!</p>
-    <div class="stats">
-      <span class="stat"><b>__NGROUPS__</b> grupos formados</span>
-      <span class="stat"><b>__NPEOPLE__</b> pessoas participando</span>
-      <span class="stat"><b>__NLEADERS__</b> capitães</span>
-    </div>
     <div class="searchbox">
       <svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
       <input id="q" type="search" placeholder="Busque seu nome aqui!" autocomplete="off" autofocus aria-label="Buscar seu nome">
@@ -259,15 +249,11 @@ def main(groups_path, hotspots_path, out_path):
     data = json.load(open(groups_path, encoding="utf-8"))
     hot = json.load(open(hotspots_path, encoding="utf-8"))
     n_groups = len(data.get("groups", []))
-    n_people = sum(len(g) for g in data.get("groups", []))
-    n_leaders = sum(1 for g in data.get("groups", []) for p in g if p.get("is_leader"))
     out = (TEMPLATE
         .replace("__LOGO__", LOGO)
         .replace("__MONTH__", html.escape(data.get("month","")))
         .replace("__GENERATED__", html.escape(data.get("generated_at", dt.date.today().isoformat())))
         .replace("__NGROUPS__", str(n_groups))
-        .replace("__NPEOPLE__", str(n_people))
-        .replace("__NLEADERS__", str(n_leaders))
         .replace("__DATA__", json.dumps(data, ensure_ascii=False))
         .replace("__HOTSPOTS__", json.dumps(hot, ensure_ascii=False)))
     open(out_path, "w", encoding="utf-8").write(out)
