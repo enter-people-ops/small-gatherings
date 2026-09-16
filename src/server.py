@@ -32,6 +32,11 @@ def fonts(fname):
     """Serve as fontes Geist auto-hospedadas referenciadas pelo artefato."""
     return send_file(os.path.join(DATA_DIR, "fonts", fname))
 
+@app.get("/favicon.svg")
+def favicon():
+    """Ícone da aba do artefato (logo-key, marca Enter)."""
+    return send_file(os.path.join(DATA_DIR, "logo-key.svg"))
+
 @app.post("/run")
 def run():
     if os.environ.get("RUN_KEY") and request.headers.get("X-Run-Key") != os.environ["RUN_KEY"]:

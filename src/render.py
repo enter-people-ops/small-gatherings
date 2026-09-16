@@ -10,6 +10,7 @@ TEMPLATE = r"""<!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title> Enter — Small Gatherings</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <style>
 /* ── Geist (auto-hospedado, como o Design System da Enter) ── */
 @font-face{font-family:"Geist";src:url("fonts/Geist-Regular.ttf") format("truetype");font-weight:400;font-display:swap}
