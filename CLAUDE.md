@@ -117,6 +117,10 @@ ANNIVERSARY_LEADER_EMAIL=mateus@getenter.ai
 GROUP_MIN_WOMEN=2
 INFER_GENDER=true
 EMAIL_DOMAIN=getenter.ai
+HISTORY_PATH=            # opcional; caminho do history.json fora do FS efêmero
+                          # (ex.: /app/state/history.json num Volume do Railway
+                          # montado FORA de /app/data). Sem isso, cai em
+                          # data/history.json do repo e reseta a cada deploy.
 ```
 Scopes do bot Slack: `chat:write`, `users:read`, `users:read.email`.
 

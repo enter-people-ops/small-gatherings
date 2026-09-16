@@ -104,13 +104,21 @@ def mark_leaders(people: list[dict], leaders: list[dict]) -> list[dict]:
     return people
 
 # ---- histórico ----
-def load_history(path: str = "../data/history.json") -> list[list[list[str]]]:
+# HISTORY_PATH aponta pro arquivo real (ex.: um Volume do Railway montado fora
+# de /app/data, pra sobreviver a redeploys). Sem a env var, cai no caminho
+# antigo dentro do repo (não persiste entre deploys sem Volume).
+def _history_path(path: str | None = None) -> str:
+    return path or os.environ.get("HISTORY_PATH", "../data/history.json")
+
+def load_history(path: str | None = None) -> list[list[list[str]]]:
+    path = _history_path(path)
     if not os.path.exists(path):
         return []
     return json.load(open(path, encoding="utf-8"))
 
-def append_history(groups_ids: list[list[str]], path: str = "../data/history.json",
+def append_history(groups_ids: list[list[str]], path: str | None = None,
                    keep_last: int = 6) -> None:
+    path = _history_path(path)
     hist = load_history(path)
     hist.append(groups_ids)
     hist = hist[-keep_last:]  # janela deslizante (histórico recente pesa mais mesmo)
