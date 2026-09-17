@@ -23,6 +23,25 @@ import os, sys, json, argparse, datetime as dt
 import convenia, sheets, render, slack_msgs as S
 from grouping import Person, Config, make_groups
 
+def groups_path() -> str:
+    """Aponta pro groups.json real (ex.: um Volume do Railway fora de /app/data,
+    pra sobreviver a redeploys e a edições manuais do painel admin — ver
+    GROUPS_PATH). Sem a env var, cai no caminho antigo dentro do repo (mesmo
+    espírito de HISTORY_PATH em sheets.py)."""
+    return os.environ.get("GROUPS_PATH", "../data/groups.json")
+
+
+def artifact_path() -> str:
+    """Idem groups_path(), mas para o index.html servido em GET / (ARTIFACT_PATH)."""
+    return os.environ.get("ARTIFACT_PATH", "../data/index.html")
+
+
+def hotspots_path() -> str:
+    """Idem groups_path(), mas para hotspots.json (agora editável pelo painel
+    admin — ver seção 17/HOTSPOTS_PATH). Sem a env var, cai em data/hotspots.json."""
+    return os.environ.get("HOTSPOTS_PATH", "../data/hotspots.json")
+
+
 def _load_env(path: str = "../.env"):
     """Carrega um .env simples (KEY=VALUE) para os.environ, se existir.
     No Railway as variáveis já vêm do ambiente, então isto é só p/ uso local."""
@@ -235,19 +254,25 @@ def run_api(send: bool) -> dict:
     groups_d = [[{**by_id[p.id], "is_leader": p.is_leader} for p in g] for g in groups]
 
     # resolve slack_id/nome ANTES de gerar o artefato, pra exibir o nome do
-    # Slack (não o nome completo do Convenia) no artefato e nas mensagens
+    # Slack (não o nome completo do Convenia) no artefato e nas mensagens.
+    # slack_id é persistido em cada pessoa (não só nos líderes) pra que o
+    # painel admin (seção 17) possa montar/reenviar as mensagens depois, a
+    # partir do groups.json salvo, sem precisar re-resolver pelo nome (que
+    # já foi sobrescrito pro nome de exibição do Slack logo abaixo).
     flat_for_slack = [p for g in groups_d for p in g]
     slack_ids, slack_names = S.resolve_ids_and_names(flat_for_slack, token=os.environ.get("SLACK_BOT_TOKEN",""))
     for p in flat_for_slack:
+        if slack_ids.get(p["id"]):
+            p["slack_id"] = slack_ids[p["id"]]
         if slack_names.get(p["id"]):
             p["name"] = slack_names[p["id"]]
 
-    payload = {"month": label, "generated_at": ref.isoformat(), "groups": groups_d}
-    json.dump(payload, open("../data/groups.json","w",encoding="utf-8"), ensure_ascii=False, indent=2)
+    payload = {"month": label, "generated_at": ref.isoformat(), "groups": groups_d, "sent_at": None}
+    json.dump(payload, open(groups_path(),"w",encoding="utf-8"), ensure_ascii=False, indent=2)
 
-    # sugestões de rolê ("Onde marcar") são uma lista fixa, curada à mão em
-    # data/hotspots.json — editar esse arquivo diretamente para atualizar.
-    render.main("../data/groups.json","../data/hotspots.json","../data/index.html")
+    # sugestões de rolê ("Onde marcar") — lista curada à mão (ou pelo painel
+    # admin) em data/hotspots.json (ver HOTSPOTS_PATH/seção 17).
+    render.main(groups_path(),hotspots_path(),artifact_path())
     artifact_url = os.environ.get("ARTIFACT_URL","")
     msgs = S.build_all(groups_d, artifact_url, label, token=os.environ.get("SLACK_BOT_TOKEN",""), ids=slack_ids)
 
@@ -266,10 +291,12 @@ def run_api(send: bool) -> dict:
               "general_msg": msgs["geral"], "leaders_msg": msgs["lideres"],
               "report_msg": msgs["relatorio"],
               "dms": [{"slack_id": d["slack_id"], "name": d["leader"]["name"], "text": d["text"]} for d in msgs["dms"]],
-              "unresolved": msgs["unresolved"], "sent": send}
+              "unresolved": msgs["unresolved"], "sent": send, "sent_at": None}
     if send:
         _send(msgs, test_mode)
         sheets.append_history([[p.id for p in g] for g in groups])
+        payload["sent_at"] = result["sent_at"] = dt.datetime.now().isoformat(timespec="seconds")
+        json.dump(payload, open(groups_path(),"w",encoding="utf-8"), ensure_ascii=False, indent=2)
     return result
 
 

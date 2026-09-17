@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enter — Admin de Grupos</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<style>
+@font-face{font-family:"Geist";src:url("fonts/Geist-Regular.ttf") format("truetype");font-weight:400;font-display:swap}
+@font-face{font-family:"Geist";src:url("fonts/Geist-Medium.ttf") format("truetype");font-weight:500;font-display:swap}
+@font-face{font-family:"Geist";src:url("fonts/Geist-SemiBold.ttf") format("truetype");font-weight:600;font-display:swap}
+:root{
+  --bg:rgb(255,255,255); --bg-2:rgb(250,250,250); --tx:rgb(23,23,23); --tx-2:rgb(82,82,82); --tx-3:rgb(161,161,161);
+  --brand:rgb(255,174,53); --on-brand:rgb(10,10,10);
+  --ring:inset 0 0 0 1px rgba(0,0,0,.15); --ring-2:inset 0 0 0 1px rgba(0,0,0,.10); --ring-focus:inset 0 0 0 2px rgb(0,0,0);
+  --danger:rgb(200,60,50); --danger-bg:rgb(252,235,233); --ok:rgb(60,140,80); --ok-bg:rgba(60,140,80,.1);
+  --font:"Geist",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  --r-lg:8px; --r-xl:12px; --r-2xl:16px; --r-full:9999px; --ease:cubic-bezier(.2,0,.2,1); --dur:150ms;
+  --tag-lead-bg:rgb(226,217,238); --tag-lead-fg:rgb(99,71,148);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg-2);color:var(--tx);font-family:var(--font);font-size:15px;line-height:1.5}
+.wrap{max-width:1100px;margin:0 auto;padding:32px 20px 80px}
+h1{font-weight:600;font-size:26px;margin:0 0 4px;letter-spacing:-.3px}
+h2{font-weight:600;font-size:18px;margin:36px 0 14px;letter-spacing:-.2px}
+.sub{color:var(--tx-2);font-size:14px;margin:0 0 28px}
+.card{background:var(--bg);box-shadow:var(--ring);border-radius:var(--r-xl);padding:20px}
+#login{max-width:380px;margin:60px auto}
+#login label{display:block;font-weight:500;font-size:13px;margin-bottom:8px}
+#login input{width:100%;font:inherit;font-size:15px;height:44px;padding:0 14px;border:0;border-radius:var(--r-lg);
+  box-shadow:var(--ring);outline:none;margin-bottom:12px}
+#login input:focus{box-shadow:var(--ring-focus)}
+button{font:inherit;cursor:pointer}
+input,select{font:inherit}
+.btn{border:0;border-radius:var(--r-full);padding:10px 18px;font-size:14px;font-weight:500;
+  background:var(--bg);box-shadow:var(--ring-2);color:var(--tx);transition:box-shadow var(--dur) var(--ease)}
+.btn:hover{box-shadow:var(--ring)}
+.btn.primary{background:var(--brand);color:var(--on-brand);box-shadow:none;font-weight:600}
+.btn.danger{background:var(--danger-bg);color:var(--danger);box-shadow:none}
+.btn.small{padding:6px 12px;font-size:12.5px}
+.btn:disabled{opacity:.5;cursor:default}
+#app{display:none}
+.toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;position:sticky;top:0;
+  background:var(--bg-2);padding:12px 0;z-index:5}
+#search{flex:1;min-width:180px;font:inherit;font-size:14px;height:40px;padding:0 14px;border:0;border-radius:var(--r-full);
+  box-shadow:var(--ring); outline:none}
+#search:focus{box-shadow:var(--ring-focus)}
+.status{font-size:13px;color:var(--tx-2)}
+.status.dirty{color:var(--danger)}
+.toast{font-size:13px;padding:8px 14px;border-radius:var(--r-lg);margin-bottom:16px;display:none}
+.toast.ok{display:block;background:var(--ok-bg);color:var(--ok)}
+.toast.err{display:block;background:var(--danger-bg);color:var(--danger)}
+
+/* envio */
+.send-card{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:28px}
+.send-card h3{margin:0 0 4px;font-size:16px;font-weight:600}
+.send-card .meta{font-size:13px;color:var(--tx-2)}
+.send-card .meta.warn{color:var(--danger)}
+.send-card.sent{box-shadow:inset 0 0 0 1.5px var(--ok)}
+
+/* adicionar pessoa */
+.addbar{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start;margin-bottom:16px;position:relative}
+.addbar input[type=search]{flex:1;min-width:200px;height:40px;padding:0 14px;border:0;border-radius:var(--r-full);box-shadow:var(--ring);outline:none}
+.addbar input[type=search]:focus{box-shadow:var(--ring-focus)}
+.addbar select{height:40px;border:0;border-radius:var(--r-full);box-shadow:var(--ring-2);padding:0 12px;background:var(--bg)}
+#roster-results{position:absolute;top:46px;left:0;right:0;background:var(--bg);box-shadow:var(--ring),0 8px 24px rgba(0,0,0,.12);
+  border-radius:var(--r-lg);z-index:6;max-height:260px;overflow:auto;display:none}
+#roster-results.show{display:block}
+.roster-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 14px;font-size:13.5px}
+.roster-row+.roster-row{box-shadow:inset 0 1px 0 rgba(0,0,0,.06)}
+.roster-row .rmeta{color:var(--tx-3);font-size:12px}
+
+/* grupos */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.group{background:var(--bg);box-shadow:var(--ring);border-radius:var(--r-xl);padding:16px}
+.group.warn{box-shadow:inset 0 0 0 1.5px var(--danger)}
+.group h3{font-size:15px;font-weight:600;margin:0 0 4px}
+.warnings{font-size:12px;color:var(--danger);margin:0 0 10px}
+.member{display:flex;align-items:center;gap:8px;padding:8px 0}
+.member+.member{box-shadow:inset 0 1px 0 rgba(0,0,0,.06)}
+.member.hidden{display:none}
+.member.new .nm{color:var(--ok)}
+.member .who{flex:1;min-width:0}
+.member .nm{font-weight:500;font-size:13.5px;display:flex;align-items:center;gap:6px}
+.member .meta{color:var(--tx-3);font-size:12px}
+.lead{font-size:10.5px;font-weight:600;color:var(--tag-lead-fg);background:var(--tag-lead-bg);
+  padding:2px 7px;border-radius:var(--r-full);white-space:nowrap}
+.member select{font-size:12.5px;border:0;border-radius:var(--r-lg);box-shadow:var(--ring-2);
+  padding:6px 8px;background:var(--bg);color:var(--tx)}
+.member.moved select{box-shadow:inset 0 0 0 1.5px var(--brand)}
+.rmv{border:0;background:none;color:var(--tx-3);font-size:15px;line-height:1;padding:4px 6px;border-radius:var(--r-lg)}
+.rmv:hover{background:var(--danger-bg);color:var(--danger)}
+
+.removed-card{margin-top:16px}
+.removed-card h3{color:var(--danger)}
+.removed-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;font-size:13.5px}
+.removed-row+.removed-row{box-shadow:inset 0 1px 0 rgba(0,0,0,.06)}
+
+/* hotspots */
+.hs-row{display:grid;grid-template-columns:110px 1fr 1fr 1fr 1fr 32px;gap:8px;align-items:center;padding:8px 0}
+.hs-row+.hs-row{box-shadow:inset 0 1px 0 rgba(0,0,0,.06)}
+.hs-row input{width:100%;height:36px;padding:0 10px;border:0;border-radius:var(--r-lg);box-shadow:var(--ring-2);outline:none;font-size:13px}
+.hs-row input:focus{box-shadow:var(--ring-focus)}
+.hs-head{display:grid;grid-template-columns:110px 1fr 1fr 1fr 1fr 32px;gap:8px;font-size:11px;color:var(--tx-3);
+  text-transform:uppercase;letter-spacing:.5px;padding:0 0 6px}
+@media (max-width:820px){
+  .hs-row,.hs-head{grid-template-columns:1fr 1fr}
+  .hs-head{display:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Admin de Grupos</h1>
+  <p class="sub">Mover, adicionar ou remover pessoas dos grupos já formados, editar as sugestões de rolê, e só disparar as mensagens no Slack quando estiver tudo revisado.</p>
+
+  <div id="login" class="card">
+    <label for="key">X-Run-Key</label>
+    <input id="key" type="password" autocomplete="off" placeholder="cole a chave (RUN_KEY)">
+    <button class="btn primary" id="enter" style="width:100%">Entrar</button>
+    <p class="sub" id="login-error" style="color:var(--danger);display:none;margin-top:10px"></p>
+  </div>
+
+  <div id="app">
+    <div class="toast" id="toast"></div>
+
+    <div class="card send-card" id="send-card">
+      <div>
+        <h3 id="send-title">Envio das mensagens</h3>
+        <div class="meta" id="send-meta">carregando…</div>
+        <div class="meta warn" id="send-unresolved" style="display:none"></div>
+      </div>
+      <button class="btn primary" id="send-btn">Enviar mensagens</button>
+    </div>
+
+    <h2>Grupos</h2>
+    <div class="toolbar">
+      <input id="search" type="search" placeholder="Buscar por nome…">
+      <span class="status" id="status">carregando…</span>
+      <button class="btn" id="discard">Descartar alterações</button>
+      <button class="btn primary" id="save">Salvar alterações</button>
+    </div>
+
+    <div class="addbar">
+      <input id="roster-q" type="search" placeholder="Adicionar pessoa: busque por nome…" autocomplete="off">
+      <select id="roster-dest"></select>
+      <div id="roster-results"></div>
+    </div>
+
+    <div class="grid" id="grid"></div>
+
+    <div class="card removed-card" id="removed-card" style="display:none">
+      <h3>Removidos desta rodada</h3>
+      <div id="removed-list"></div>
+    </div>
+
+    <h2>Sugestões de rolê ("Onde marcar")</h2>
+    <div class="toolbar">
+      <span class="status" id="hs-status">carregando…</span>
+      <button class="btn" id="hs-add-row">+ sugestão</button>
+      <button class="btn primary" id="hs-save">Salvar sugestões</button>
+    </div>
+    <div class="card">
+      <div class="hs-head"><span>Categoria</span><span>Nome</span><span>Área</span><span>Nota</span><span>Link do Maps</span><span></span></div>
+      <div id="hs-list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const KEY_STORAGE = "sg_admin_key";
+let DATA = null;          // resposta crua de /admin/api/groups
+let byId = {};            // id -> person (inclui gente ainda não salva, adicionada nesta sessão)
+let assignments = {};     // id -> group_index atual (só quem está "ativo" numa rodada)
+let original = {};        // id -> group_index original (pra dirty-check / descartar)
+let removedIds = new Set();
+
+let HOTSPOTS = [];         // cópia local editável de {cat,name,area,note,maps_url}
+let hotspotsOriginal = "";
+
+function authHeaders(){ return {"X-Run-Key": sessionStorage.getItem(KEY_STORAGE) || ""}; }
+function esc(s){ const d=document.createElement('div'); d.textContent = s==null?'':String(s); return d.innerHTML; }
+
+async function api(path, opts){
+  const res = await fetch(path, {...opts, headers: {...authHeaders(), ...(opts&&opts.headers||{})}});
+  if(res.status === 401) throw new Error("Chave inválida.");
+  const data = await res.json().catch(()=>({}));
+  if(!res.ok) throw new Error(data.error || "Erro na requisição.");
+  return data;
+}
+
+// ---------------------------------------------------------------- grupos
+function initState(data){
+  DATA = data;
+  byId = {}; assignments = {}; original = {}; removedIds = new Set();
+  data.groups.forEach((g, gi) => g.forEach(p => {
+    byId[p.id] = p; assignments[p.id] = gi; original[p.id] = gi;
+  }));
+}
+
+function isDirty(){
+  const keys = new Set([...Object.keys(assignments), ...Object.keys(original)]);
+  for(const id of keys){ if(assignments[id] !== original[id]) return true; }
+  return false;
+}
+
+function currentGroups(){
+  const groups = DATA.groups.map(() => []);
+  Object.keys(assignments).forEach(id => groups[assignments[id]].push(byId[id]));
+  return groups;
+}
+
+function groupWarnings(groups){
+  const minWomen = DATA.min_women ?? 2;
+  return groups.map((g, i) => {
+    const issues = [];
+    if(g.length === 0) issues.push("grupo vazio");
+    else {
+      if(i !== 0){
+        const women = g.filter(p => (p.gender||"").toUpperCase() === "F").length;
+        if(women < minWomen) issues.push(`${women} mulher(es) (mínimo ${minWomen})`);
+      }
+      if(!g.some(p => p.is_leader)) issues.push("sem líder");
+    }
+    return issues;
+  });
+}
+
+function renderDestSelect(){
+  const sel = document.getElementById("roster-dest");
+  const prev = sel.value;
+  sel.innerHTML = DATA.groups.map((_, i) => `<option value="${i}">Grupo ${i+1}</option>`).join("");
+  if(prev !== "" && Number(prev) < DATA.groups.length) sel.value = prev;
+}
+
+function render(){
+  const groups = currentGroups();
+  const warnings = groupWarnings(groups);
+  const q = (document.getElementById("search").value || "").trim().toLowerCase();
+  const grid = document.getElementById("grid");
+  grid.innerHTML = groups.map((g, gi) => {
+    const members = [...g].sort((a,b)=>a.name.localeCompare(b.name)).map(p => {
+      const match = !q || p.name.toLowerCase().includes(q);
+      const moved = assignments[p.id] !== (original[p.id] ?? assignments[p.id]);
+      const isNew = !(p.id in original);
+      const opts = groups.map((_, oi) => `<option value="${oi}" ${oi===assignments[p.id]?'selected':''}>Grupo ${oi+1}</option>`).join("");
+      return `<div class="member ${match?'':'hidden'} ${moved?'moved':''} ${isNew?'new':''}" data-id="${esc(p.id)}">
+        <div class="who"><div class="nm">${esc(p.name)}${p.is_leader?'<span class="lead">líder</span>':''}${isNew?'<span class="lead" style="background:var(--ok-bg);color:var(--ok)">novo</span>':''}</div>
+        <div class="meta">${esc([p.team, p.tenure_label].filter(Boolean).join(' · '))}</div></div>
+        <select data-id="${esc(p.id)}">${opts}</select>
+        <button class="rmv" data-id="${esc(p.id)}" title="Remover desta rodada">✕</button>
+      </div>`;
+    }).join("");
+    const warn = warnings[gi];
+    return `<div class="group ${warn.length?'warn':''}">
+      <h3>Grupo ${gi+1} · ${g.length} pessoas</h3>
+      ${warn.length ? `<p class="warnings">${esc(warn.join(' · '))}</p>` : ''}
+      ${members}
+    </div>`;
+  }).join("");
+  grid.querySelectorAll("select").forEach(sel => {
+    sel.onchange = () => { assignments[sel.dataset.id] = parseInt(sel.value, 10); render(); };
+  });
+  grid.querySelectorAll(".rmv").forEach(btn => {
+    btn.onclick = () => { delete assignments[btn.dataset.id]; removedIds.add(btn.dataset.id); render(); };
+  });
+
+  const removedCard = document.getElementById("removed-card");
+  const removedIdsArr = [...removedIds].filter(id => !(id in assignments));
+  removedCard.style.display = removedIdsArr.length ? "block" : "none";
+  document.getElementById("removed-list").innerHTML = removedIdsArr.map(id => {
+    const p = byId[id];
+    return `<div class="removed-row"><span>${esc(p.name)} <span class="meta" style="color:var(--tx-3)">${esc(p.team||'')}</span></span>
+      <button class="btn small" data-id="${esc(id)}">Restaurar</button></div>`;
+  }).join("");
+  document.getElementById("removed-list").querySelectorAll("button").forEach(btn => {
+    btn.onclick = () => {
+      const id = btn.dataset.id;
+      removedIds.delete(id);
+      assignments[id] = original[id] ?? 0;
+      render();
+    };
+  });
+
+  const status = document.getElementById("status");
+  const dirty = isDirty();
+  status.textContent = dirty ? "alterações não salvas" : "tudo salvo";
+  status.className = "status" + (dirty ? " dirty" : "");
+  document.getElementById("save").disabled = !dirty;
+  document.getElementById("discard").disabled = !dirty;
+  renderSendCard(dirty);
+}
+
+function renderSendCard(dirty){
+  const card = document.getElementById("send-card");
+  const title = document.getElementById("send-title");
+  const meta = document.getElementById("send-meta");
+  const unresolvedEl = document.getElementById("send-unresolved");
+  const btn = document.getElementById("send-btn");
+  const total = Object.keys(assignments).length;
+
+  card.classList.toggle("sent", !!DATA.sent_at);
+  if(DATA.sent_at){
+    title.textContent = "Já enviado";
+    meta.textContent = `Enviado em ${DATA.sent_at} · ${DATA.n_groups ?? DATA.groups.length} grupos, ${total} pessoas.`;
+    btn.textContent = "Reenviar mesmo assim";
+  } else {
+    title.textContent = "Ainda não enviado";
+    meta.textContent = `${DATA.groups.length} grupos, ${total} pessoas prontas pra revisão.`;
+    btn.textContent = "Enviar mensagens";
+  }
+  const unresolved = (DATA.unresolved || []).filter(n => Object.values(byId).some(p => p.name === n));
+  if(unresolved.length){
+    unresolvedEl.style.display = "block";
+    unresolvedEl.textContent = `${unresolved.length} pessoa(s) sem @ no Slack (vão aparecer só pelo nome): ${unresolved.slice(0,6).join(', ')}${unresolved.length>6?'…':''}`;
+  } else {
+    unresolvedEl.style.display = "none";
+  }
+  btn.disabled = dirty;
+  btn.title = dirty ? "Salve as alterações de grupos antes de enviar" : "";
+}
+
+function showToast(msg, ok){
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.className = "toast " + (ok ? "ok" : "err");
+  if(ok) setTimeout(() => { t.className = "toast"; }, 5000);
+}
+
+async function saveGroups(){
+  document.getElementById("save").disabled = true;
+  try{
+    const data = await api("/admin/api/groups", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({assignments})
+    });
+    const parts = [];
+    if(data.added && data.added.length) parts.push(`${data.added.length} adicionada(s)`);
+    if(data.removed && data.removed.length) parts.push(`${data.removed.length} removida(s)`);
+    if((data.warnings||[]).length) parts.push(`${data.warnings.length} grupo(s) com aviso`);
+    showToast(parts.length ? `Salvo — ${parts.join(', ')}.` : "Salvo com sucesso.", true);
+    await reloadGroups();
+  }catch(e){
+    showToast(e.message, false);
+    render();
+  }
+}
+
+function discard(){
+  assignments = {...original};
+  removedIds = new Set();
+  render();
+}
+
+async function reloadGroups(){
+  const data = await api("/admin/api/groups");
+  initState(data);
+  renderDestSelect();
+  render();
+}
+
+// ------------------------------------------------------- adicionar pessoa
+let rosterT;
+async function searchRoster(q){
+  const box = document.getElementById("roster-results");
+  if((q||"").trim().length < 2){ box.className = ""; box.innerHTML = ""; return; }
+  let people;
+  try{ people = await api("/admin/api/roster?q=" + encodeURIComponent(q)); }
+  catch(e){ box.className = "show"; box.innerHTML = `<div class="roster-row">${esc(e.message)}</div>`; return; }
+  if(!people.length){ box.className = "show"; box.innerHTML = `<div class="roster-row">Ninguém encontrado (ou já está em algum grupo).</div>`; return; }
+  box.className = "show";
+  box.innerHTML = people.map(p => `<div class="roster-row">
+      <span>${esc(p.name)} <span class="rmeta">${esc([p.team, p.tenure_label].filter(Boolean).join(' · '))}</span></span>
+      <button class="btn small" data-id="${esc(p.id)}">Adicionar</button>
+    </div>`).join("");
+  box.querySelectorAll("button").forEach(btn => {
+    const p = people.find(x => x.id === btn.dataset.id);
+    btn.onclick = () => {
+      byId[p.id] = {...p, is_leader: false};
+      assignments[p.id] = parseInt(document.getElementById("roster-dest").value, 10) || 0;
+      removedIds.delete(p.id);
+      document.getElementById("roster-q").value = "";
+      box.className = ""; box.innerHTML = "";
+      render();
+    };
+  });
+}
+document.getElementById("roster-q").addEventListener("input", e => {
+  clearTimeout(rosterT);
+  const v = e.target.value;
+  rosterT = setTimeout(() => searchRoster(v), 250);
+});
+document.addEventListener("click", e => {
+  const box = document.getElementById("roster-results");
+  if(!e.target.closest(".addbar")) { box.className = ""; }
+});
+
+// ------------------------------------------------------------------ envio
+async function sendNow(){
+  const already = !!DATA.sent_at;
+  const msg = already
+    ? "Este mês JÁ foi enviado. Tem certeza que quer reenviar as mensagens pra todo mundo de novo?"
+    : "Confirma o envio das mensagens no Slack (mensagem geral, líderes, DMs e relatório)? Essa ação não pode ser desfeita.";
+  if(!confirm(msg)) return;
+  const btn = document.getElementById("send-btn");
+  btn.disabled = true;
+  try{
+    const res = await api("/admin/api/send", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({force: already})
+    });
+    showToast(`Enviado! (${res.test_mode ? 'modo TESTE' : 'PRODUÇÃO'})${res.unresolved.length ? ' — ' + res.unresolved.length + ' sem @ no Slack.' : ''}`, true);
+    await reloadGroups();
+  }catch(e){
+    showToast(e.message, false);
+    render();
+  }
+}
+
+// ------------------------------------------------------------- hotspots
+function hsSnapshot(){ return JSON.stringify(HOTSPOTS); }
+function hsDirty(){ return hsSnapshot() !== hotspotsOriginal; }
+
+function renderHotspots(){
+  const list = document.getElementById("hs-list");
+  list.innerHTML = HOTSPOTS.map((it, i) => `<div class="hs-row" data-i="${i}">
+    <input data-f="cat" value="${esc(it.cat||'')}" placeholder="Categoria">
+    <input data-f="name" value="${esc(it.name||'')}" placeholder="Nome">
+    <input data-f="area" value="${esc(it.area||'')}" placeholder="Área">
+    <input data-f="note" value="${esc(it.note||'')}" placeholder="Nota">
+    <input data-f="maps_url" value="${esc(it.maps_url||'')}" placeholder="https://maps.app.goo.gl/…">
+    <button class="rmv" title="Remover">✕</button>
+  </div>`).join("");
+  list.querySelectorAll(".hs-row").forEach(row => {
+    const i = parseInt(row.dataset.i, 10);
+    row.querySelectorAll("input").forEach(inp => {
+      inp.oninput = () => { HOTSPOTS[i][inp.dataset.f] = inp.value; updateHsStatus(); };
+    });
+    row.querySelector(".rmv").onclick = () => { HOTSPOTS.splice(i, 1); renderHotspots(); updateHsStatus(); };
+  });
+  updateHsStatus();
+}
+
+function updateHsStatus(){
+  const status = document.getElementById("hs-status");
+  const dirty = hsDirty();
+  status.textContent = dirty ? "alterações não salvas" : "tudo salvo";
+  status.className = "status" + (dirty ? " dirty" : "");
+  document.getElementById("hs-save").disabled = !dirty;
+}
+
+async function loadHotspots(){
+  const data = await api("/admin/api/hotspots");
+  HOTSPOTS = (data.items || []).map(it => ({...it}));
+  hotspotsOriginal = hsSnapshot();
+  renderHotspots();
+}
+
+async function saveHotspots(){
+  document.getElementById("hs-save").disabled = true;
+  try{
+    const res = await api("/admin/api/hotspots", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({items: HOTSPOTS})
+    });
+    hotspotsOriginal = hsSnapshot();
+    showToast(`Sugestões salvas (${res.n_items}).`, true);
+    updateHsStatus();
+  }catch(e){
+    showToast(e.message, false);
+    updateHsStatus();
+  }
+}
+
+// --------------------------------------------------------------------- boot
+async function boot(){
+  document.getElementById("status").textContent = "carregando…";
+  try{
+    const data = await api("/admin/api/groups");
+    initState(data);
+    renderDestSelect();
+    document.getElementById("login").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    render();
+    await loadHotspots();
+  }catch(e){
+    document.getElementById("login-error").textContent = e.message;
+    document.getElementById("login-error").style.display = "block";
+    sessionStorage.removeItem(KEY_STORAGE);
+  }
+}
+
+document.getElementById("enter").onclick = () => {
+  sessionStorage.setItem(KEY_STORAGE, document.getElementById("key").value.trim());
+  boot();
+};
+document.getElementById("key").addEventListener("keydown", e => { if(e.key === "Enter") document.getElementById("enter").click(); });
+document.getElementById("search").addEventListener("input", render);
+document.getElementById("save").onclick = saveGroups;
+document.getElementById("discard").onclick = discard;
+document.getElementById("send-btn").onclick = sendNow;
+document.getElementById("hs-add-row").onclick = () => { HOTSPOTS.push({cat:"",name:"",area:"",note:"",maps_url:""}); renderHotspots(); updateHsStatus(); };
+document.getElementById("hs-save").onclick = saveHotspots;
+
+window.addEventListener("beforeunload", e => { if(isDirty() || hsDirty()){ e.preventDefault(); e.returnValue = ""; } });
+
+if(sessionStorage.getItem(KEY_STORAGE)) boot();
+</script>
+</body>
+</html>

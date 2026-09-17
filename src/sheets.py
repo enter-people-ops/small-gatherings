@@ -123,3 +123,20 @@ def append_history(groups_ids: list[list[str]], path: str | None = None,
     hist.append(groups_ids)
     hist = hist[-keep_last:]  # janela deslizante (histórico recente pesa mais mesmo)
     json.dump(hist, open(path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+
+
+def replace_last_history(groups_ids: list[list[str]], path: str | None = None,
+                         keep_last: int = 6) -> None:
+    """Substitui a última rodada do histórico (em vez de acrescentar uma nova).
+    Usado pelo painel admin: a rodada deste mês já foi registrada por
+    append_history no /run?send=true; isto só corrige o snapshot pra refletir
+    a composição final depois de reatribuições manuais, pra não confundir o
+    cálculo de novidade do mês seguinte."""
+    path = _history_path(path)
+    hist = load_history(path)
+    if hist:
+        hist[-1] = groups_ids
+    else:
+        hist.append(groups_ids)
+    hist = hist[-keep_last:]
+    json.dump(hist, open(path, "w", encoding="utf-8"), ensure_ascii=False, indent=1)

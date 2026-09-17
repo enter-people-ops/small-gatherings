@@ -167,6 +167,8 @@ const DATA = __DATA__;
 const HOTSPOTS = __HOTSPOTS__;
 const AV = ["rgb(227,86,71)","rgb(80,179,49)","rgb(47,159,198)","rgb(148,114,194)","rgb(198,152,28)","rgb(227,141,31)"];
 const norm = s => (s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
+const ESC_MAP = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};
+function esc(s){ return (s==null?'':String(s)).replace(/[&<>"']/g, c => ESC_MAP[c]); }
 function initials(n){const p=n.trim().split(/\s+/);return ((p[0]||"")[0]||"")+((p[p.length-1]||"")[0]||"");}
 function groupOf(id){return DATA.groups.find(g=>g.some(p=>p.id===id));}
 
@@ -177,15 +179,15 @@ function renderGroup(group, meId){
     const av = AV[(p.name.charCodeAt(0)+(p.name.charCodeAt(1)||0))%AV.length];
     const meta = [p.team, p.tenure_label].filter(Boolean).join(' · ');
     return `<li class="member ${isMe?'me':''}">
-      <div class="av" style="background:${av}">${initials(p.name).toUpperCase()}</div>
-      <div class="who"><div class="nm">${p.name}${isMe?' · você':''}</div>
-      <div class="meta">${meta}</div></div>
+      <div class="av" style="background:${av}">${esc(initials(p.name).toUpperCase())}</div>
+      <div class="who"><div class="nm">${esc(p.name)}${isMe?' · você':''}</div>
+      <div class="meta">${esc(meta)}</div></div>
       ${p.is_leader?'<span class="lead">capitão</span>':''}
     </li>`;}).join("");
   return `<div class="groupcard">
-    <div class="gc-top"><div><p class="you">Seu Small Gathering de ${DATA.month}</p>
+    <div class="gc-top"><div><p class="you">Seu Small Gathering de ${esc(DATA.month)}</p>
       <h2>${group.length} Pessoas</h2></div>
-      <span class="chip">${leader.name.split(' ')[0]} é responsável por garantir que o Small Gathering vai sair do papel!</span></div>
+      <span class="chip">${esc(leader.name.split(' ')[0])} é responsável por garantir que o Small Gathering vai sair do papel!</span></div>
     <ul class="members">${members}</ul>
   </div>`;
 }
@@ -197,10 +199,10 @@ function search(v){
   if(q.length<2){results.innerHTML="";return;}
   const all = DATA.groups.flat();
   const hits = all.filter(p=>norm(p.name).includes(q));
-  if(hits.length===0){results.innerHTML=`<p class="empty">Não achei ninguém com “${v}”. Confere a grafia ou tenta só o primeiro nome.</p>`;return;}
+  if(hits.length===0){results.innerHTML=`<p class="empty">Não achei ninguém com “${esc(v)}”. Confere a grafia ou tenta só o primeiro nome.</p>`;return;}
   if(hits.length===1){show(hits[0].id);return;}
   results.innerHTML = `<p class="empty">Achei ${hits.length} pessoas</p>
-    <div class="pick">${hits.slice(0,12).map(p=>`<button data-id="${p.id}">${[p.name,p.team].filter(Boolean).join(' · ')}</button>`).join("")}</div>`;
+    <div class="pick">${hits.slice(0,12).map(p=>`<button data-id="${esc(p.id)}">${esc([p.name,p.team].filter(Boolean).join(' · '))}</button>`).join("")}</div>`;
   results.querySelectorAll('button').forEach(b=>b.onclick=()=>show(b.dataset.id));
 }
 let t; document.getElementById('q').addEventListener('input',e=>{clearTimeout(t);t=setTimeout(()=>search(e.target.value),120);});
@@ -209,7 +211,7 @@ const spotCats = [...new Set((HOTSPOTS.items||[]).map(s=>s.cat))];
 let activeCat = 'Todas';
 function renderFilters(){
   document.getElementById('filters').innerHTML = ['Todas', ...spotCats].map(c=>
-    `<button class="filter-btn ${c===activeCat?'active':''}" data-cat="${c}">${c}</button>`
+    `<button class="filter-btn ${c===activeCat?'active':''}" data-cat="${esc(c)}">${esc(c)}</button>`
   ).join("");
   document.querySelectorAll('#filters .filter-btn').forEach(btn=>{
     btn.onclick = ()=>{ activeCat = btn.dataset.cat; renderFilters(); renderSpots(); };
@@ -220,9 +222,9 @@ function renderSpots(){
   const grid = document.getElementById('spotgrid');
   grid.innerHTML = items.length ? items.map(s=>{
     const url = s.maps_url || ('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent((s.name||'')+' '+(s.area||'')));
-    return `<a class="spot" href="${url}" target="_blank" rel="noopener">
-      <div class="c">${s.cat}</div><div class="n">${s.name}</div>
-      <div class="a">${s.area}</div>${s.note?`<div class="no">${s.note}</div>`:''}</a>`;
+    return `<a class="spot" href="${esc(url)}" target="_blank" rel="noopener">
+      <div class="c">${esc(s.cat)}</div><div class="n">${esc(s.name)}</div>
+      <div class="a">${esc(s.area)}</div>${s.note?`<div class="no">${esc(s.note)}</div>`:''}</a>`;
   }).join("") : `<p class="spots-empty">Sem sugestões nessa categoria ainda.</p>`;
   document.getElementById('spots-count').textContent = items.length + (items.length===1?' sugestão':' sugestões');
 }
@@ -231,7 +233,7 @@ renderSpots();
 
 function renderMini(list){
   return list.map((g,i)=>`<div class="mini"><h4>Grupo ${i+1}</h4><ul>${
-    g.map(p=>`<li>${p.is_leader?'<span class="star">★</span> ':''}<b>${p.name}</b>${p.team?' · '+p.team:''}</li>`).join("")}</ul></div>`).join("");
+    g.map(p=>`<li>${p.is_leader?'<span class="star">★</span> ':''}<b>${esc(p.name)}</b>${p.team?' · '+esc(p.team):''}</li>`).join("")}</ul></div>`).join("");
 }
 document.getElementById('allgroups').innerHTML = renderMini(DATA.groups.slice(0,3));
 const moreBtn = document.getElementById('more-groups');
@@ -246,6 +248,13 @@ else{
 </body>
 </html>"""
 
+def _json_for_script(obj) -> str:
+    """json.dumps só é seguro dentro de <script> se blindarmos '<' — sem
+    isso, um campo de texto livre (ex.: nome/nota de um hotspot editado pelo
+    painel admin) contendo '</script>' fecharia a tag e injetaria HTML/JS
+    arbitrário no artefato público (GET /, sem autenticação)."""
+    return json.dumps(obj, ensure_ascii=False).replace("<", "\\u003c")
+
 def main(groups_path, hotspots_path, out_path):
     data = json.load(open(groups_path, encoding="utf-8"))
     hot = json.load(open(hotspots_path, encoding="utf-8"))
@@ -255,8 +264,8 @@ def main(groups_path, hotspots_path, out_path):
         .replace("__MONTH__", html.escape(data.get("month","")))
         .replace("__GENERATED__", html.escape(data.get("generated_at", dt.date.today().isoformat())))
         .replace("__NGROUPS__", str(n_groups))
-        .replace("__DATA__", json.dumps(data, ensure_ascii=False))
-        .replace("__HOTSPOTS__", json.dumps(hot, ensure_ascii=False)))
+        .replace("__DATA__", _json_for_script(data))
+        .replace("__HOTSPOTS__", _json_for_script(hot)))
     open(out_path, "w", encoding="utf-8").write(out)
     print("Artefato gerado:", out_path)
 
