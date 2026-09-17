@@ -226,9 +226,8 @@ Cenário: **"Enter · Encontros — mensal (dia 1º)"**, id **6227802**.
 - Um único módulo HTTP: **POST `/run?send=false`** com header `X-Run-Key`
   (desde o gate de aprovação, set/2026 — ver seção 17). O Make só GERA os
   grupos/artefato; ninguém recebe mensagem até um admin clicar em "Enviar"
-  no painel `/admin`. **Se o módulo HTTP ainda estiver configurado com
-  `send=true`, troque pra `send=false`** — senão o mês inteiro é enviado
-  direto pelo Make, sem revisão nenhuma.
+  no painel `/admin`. **Já atualizado em set/2026** — confirmado que o
+  módulo HTTP está com `send=false` (antes era `send=true`).
 - Agendamento: monthly, dia 1, 09:00 (conferir fuso da conta = São Paulo).
 - Estado atual: **INATIVO**. "Run once" testa (respeita TEST_MODE). Ativar o
   toggle só na hora de ir ao ar.
@@ -260,7 +259,9 @@ Cenário: **"Enter · Encontros — mensal (dia 1º)"**, id **6227802**.
   do repo como da vez anterior) guardando `history.json` via `HISTORY_PATH`
   — o histórico de pares agora sobrevive a redeploys (ver seção 14, resolvido
   em set/2026). `data/` do repo continua sem Volume.
-- Make: cenário 6227802 agendado dia 1 às 09:00, **INATIVO**.
+- Make: cenário 6227802 agendado dia 1 às 09:00, **INATIVO**. Módulo HTTP
+  já atualizado pra `/run?send=false` (gate de aprovação — ver seção 17),
+  confirmado em set/2026.
 - Último ensaio real (`send=true`, `TEST_MODE=true`): 22 grupos, gênero inferido
   ({"?":15,"F":52,"M":162}), grupo do Mateus com aniversariantes não-líderes,
   relatório OK, `sent:true` no canal de teste. Esses 22 grupos foram usados
@@ -272,9 +273,9 @@ Cenário: **"Enter · Encontros — mensal (dia 1º)"**, id **6227802**.
 - ~~Persistência do histórico fora do FS efêmero do Railway~~ — **resolvido**
   em set/2026: volume `small-gatherings-volume` em `/app/state` +
   `HISTORY_PATH` (ver seção 6 e 13).
-- Ir ao ar: `TEST_MODE=false` + módulo HTTP do Make apontando pra
-  `/run?send=false` (gate de aprovação — ver seção 17, não é mais
-  `send=true`) + ativar o cenário no Make.
+- Ir ao ar: `TEST_MODE=false` + ativar o cenário no Make. (Módulo HTTP já
+  está com `/run?send=false` — gate de aprovação, ver seção 17 — confirmado
+  em set/2026; falta só isso.)
 - (Opcional) senioridade real se preencherem cargos.
 - Transferir o projeto Railway pro workspace **Enter Apps** (hoje em
   enter-people-ops's Projects) — bloqueado até alguém com admin em Enter Apps
