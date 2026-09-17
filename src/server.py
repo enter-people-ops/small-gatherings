@@ -14,13 +14,32 @@ GATE DE APROVAÇÃO (set/2026): o Make agenda o dia 1º e chama POST
 Protegido por header X-Run-Key == RUN_KEY (defina no Railway e no Make).
 """
 from __future__ import annotations
-import os, io, json
+import os, io, json, shutil
 from flask import Flask, request, jsonify, send_file, abort
 import main as pipeline
 import group_admin
 
 app = Flask(__name__)
 DATA_DIR = os.environ.get("DATA_DIR", "../data")
+
+def _seed_persistent_files():
+    """Quando GROUPS_PATH/ARTIFACT_PATH/HOTSPOTS_PATH passam a apontar pra um
+    Volume (ex.: configurado agora no Railway) que ainda não tem esses
+    arquivos, copia o que já está commitado em data/ pra lá — senão o app
+    simplesmente para de achar o artefato/grupos do mês corrente (GET /
+    passa a mostrar "Ainda não há grupos") até alguém rodar /run de novo, o
+    que reembaralharia tudo. Roda uma vez por start do processo; não
+    sobrescreve nada que já exista no destino."""
+    for configured, default in (
+        (pipeline.groups_path(), "../data/groups.json"),
+        (pipeline.artifact_path(), "../data/index.html"),
+        (pipeline.hotspots_path(), "../data/hotspots.json"),
+    ):
+        if configured != default and not os.path.exists(configured) and os.path.exists(default):
+            os.makedirs(os.path.dirname(configured) or ".", exist_ok=True)
+            shutil.copyfile(default, configured)
+
+_seed_persistent_files()
 
 def _check_key():
     if os.environ.get("RUN_KEY") and request.headers.get("X-Run-Key") != os.environ["RUN_KEY"]:
