@@ -12,7 +12,7 @@ agendada pelo Make (dia 1º às 09:00). Base: ~229 pessoas ativas.
 2. Lê os líderes cadastrados no painel `/admin` (por ID do Convenia — ver
    seção 17) e marca `is_leader` em quem estiver elegível este mês.
 3. Forma os grupos respeitando as regras (seção 2).
-4. Sugestões de rolê ("Onde marcar") vêm de uma lista fixa, curada à mão em
+4. Sugestões de gathering ("Onde marcar") vêm de uma lista fixa, curada à mão em
    `data/hotspots.json` — não há mais busca automática por API.
 5. Gera `data/index.html` — artefato pesquisável com a identidade visual da Enter.
 6. Monta e envia no Slack: msg geral, msg de líderes, uma DM por líder e um
@@ -87,7 +87,7 @@ src/group_admin.py  lógica do painel admin: mover/adicionar/remover pessoas,
 src/admin.html      front-end estático do painel admin (GET /admin)
 src/server.py       Flask: GET / (artefato), GET /fonts, GET /admin (+ /admin/api/*),
                     POST /run, GET /debug, GET /health
-data/hotspots.json  sugestões de rolê ("Onde marcar") — editável por /admin ou à mão
+data/hotspots.json  sugestões de gathering ("Onde marcar") — editável por /admin ou à mão
 data/leaders.json   líderes do mês, por ID do Convenia — editável só por /admin
 data/team_overrides.json  correção manual de `team` (Convenia errado/desatualizado)
 data/fonts/         Geist (auto-hospedada, identidade Enter)
@@ -110,7 +110,7 @@ requirements.txt    requests, flask, gunicorn
 - `POST /admin/api/groups`   move/adiciona/remove pessoas: `{"assignments": {person_id: group_index}}`
                              (IDs que somem = removidos; IDs novos = precisam existir no Convenia agora).
 - `GET  /admin/api/roster?q=` gente elegível no Convenia ainda sem grupo (busca por nome, >=2 chars).
-- `GET  /admin/api/hotspots`  sugestões de rolê atuais (`{"items":[...]}`).
+- `GET  /admin/api/hotspots`  sugestões de gathering atuais (`{"items":[...]}`).
 - `POST /admin/api/hotspots`  substitui a lista inteira: `{"items":[{cat,name,area,note,maps_url}]}`.
 - `GET  /admin/api/leaders`   líderes cadastrados, enriquecidos com nome/time atuais do Convenia.
 - `POST /admin/api/leaders`   substitui a lista inteira: `{"leaders": [{id, slack_id, is_anniversary_leader}]}`
@@ -340,14 +340,14 @@ não arriscar aplicar na pessoa errada) — confira esses campos após editar o
 arquivo. Como os demais arquivos de `data/`, só tem efeito no artefato/relatório
 depois de rodar `POST /run?send=false` (ou `send=true`) uma vez (ver seção 15).
 
-## 16. Sugestões de rolê ("Onde marcar")
+## 16. Sugestões de gathering ("Onde marcar")
 Lista **curada à mão**, sem busca automática (o antigo `src/hotspots.py`, que
 buscava lugares via Nominatim/Overpass num raio de 5km do escritório, foi
 removido em set/2026 porque o Overpass é um servidor público compartilhado e
 ficava lento/instável, e porque o time preferiu curar os lugares manualmente
 em vez de depender de heurísticas de "lugar estabelecido"). Desde set/2026
 dá pra editar de dois jeitos:
-- **Painel admin** (`/admin`, seção "Sugestões de rolê") — adiciona/edita/
+- **Painel admin** (`/admin`, seção "Sugestões de gathering") — adiciona/edita/
   remove itens numa tela, sem tocar em JSON. Recomendado no dia a dia.
 - **Editar `data/hotspots.json` direto** (ou `HOTSPOTS_PATH`, se configurado)
   e rodar `POST /run?send=false` (ou `send=true`) uma vez pra regenerar o
@@ -360,11 +360,11 @@ links curtos `maps.app.goo.gl` colados manualmente; o painel exige que comece
 com `http://`/`https://`, pra não aceitar um esquema tipo `javascript:` por
 engano). O pipeline (`main.py`) não toca mais nesse arquivo.
 
-## 17. Painel admin (`/admin`) — grupos, rolê e gate de aprovação do envio
+## 17. Painel admin (`/admin`) — grupos, gathering e gate de aprovação do envio
 Adicionado em set/2026, em duas ondas. Primeiro só pra mover gente entre
 grupos sem depender de rodar `/run` de novo (o que reembaralharia todo
 mundo); depois expandido pra também adicionar/remover pessoas, editar as
-sugestões de rolê, e — a mudança mais importante — **exigir um clique
+sugestões de gathering, e — a mudança mais importante — **exigir um clique
 humano antes de qualquer mensagem sair no Slack**.
 
 ### Login
@@ -381,7 +381,7 @@ gerava os grupos E já mandava tudo no Slack, na mesma chamada. Agora:
    os grupos, o artefato e a prévia das mensagens. `groups.json` grava
    `"sent_at": null`. **Nada é enviado.**
 2. Um admin abre `/admin`, revisa/ajusta (move, adiciona, remove pessoas;
-   ajusta as sugestões de rolê) o quanto quiser — sem pressa, sem prazo.
+   ajusta as sugestões de gathering) o quanto quiser — sem pressa, sem prazo.
 3. Só quando clicar em **"Enviar mensagens"** (`POST /admin/api/send`,
    `group_admin.send_now()`) é que as 3 mensagens saem de verdade: monta os
    textos a partir do `groups.json` ATUAL (já com as edições), chama
@@ -464,7 +464,7 @@ existe mais `ambiguous`/`not_found` por apelido.
   `ambiguous`/`not_found` voltam no retorno pra corrigir manualmente depois
   (adicionando essas pessoas pela busca normal).
 
-### Sugestões de rolê (hotspots)
+### Sugestões de gathering (hotspots)
 `GET/POST /admin/api/hotspots` — CRUD completo da lista (`data/hotspots.json`
 ou `HOTSPOTS_PATH`); `POST` substitui a lista inteira. `maps_url`, se
 preenchido, precisa começar com `http://`/`https://` (`group_admin._clean_hotspot`),

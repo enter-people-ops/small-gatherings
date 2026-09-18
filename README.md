@@ -3,7 +3,7 @@
 Todo dia 1º do mês: busca elegíveis no Convenia (ativos + admitidos no mês),
 lê a planilha de líderes, forma grupos (diversidade de gênero/time/senioridade
 + evita repetir pares do histórico, sempre ≥1 líder por grupo), gera um artefato
-HTML pesquisável (com sugestões de rolê reais do OpenStreetMap, num raio de
+HTML pesquisável (com sugestões de gathering reais do OpenStreetMap, num raio de
 5km do escritório — almoço/jantar/barzinhos/aulas) e envia 3 mensagens no Slack.
 
 ## Arquitetura (Make.com + Railway)
@@ -61,7 +61,7 @@ distribuído o mais uniformemente possível. Não há mais tamanho fixo configur
 
 Scopes do bot Slack: chat:write, users:read, users:read.email.
 
-## Sugestões de rolê ("Onde marcar")
+## Sugestões de gathering ("Onde marcar")
 Lista fixa, curada à mão em `data/hotspots.json` (nome, categoria, área, nota
 e link do Google Maps). Não há mais busca automática por API — para atualizar,
 edite o arquivo diretamente. Detalhes: `CLAUDE.md` seção 16.
@@ -86,7 +86,7 @@ gravar o histórico numa aba da própria planilha / no Drive (conectores já ati
     src/render.py     gera index.html a partir de groups.json + hotspots.json
     src/main.py       orquestrador (CLI --dry-run/--send + run_api p/ o servidor)
     src/server.py     Flask: GET / (artefato) e POST /run (Make)
-    data/hotspots.json  sugestões de rolê ("Onde marcar") — lista fixa, editada à mão
+    data/hotspots.json  sugestões de gathering ("Onde marcar") — lista fixa, editada à mão
     Procfile          start do Railway (gunicorn)
 
 ## Identidade visual (Enter Design System)

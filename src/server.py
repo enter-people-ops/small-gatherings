@@ -5,7 +5,7 @@ Serviço web (Railway) que:
                          também envia direto pelo Slack (atalho manual — ver
                          GATE DE APROVAÇÃO abaixo); default é ?send=false.
   - GET  /admin       -> painel admin (mover/adicionar/remover pessoas,
-                         editar sugestões de rolê, apertar "enviar").
+                         editar sugestões de gathering, apertar "enviar").
   - GET  /health      -> checagem simples.
 
 GATE DE APROVAÇÃO (set/2026): o Make agenda o dia 1º e chama POST

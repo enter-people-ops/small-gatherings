@@ -162,7 +162,7 @@ input,select{font:inherit}
 <body>
 <div class="wrap">
   <h1>Admin de Grupos</h1>
-  <p class="sub">Mover, adicionar ou remover pessoas dos grupos já formados, gerenciar líderes, editar as sugestões de rolê, e só disparar as mensagens no Slack quando estiver tudo revisado.</p>
+  <p class="sub">Mover, adicionar ou remover pessoas dos grupos já formados, gerenciar líderes, editar as sugestões de gathering, e só disparar as mensagens no Slack quando estiver tudo revisado.</p>
 
   <div id="login" class="card">
     <label for="key">X-Run-Key</label>
@@ -178,7 +178,7 @@ input,select{font:inherit}
     <div class="tabs">
       <button class="tab-btn active" data-tab="grupos">Grupos</button>
       <button class="tab-btn" data-tab="lideres">Líderes</button>
-      <button class="tab-btn" data-tab="role">Sugestões de rolê</button>
+      <button class="tab-btn" data-tab="gathering">Sugestões de gathering</button>
       <button class="tab-btn" data-tab="envio">Envio <span class="tab-dot" id="envio-dot"></span></button>
     </div>
 
@@ -220,7 +220,7 @@ input,select{font:inherit}
       </div>
     </div>
 
-    <div class="tab-panel" data-panel="role" hidden>
+    <div class="tab-panel" data-panel="gathering" hidden>
       <div class="toolbar">
         <span class="status" id="hs-status">carregando…</span>
         <button class="btn" id="hs-add-row">+ sugestão</button>
@@ -333,7 +333,7 @@ function renderSummary(){
     DATA ? chip(totalPeople, "pessoas") : "",
     warnCount ? chip(warnCount, "grupo(s) com aviso", "warn") : "",
     chip(LEADERS.length, "líderes", notEligibleLeaders ? "warn" : ""),
-    chip(HOTSPOTS.length, "sugestões de rolê"),
+    chip(HOTSPOTS.length, "sugestões de gathering"),
     DATA ? chip(sent ? "✓" : "…", sent ? "enviado" : "não enviado", sent ? "ok" : "warn") : "",
   ].filter(Boolean).join("");
 

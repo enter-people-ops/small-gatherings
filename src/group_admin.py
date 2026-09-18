@@ -1,13 +1,13 @@
 """
 Painel admin: reatribuição manual de pessoas entre os grupos já formados,
-CRUD das sugestões de rolê, CRUD dos líderes (por ID do Convenia — substitui
+CRUD das sugestões de gathering, CRUD dos líderes (por ID do Convenia — substitui
 a antiga planilha) e o botão de envio real das mensagens no Slack — tudo sem
 depender de rodar o pipeline (/run) de novo.
 
 Fluxo esperado a partir de set/2026: o Make (ou um /run manual) chama
 POST /run?send=false, que só GERA os grupos/artefato e NUNCA envia nada.
 Um humano revisa em /admin (move/adiciona/remove pessoas, ajusta as
-sugestões de rolê) e só então clica em "Enviar mensagens", que dispara
+sugestões de gathering) e só então clica em "Enviar mensagens", que dispara
 send_now() abaixo. `POST /run?send=true` continua existindo como atalho
 manual (gera E envia na mesma chamada, pulando a revisão) — não é mais o
 caminho usado pelo agendamento do Make (ver CLAUDE.md seção 11).
@@ -200,7 +200,7 @@ def send_now(force: bool = False) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# sugestões de rolê (hotspots)
+# sugestões de gathering (hotspots)
 # ---------------------------------------------------------------------------
 def load_hotspots() -> dict:
     path = pipeline.hotspots_path()

@@ -269,7 +269,7 @@ def run_api(send: bool) -> dict:
     payload = {"month": label, "generated_at": ref.isoformat(), "groups": groups_d, "sent_at": None}
     json.dump(payload, open(groups_path(),"w",encoding="utf-8"), ensure_ascii=False, indent=2)
 
-    # sugestões de rolê ("Onde marcar") — lista curada à mão (ou pelo painel
+    # sugestões de gathering ("Onde marcar") — lista curada à mão (ou pelo painel
     # admin) em data/hotspots.json (ver HOTSPOTS_PATH/seção 17).
     render.main(groups_path(),hotspots_path(),artifact_path())
     artifact_url = os.environ.get("ARTIFACT_URL","")
