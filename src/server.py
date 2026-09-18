@@ -156,6 +156,42 @@ def admin_save_hotspots():
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
 
+@app.get("/admin/api/leaders")
+def admin_get_leaders():
+    _check_key()
+    return jsonify({"leaders": group_admin.list_leaders()})
+
+@app.post("/admin/api/leaders")
+def admin_save_leaders():
+    _check_key()
+    body = request.get_json(force=True, silent=True) or {}
+    leaders = body.get("leaders")
+    try:
+        return jsonify(group_admin.save_leaders(leaders))
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 400
+
+@app.get("/admin/api/leaders/roster")
+def admin_leader_roster():
+    """Gente elegível no Convenia que ainda não é líder — pra o painel
+    oferecer como 'adicionar líder'. Exige ?q= (>=2 caracteres)."""
+    _check_key()
+    return jsonify(group_admin.list_leader_candidates(request.args.get("q", "")))
+
+@app.post("/admin/api/leaders/import-from-sheet")
+def admin_import_leaders():
+    """Migração ÚNICA dos líderes a partir da antiga planilha
+    (LEADERS_CSV_URL) — não faz mais parte do pipeline mensal, ver
+    CLAUDE.md seção 17."""
+    _check_key()
+    csv_url = os.environ.get("LEADERS_CSV_URL")
+    if not csv_url:
+        return jsonify({"error": "LEADERS_CSV_URL não está configurada — nada pra importar."}), 400
+    try:
+        return jsonify(group_admin.import_leaders_from_sheet(csv_url))
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+
 @app.post("/admin/api/send")
 def admin_send():
     """O ÚNICO gatilho de envio real das mensagens no Slack, a partir de

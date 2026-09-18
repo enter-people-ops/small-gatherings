@@ -9,8 +9,8 @@ agendada pelo Make (dia 1º às 09:00). Base: ~229 pessoas ativas.
 ## 1. O que o sistema faz (pipeline mensal)
 1. Busca em `/employees` do Convenia os ATIVOS + admitidos no mês (paginado,
    enriquecido em paralelo por `/employees/{id}`).
-2. Lê a planilha de líderes (Google Sheets publicado como CSV) e casa cada
-   líder com um ativo do Convenia (por e-mail primeiro, depois por nome).
+2. Lê os líderes cadastrados no painel `/admin` (por ID do Convenia — ver
+   seção 17) e marca `is_leader` em quem estiver elegível este mês.
 3. Forma os grupos respeitando as regras (seção 2).
 4. Sugestões de rolê ("Onde marcar") vêm de uma lista fixa, curada à mão em
    `data/hotspots.json` — não há mais busca automática por API.
@@ -19,13 +19,14 @@ agendada pelo Make (dia 1º às 09:00). Base: ~229 pessoas ativas.
    relatório de conformidade das regras.
 
 ## 2. Regras de formação (decisões já tomadas)
-- Cada grupo tem >=1 líder (líderes vêm da planilha).
+- Cada grupo tem >=1 líder (líderes cadastrados em `/admin` — seção 17).
 - Mistura por **gênero**, **time** e **tempo de casa** (diversidade).
 - Minimiza repetição de pares vs histórico (novidade).
-- **Grupo do Mateus** (líder por e-mail `ANNIVERSARY_LEADER_EMAIL`, default
-  `mateus@getenter.ai`) é SEMPRE o primeiro e reúne os **aniversariantes de casa
-  do mês a partir de 1 ano** (qualquer múltiplo de 12 meses, sem teto — não há
-  mais a marca de 6 meses).
+- **Grupo do Mateus** (o líder marcado como `is_anniversary_leader` no painel
+  `/admin` — ver seção 17; até set/2026 era identificado por e-mail via
+  `ANNIVERSARY_LEADER_EMAIL`, hoje aposentado) é SEMPRE o primeiro e reúne os
+  **aniversariantes de casa do mês a partir de 1 ano** (qualquer múltiplo de
+  12 meses, sem teto — não há mais a marca de 6 meses).
 - **Líderes que fazem aniversário continuam liderando** seus grupos — NÃO são
   puxados para o grupo do Mateus (só não-líderes vão).
 - **>=2 mulheres por grupo**, EXCETO o grupo do Mateus (`GROUP_MIN_WOMEN`, default 2).
@@ -47,8 +48,12 @@ agendada pelo Make (dia 1º às 09:00). Base: ~229 pessoas ativas.
 - **Gênero vazio no Convenia p/ ~79%** → inferido pelo primeiro nome
   (`gender_infer.py`: dicionário de nomes BR + heurística de terminação),
   só preenchendo os vazios; togglável por `INFER_GENDER`. Relatório avisa a inferência.
-- Nomes na planilha de líderes costumam ser apelidos/curtos ("Banduk", "cezar",
-  "Mike Mac-Vicar") — por isso o casamento é por tokens de e-mail e depois nome.
+- Líderes eram escolhidos por uma planilha (nomes costumavam ser apelidos/
+  curtos — "Banduk", "cezar", "Mike Mac-Vicar" — casados por token de e-mail
+  e depois nome). **Aposentado em set/2026**: agora são escolhidos direto no
+  Convenia pelo painel `/admin` (por ID, sem ambiguidade) — ver seção 17.
+  `sheets.read_leaders_csv`/`match_leaders` continuam no código só pra
+  migração única (`POST /admin/api/leaders/import-from-sheet`).
 - **Nome exibido no artefato/mensagens = nome do Slack** (display_name >
   real_name), não o nome completo do Convenia — resolvido em `main.py` antes
   de gerar o artefato. Quem não tem match no Slack mantém o nome do Convenia
@@ -69,19 +74,21 @@ agendada pelo Make (dia 1º às 09:00). Base: ~229 pessoas ativas.
 src/grouping.py     motor de formação (seed + busca local; testado)
 src/convenia.py     cliente Convenia v3 + tempo de casa + inferência de gênero
 src/gender_infer.py inferência de gênero por nome (BR)
-src/sheets.py       leitura de líderes (CSV) + histórico + casamento por tokens
+src/sheets.py       líderes por ID (load_leaders/save_leaders/mark_leaders_by_id)
+                    + histórico; read_leaders_csv/match_leaders só pra migração
 src/slack_msgs.py   match Convenia→Slack + 3 mensagens + relatório
 src/render.py       gera index.html a partir de groups.json + hotspots.json
 src/main.py         run_api (pipeline), build_groups (grupo do Mateus),
                     _send (roteamento TESTE), diagnose, work_anniversaries,
-                    groups_path()/artifact_path() (caminhos configuráveis)
+                    groups_path()/artifact_path()/hotspots_path() (caminhos configuráveis)
 src/group_admin.py  lógica do painel admin: mover/adicionar/remover pessoas,
-                    CRUD de hotspots, e o gate de aprovação do envio
-                    (send_now()) — ver seção 17
+                    CRUD de líderes e de hotspots, migração da planilha, e o
+                    gate de aprovação do envio (send_now()) — ver seção 17
 src/admin.html      front-end estático do painel admin (GET /admin)
-src/server.py       Flask: GET / (artefato), GET /fonts, GET /admin (+ /admin/api/groups),
+src/server.py       Flask: GET / (artefato), GET /fonts, GET /admin (+ /admin/api/*),
                     POST /run, GET /debug, GET /health
-data/hotspots.json  sugestões de rolê ("Onde marcar") — lista fixa, editada à mão
+data/hotspots.json  sugestões de rolê ("Onde marcar") — editável por /admin ou à mão
+data/leaders.json   líderes do mês, por ID do Convenia — editável só por /admin
 data/team_overrides.json  correção manual de `team` (Convenia errado/desatualizado)
 data/fonts/         Geist (auto-hospedada, identidade Enter)
 data/logo-enter.svg logo oficial
@@ -96,7 +103,7 @@ requirements.txt    requests, flask, gunicorn
                           — é o que o Make chama agora (ver GATE DE APROVAÇÃO, seção 17).
 - `POST /run?send=true`   atalho manual: gera E JÁ ENVIA na mesma chamada, pulando a
                           revisão do painel admin. Não é mais o caminho do Make.
-- `GET  /debug`           diagnóstico do casamento de líderes (rápido, sem enrich).
+- `GET  /debug`           diagnóstico dos líderes cadastrados vs elegíveis este mês (rápido, sem enrich).
 - `GET  /health`          `{"ok": true}`.
 - `GET  /admin`           painel admin (HTML estático; pede a X-Run-Key no navegador — ver seção 17).
 - `GET  /admin/api/groups`   grupos atuais + `min_women`, `sent_at`, `unresolved`.
@@ -105,6 +112,13 @@ requirements.txt    requests, flask, gunicorn
 - `GET  /admin/api/roster?q=` gente elegível no Convenia ainda sem grupo (busca por nome, >=2 chars).
 - `GET  /admin/api/hotspots`  sugestões de rolê atuais (`{"items":[...]}`).
 - `POST /admin/api/hotspots`  substitui a lista inteira: `{"items":[{cat,name,area,note,maps_url}]}`.
+- `GET  /admin/api/leaders`   líderes cadastrados, enriquecidos com nome/time atuais do Convenia.
+- `POST /admin/api/leaders`   substitui a lista inteira: `{"leaders": [{id, slack_id, is_anniversary_leader}]}`
+                             (no máximo 1 com `is_anniversary_leader: true`).
+- `GET  /admin/api/leaders/roster?q=` gente elegível no Convenia que ainda não é líder (busca por nome).
+- `POST /admin/api/leaders/import-from-sheet` migração ÚNICA a partir da antiga planilha
+                             (`LEADERS_CSV_URL`) — substitui a lista de líderes pelo resultado do
+                             casamento por nome/e-mail de sempre. Não faz parte do pipeline mensal.
 - `POST /admin/api/send`      **único** gatilho do envio real no Slack a partir de set/2026 —
                              botão "Enviar mensagens" do painel. `{"force": true}` reenvia mesmo
                              se este mês já tiver sido enviado (bloqueado por padrão).
@@ -113,7 +127,10 @@ requirements.txt    requests, flask, gunicorn
 ```
 CONVENIA_TOKEN=            # Convenia > Config > API
 SLACK_BOT_TOKEN=          # api.slack.com/apps > OAuth > Bot token (xoxb-)
-LEADERS_CSV_URL=          # Sheets > Publicar na web > CSV
+LEADERS_CSV_URL=          # OPCIONAL desde set/2026 — só usada por POST
+                          # /admin/api/leaders/import-from-sheet (migração
+                          # única). Líderes são cadastrados em /admin
+                          # (ver seção 17), não fazem mais parte do pipeline.
 ARTIFACT_URL=            # URL pública do Railway (definir após 1º deploy)
 RUN_KEY=small-gatherings-2026   # senha do header X-Run-Key
 TEST_MODE=true                   # true = tudo cai nos canais de TESTE (ver seção 8)
@@ -131,7 +148,6 @@ DM_RELATORIO=             # Slack ID de quem recebe o relatório por DM (não é
 # DMs de líderes "pra valer" não têm variável própria: vão direto pro slack_id
 # de cada líder, resolvido automaticamente (users.list / planilha).
 
-ANNIVERSARY_LEADER_EMAIL=mateus@getenter.ai
 GROUP_MIN_WOMEN=2
 INFER_GENDER=true
 EMAIL_DOMAIN=getenter.ai
@@ -151,15 +167,22 @@ ARTIFACT_PATH=            # opcional; idem, mas pro index.html servido em GET /
 HOTSPOTS_PATH=            # opcional; idem, mas pro hotspots.json (agora
                           # editável pelo painel admin — ver seção 17). Sem
                           # a env var, cai em data/hotspots.json do repo.
+LEADERS_PATH=             # opcional; idem, mas pro leaders.json (líderes
+                          # cadastrados por ID do Convenia — ver seção 17).
+                          # Sem a env var, cai em data/leaders.json (não
+                          # existe no repo por padrão — começa vazio até
+                          # cadastrar em /admin ou importar da planilha).
 ```
 Scopes do bot Slack: `chat:write`, `users:read`, `users:read.email`.
 
-## 7. Planilha de líderes (Google Sheets → Publicar na web → CSV)
-Colunas (nomes flexíveis): `nome` (obrigatório), `email` (recomendado — resolve
-apelidos), `slack_id` (opcional, override definitivo do @). O `email` casa o líder
-com o Convenia mesmo quando o nome é apelido. Se um líder ficar `ambiguous` (nome
-curto casa com >1 pessoa), acrescente sobrenome; se `not_found`, corrija a grafia
-ou ponha o slack_id.
+## 7. Líderes (histórico: planilha do Google → hoje painel `/admin`)
+**Aposentado em set/2026.** Até então, os líderes viviam numa planilha do
+Google (Publicar na web → CSV) com colunas `nome`/`email`/`slack_id`, casada
+por heurística de tokens contra o Convenia (podia dar `ambiguous`/`not_found`
+— daí o `/debug` antigo). Hoje os líderes são cadastrados direto no painel
+`/admin` (busca e escolha no Convenia por ID, sem ambiguidade — ver seção
+17), e a planilha só serve pra uma migração única
+(`POST /admin/api/leaders/import-from-sheet`) se algum dia for útil de novo.
 
 ## 8. Modo TESTE
 Com `TEST_MODE=true` (tudo sandboxed, rotulado `[TESTE]`):
@@ -185,8 +208,11 @@ dizendo qual variável falta (não há fallback silencioso entre modos).
 2. Em Variables, preencha tudo da seção 6 (menos `ARTIFACT_URL`).
 3. Settings > Networking > Generate Domain → copie a URL → defina `ARTIFACT_URL`
    com ela → redeploy.
-4. Publique a planilha de líderes como CSV e cole em `LEADERS_CSV_URL`.
-5. Crie o app Slack, instale, copie o bot token e os IDs de canal.
+4. Crie o app Slack, instale, copie o bot token e os IDs de canal.
+5. Rode `POST /run?send=false` uma vez pra gerar o primeiro `groups.json`
+   vazio de líderes, abra `/admin` > Líderes e cadastre quem vai liderar
+   (busca por nome no Convenia — ver seção 17). Rode `/run?send=false` de
+   novo pra formar os grupos já com os líderes certos.
 6. Teste (seção 10). Quando ok, monte/ative o Make (seção 11).
 
 Rodar local: `pip install -r requirements.txt`; copie `.env.example` -> `.env` e
@@ -409,6 +435,35 @@ não-bloqueantes** — o card fica vermelho, mas salva do mesmo jeito (é um
 override consciente do admin). Editar **não reenvia nada** por conta própria
 — só o clique em "Enviar mensagens" dispara Slack.
 
+### Líderes (por ID do Convenia — substitui a planilha)
+Desde set/2026, `/admin` > Líderes é a ÚNICA forma de configurar quem lidera
+(a planilha do Google, seção 7, foi aposentada). Cadastrar um líder é
+escolher a pessoa direto na busca do Convenia (`GET /admin/api/leaders/roster?q=`,
+mesma família de `_search_eligible` usada pra "adicionar pessoa" nos grupos)
+— o painel guarda só o **ID**, nunca nome/e-mail digitado à mão, então não
+existe mais `ambiguous`/`not_found` por apelido.
+
+- `GET/POST /admin/api/leaders` — `POST` substitui a lista inteira:
+  `{"leaders": [{"id", "slack_id" (opcional), "is_anniversary_leader" (opcional)}]}`.
+  No máximo 1 líder pode ter `is_anniversary_leader: true` (400 se vier mais
+  de 1) — é ele quem lidera o grupo do Mateus (seção 2), sem precisar mais
+  de `ANNIVERSARY_LEADER_EMAIL`/e-mail corporativo (que o Convenia quase
+  nunca preenche).
+- `sheets.mark_leaders_by_id()` marca `is_leader` a partir dessa lista a cada
+  `/run` e devolve quem está cadastrado mas **não elegível** este mês (ex.:
+  desligado) — aparece como `missing_leaders` no `/run`/`/debug` e como
+  `eligible: false` no painel, sem quebrar o resto do pipeline.
+- `slack_id` no leaders.json é só um **override opcional** (pro caso raro do
+  match automático do Slack falhar pra aquela pessoa) — o normal é deixar em
+  branco e deixar o `S.resolve_ids_and_names()` de sempre resolver.
+- **Migração única**: `POST /admin/api/leaders/import-from-sheet` lê
+  `LEADERS_CSV_URL` (se ainda configurada) e roda o casamento por nome/e-mail
+  de sempre (`sheets.read_leaders_csv`/`match_leaders`, mantidos só pra isso),
+  gravando o resultado (`status: ok`) em `leaders.json` — **substitui** a
+  lista atual inteira, por isso o painel pede confirmação antes de chamar.
+  `ambiguous`/`not_found` voltam no retorno pra corrigir manualmente depois
+  (adicionando essas pessoas pela busca normal).
+
 ### Sugestões de rolê (hotspots)
 `GET/POST /admin/api/hotspots` — CRUD completo da lista (`data/hotspots.json`
 ou `HOTSPOTS_PATH`); `POST` substitui a lista inteira. `maps_url`, se
@@ -434,5 +489,12 @@ artefato público (`GET /`, sem autenticação).
 Por padrão `GROUPS_PATH`/`ARTIFACT_PATH`/`HOTSPOTS_PATH` caem nos mesmos
 `data/*.json`/`data/index.html` do repo (ephemeral FS do Railway — ver seção
 15), então uma edição sobrevive até o próximo redeploy, mas não além disso.
-Pra sobreviver a redeploys, aponte as três variáveis pro mesmo Volume já
-usado por `HISTORY_PATH` (ver seção 6 e 13).
+`LEADERS_PATH` é diferente: não existe `data/leaders.json` no repo (a lista
+sempre viveu só na planilha ou, agora, no painel), então sem a env var ela
+some por completo a cada redeploy — **configure `LEADERS_PATH` desde já**
+(não só "quando quiser", como as outras) se não quiser recadastrar líderes
+toda vez. Pra sobreviver a redeploys, aponte as quatro variáveis pro mesmo
+Volume já usado por `HISTORY_PATH` (ver seção 6 e 13); `server.py` semeia
+`GROUPS_PATH`/`ARTIFACT_PATH`/`HOTSPOTS_PATH` a partir de `data/` na primeira
+vez que o Volume estiver vazio (`_seed_persistent_files()`), mas não faz
+isso pra `LEADERS_PATH` (não há nada em `data/` pra copiar).

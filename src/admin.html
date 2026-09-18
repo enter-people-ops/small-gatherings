@@ -96,6 +96,20 @@ input,select{font:inherit}
 .removed-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;font-size:13.5px}
 .removed-row+.removed-row{box-shadow:inset 0 1px 0 rgba(0,0,0,.06)}
 
+/* líderes */
+.ld-row{display:grid;grid-template-columns:170px 1fr 150px 32px;gap:10px;align-items:center;padding:8px 0}
+.ld-row+.ld-row{box-shadow:inset 0 1px 0 rgba(0,0,0,.06)}
+.ld-row .who .nm{font-weight:500;font-size:13.5px;display:flex;align-items:center;gap:6px}
+.ld-row .who .meta{color:var(--tx-3);font-size:12px}
+.ld-radio{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--tx-2);white-space:nowrap}
+.ld-row input[type=text]{width:100%;height:34px;padding:0 10px;border:0;border-radius:var(--r-lg);box-shadow:var(--ring-2);outline:none;font-size:12.5px}
+.ld-row input[type=text]:focus{box-shadow:var(--ring-focus)}
+.not-eligible{font-size:10.5px;font-weight:600;color:var(--danger);background:var(--danger-bg);
+  padding:2px 7px;border-radius:var(--r-full);white-space:nowrap}
+@media (max-width:820px){
+  .ld-row{grid-template-columns:1fr}
+}
+
 /* hotspots */
 .hs-row{display:grid;grid-template-columns:110px 1fr 1fr 1fr 1fr 32px;gap:8px;align-items:center;padding:8px 0}
 .hs-row+.hs-row{box-shadow:inset 0 1px 0 rgba(0,0,0,.06)}
@@ -152,6 +166,21 @@ input,select{font:inherit}
     <div class="card removed-card" id="removed-card" style="display:none">
       <h3>Removidos desta rodada</h3>
       <div id="removed-list"></div>
+    </div>
+
+    <h2>Líderes</h2>
+    <p class="sub" style="margin-top:-8px">Quem lidera define quantos grupos existem no próximo <code>/run</code>. Marque no máximo 1 como "líder do aniversário" (reúne quem faz aniversário de casa no mês).</p>
+    <div class="toolbar">
+      <span class="status" id="ld-status">carregando…</span>
+      <button class="btn" id="ld-import">Importar da planilha (uma vez)</button>
+      <button class="btn primary" id="ld-save">Salvar líderes</button>
+    </div>
+    <div class="addbar">
+      <input id="leader-q" type="search" placeholder="Adicionar líder: busque por nome…" autocomplete="off">
+      <div id="leader-results"></div>
+    </div>
+    <div class="card">
+      <div id="ld-list"></div>
     </div>
 
     <h2>Sugestões de rolê ("Onde marcar")</h2>
@@ -391,8 +420,12 @@ document.getElementById("roster-q").addEventListener("input", e => {
   rosterT = setTimeout(() => searchRoster(v), 250);
 });
 document.addEventListener("click", e => {
-  const box = document.getElementById("roster-results");
-  if(!e.target.closest(".addbar")) { box.className = ""; }
+  if(!e.target.closest("#roster-q") && !e.target.closest("#roster-results")){
+    document.getElementById("roster-results").className = "";
+  }
+  if(!e.target.closest("#leader-q") && !e.target.closest("#leader-results")){
+    document.getElementById("leader-results").className = "";
+  }
 });
 
 // ------------------------------------------------------------------ envio
@@ -415,6 +448,110 @@ async function sendNow(){
   }catch(e){
     showToast(e.message, false);
     render();
+  }
+}
+
+// -------------------------------------------------------------- líderes
+let LEADERS = [];
+let leadersOriginal = "";
+
+function ldSnapshot(){
+  return JSON.stringify(LEADERS.map(l => ({id: l.id, slack_id: l.slack_id || null, is_anniversary_leader: !!l.is_anniversary_leader})));
+}
+function ldDirty(){ return ldSnapshot() !== leadersOriginal; }
+
+function renderLeaders(){
+  const list = document.getElementById("ld-list");
+  list.innerHTML = LEADERS.length ? LEADERS.map((l, i) => `<div class="ld-row" data-i="${i}">
+      <label class="ld-radio"><input type="radio" name="anniv-leader" ${l.is_anniversary_leader ? 'checked' : ''}> líder do aniversário</label>
+      <div class="who"><div class="nm">${esc(l.name || l.id)}${l.eligible === false ? '<span class="not-eligible">não elegível este mês</span>' : ''}</div>
+      <div class="meta">${esc(l.team || '')}</div></div>
+      <input type="text" value="${esc(l.slack_id || '')}" placeholder="slack_id (opcional)">
+      <button class="rmv" title="Remover">✕</button>
+    </div>`).join("") : `<p class="sub" style="margin:0">Nenhum líder cadastrado ainda — busque acima ou importe da planilha.</p>`;
+  list.querySelectorAll(".ld-row").forEach(row => {
+    const i = parseInt(row.dataset.i, 10);
+    row.querySelector('input[type=radio]').onchange = () => {
+      LEADERS.forEach((l, j) => { l.is_anniversary_leader = (j === i); });
+      renderLeaders(); updateLdStatus();
+    };
+    row.querySelector('input[type=text]').oninput = e => { LEADERS[i].slack_id = e.target.value; updateLdStatus(); };
+    row.querySelector(".rmv").onclick = () => { LEADERS.splice(i, 1); renderLeaders(); updateLdStatus(); };
+  });
+  updateLdStatus();
+}
+
+function updateLdStatus(){
+  const status = document.getElementById("ld-status");
+  const dirty = ldDirty();
+  status.textContent = dirty ? "alterações não salvas" : "tudo salvo";
+  status.className = "status" + (dirty ? " dirty" : "");
+  document.getElementById("ld-save").disabled = !dirty;
+}
+
+async function loadLeaders(){
+  const data = await api("/admin/api/leaders");
+  LEADERS = (data.leaders || []).map(l => ({...l}));
+  leadersOriginal = ldSnapshot();
+  renderLeaders();
+}
+
+async function saveLeaders(){
+  document.getElementById("ld-save").disabled = true;
+  try{
+    const payload = LEADERS.map(l => ({id: l.id, slack_id: l.slack_id || null, is_anniversary_leader: !!l.is_anniversary_leader}));
+    const res = await api("/admin/api/leaders", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({leaders: payload})
+    });
+    showToast(`Líderes salvos (${res.n_leaders}).`, true);
+    await loadLeaders();
+  }catch(e){
+    showToast(e.message, false);
+    updateLdStatus();
+  }
+}
+
+let leaderT;
+async function searchLeaderCandidates(q){
+  const box = document.getElementById("leader-results");
+  if((q||"").trim().length < 2){ box.className = ""; box.innerHTML = ""; return; }
+  let people;
+  try{ people = await api("/admin/api/leaders/roster?q=" + encodeURIComponent(q)); }
+  catch(e){ box.className = "show"; box.innerHTML = `<div class="roster-row">${esc(e.message)}</div>`; return; }
+  if(!people.length){ box.className = "show"; box.innerHTML = `<div class="roster-row">Ninguém encontrado (ou já é líder).</div>`; return; }
+  box.className = "show";
+  box.innerHTML = people.map(p => `<div class="roster-row">
+      <span>${esc(p.name)} <span class="rmeta">${esc([p.team, p.tenure_label].filter(Boolean).join(' · '))}</span></span>
+      <button class="btn small" data-id="${esc(p.id)}">Adicionar</button>
+    </div>`).join("");
+  box.querySelectorAll("button").forEach(btn => {
+    const p = people.find(x => x.id === btn.dataset.id);
+    btn.onclick = () => {
+      LEADERS.push({id: p.id, name: p.name, team: p.team, slack_id: null, is_anniversary_leader: false, eligible: true});
+      document.getElementById("leader-q").value = "";
+      box.className = ""; box.innerHTML = "";
+      renderLeaders(); updateLdStatus();
+    };
+  });
+}
+document.getElementById("leader-q").addEventListener("input", e => {
+  clearTimeout(leaderT);
+  const v = e.target.value;
+  leaderT = setTimeout(() => searchLeaderCandidates(v), 250);
+});
+
+async function importLeadersFromSheet(){
+  if(!confirm("Isso SUBSTITUI toda a lista de líderes atual pelo resultado do casamento com a planilha antiga (LEADERS_CSV_URL). Só faz sentido rodar uma vez, na migração. Continuar?")) return;
+  try{
+    const res = await api("/admin/api/leaders/import-from-sheet", {method: "POST"});
+    const extra = [];
+    if(res.not_found && res.not_found.length) extra.push(`não encontrados: ${res.not_found.join(', ')}`);
+    if(res.ambiguous && res.ambiguous.length) extra.push(`ambíguos: ${res.ambiguous.join(', ')}`);
+    showToast(`Importado(s) ${res.imported} líder(es) da planilha.${extra.length ? ' ' + extra.join(' · ') + '.' : ''}`, true);
+    await loadLeaders();
+  }catch(e){
+    showToast(e.message, false);
   }
 }
 
@@ -484,6 +621,7 @@ async function boot(){
     document.getElementById("login").style.display = "none";
     document.getElementById("app").style.display = "block";
     render();
+    await loadLeaders();
     await loadHotspots();
   }catch(e){
     document.getElementById("login-error").textContent = e.message;
@@ -503,8 +641,10 @@ document.getElementById("discard").onclick = discard;
 document.getElementById("send-btn").onclick = sendNow;
 document.getElementById("hs-add-row").onclick = () => { HOTSPOTS.push({cat:"",name:"",area:"",note:"",maps_url:""}); renderHotspots(); updateHsStatus(); };
 document.getElementById("hs-save").onclick = saveHotspots;
+document.getElementById("ld-save").onclick = saveLeaders;
+document.getElementById("ld-import").onclick = importLeadersFromSheet;
 
-window.addEventListener("beforeunload", e => { if(isDirty() || hsDirty()){ e.preventDefault(); e.returnValue = ""; } });
+window.addEventListener("beforeunload", e => { if(isDirty() || ldDirty() || hsDirty()){ e.preventDefault(); e.returnValue = ""; } });
 
 if(sessionStorage.getItem(KEY_STORAGE)) boot();
 </script>

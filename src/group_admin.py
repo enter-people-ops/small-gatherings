@@ -1,7 +1,8 @@
 """
 Painel admin: reatribuição manual de pessoas entre os grupos já formados,
-CRUD das sugestões de rolê e o botão de envio real das mensagens no Slack —
-tudo sem depender de rodar o pipeline (/run) de novo.
+CRUD das sugestões de rolê, CRUD dos líderes (por ID do Convenia — substitui
+a antiga planilha) e o botão de envio real das mensagens no Slack — tudo sem
+depender de rodar o pipeline (/run) de novo.
 
 Fluxo esperado a partir de set/2026: o Make (ou um /run manual) chama
 POST /run?send=false, que só GERA os grupos/artefato e NUNCA envia nada.
@@ -58,20 +59,26 @@ def _all_eligible(force: bool = False) -> list[dict]:
     return _roster_cache["people"]
 
 
-def list_roster(query: str, limit: int = 30) -> list[dict]:
-    """Gente elegível no Convenia que ainda NÃO está em nenhum grupo deste
-    mês — candidatos a 'adicionar' no painel. `query` é obrigatório (>=2
-    caracteres) pra não devolver a base toda de uma vez."""
+def _search_eligible(query: str, exclude_ids: set, limit: int = 30) -> list[dict]:
+    """Busca por nome (>=2 caracteres) entre os elegíveis no Convenia,
+    excluindo quem já está em `exclude_ids`. Base pra 'adicionar pessoa' (nos
+    grupos) e 'adicionar líder' — cada um exclui um conjunto diferente."""
     query = (query or "").strip()
     if len(query) < 2:
         return []
-    data = load_groups()
-    existing_ids = {p["id"] for g in data["groups"] for p in g}
     q = query.lower()
-    out = [p for p in _all_eligible() if p["id"] not in existing_ids and q in p["name"].lower()]
+    out = [p for p in _all_eligible() if p["id"] not in exclude_ids and q in p["name"].lower()]
     return [{"id": p["id"], "name": p["name"], "team": p.get("team"),
              "gender": p.get("gender"), "tenure_label": p.get("tenure_label")}
             for p in out[:limit]]
+
+
+def list_roster(query: str, limit: int = 30) -> list[dict]:
+    """Gente elegível no Convenia que ainda NÃO está em nenhum grupo deste
+    mês — candidatos a 'adicionar' num grupo."""
+    data = load_groups()
+    existing_ids = {p["id"] for g in data["groups"] for p in g}
+    return _search_eligible(query, existing_ids, limit)
 
 
 def _resolve_new_people(ids: set[str]) -> dict[str, dict]:
@@ -233,3 +240,75 @@ def save_hotspots(items: list) -> dict:
         render.main(gpath, path, pipeline.artifact_path())
 
     return {"ok": True, "n_items": len(cleaned)}
+
+
+# ---------------------------------------------------------------------------
+# líderes (por ID do Convenia — substitui a planilha, ver CLAUDE.md seção 17)
+# ---------------------------------------------------------------------------
+def list_leaders() -> list[dict]:
+    """Líderes cadastrados + dados frescos do Convenia (nome/time), pra
+    exibir no painel. Quem não está mais elegível aparece com `eligible:
+    false` (ex.: desligado) em vez de simplesmente sumir."""
+    leaders = sheets.load_leaders()
+    by_id = {p["id"]: p for p in _all_eligible()}
+    out = []
+    for l in leaders:
+        p = by_id.get(l["id"])
+        out.append({
+            "id": l["id"],
+            "slack_id": l.get("slack_id"),
+            "is_anniversary_leader": bool(l.get("is_anniversary_leader")),
+            "name": p["name"] if p else None,
+            "team": p.get("team") if p else None,
+            "eligible": p is not None,
+        })
+    return out
+
+
+def list_leader_candidates(query: str, limit: int = 30) -> list[dict]:
+    """Gente elegível no Convenia que ainda não é líder — candidatos a
+    'adicionar líder' no painel."""
+    existing_ids = {l["id"] for l in sheets.load_leaders()}
+    return _search_eligible(query, existing_ids, limit)
+
+
+def save_leaders(leaders: list) -> dict:
+    if not isinstance(leaders, list):
+        raise ValueError("'leaders' precisa ser uma lista.")
+    seen, cleaned, anniversary_count = set(), [], 0
+    for l in leaders:
+        if not isinstance(l, dict) or not l.get("id"):
+            continue
+        lid = str(l["id"])
+        if lid in seen:
+            continue
+        seen.add(lid)
+        is_anniv = bool(l.get("is_anniversary_leader"))
+        anniversary_count += is_anniv
+        cleaned.append({"id": lid, "slack_id": (l.get("slack_id") or None),
+                        "is_anniversary_leader": is_anniv})
+    if anniversary_count > 1:
+        raise ValueError("Só pode haver 1 líder marcado como 'líder do grupo do aniversário'.")
+    sheets.save_leaders(cleaned)
+    return {"ok": True, "n_leaders": len(cleaned)}
+
+
+def import_leaders_from_sheet(csv_url: str) -> dict:
+    """Migração ÚNICA a partir da antiga planilha (Google Sheets publicado
+    como CSV) — usa a mesma heurística de sempre (`sheets.match_leaders`) só
+    pra popular `leaders.json` de uma vez, sem recadastrar todo mundo na mão.
+    Não faz mais parte do pipeline mensal (ver CLAUDE.md seção 17); depois de
+    rodar, os líderes já ficam 100% editáveis pelo painel — `LEADERS_CSV_URL`
+    não precisa mais estar configurada."""
+    people = _all_eligible(force=True)
+    by_id = {p["id"]: p for p in people}
+    old_leaders = sheets.read_leaders_csv(csv_url)
+    matches = sheets.match_leaders(people, old_leaders)
+    imported = [{"id": m["id"], "slack_id": m["leader"].get("slack_id"), "is_anniversary_leader": False}
+                for m in matches.values() if m["status"] == "ok"]
+    ambiguous = [n for n, m in matches.items() if m["status"] == "ambiguous"]
+    not_found = [n for n, m in matches.items() if m["status"] == "not_found"]
+    sheets.save_leaders(imported)
+    return {"ok": True, "imported": len(imported),
+            "imported_names": [by_id[l["id"]]["name"] for l in imported],
+            "ambiguous": ambiguous, "not_found": not_found}

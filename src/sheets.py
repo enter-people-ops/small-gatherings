@@ -1,11 +1,12 @@
 """
-Leitura da planilha de líderes e persistência do histórico.
+Líderes (por ID do Convenia, painel admin) e persistência do histórico.
 
-Líderes: planilha Google publicada como CSV (Arquivo > Compartilhar >
-Publicar na web > CSV) OU via Sheets API. Colunas esperadas (flexível):
-  - nome        (obrigatório; casado com o nome do Convenia)
-  - email       (opcional; ajuda no mapeamento Slack)
-  - slack_id    (opcional; mapeamento Slack mais confiável)
+Líderes: desde set/2026 vivem em data/leaders.json (ou LEADERS_PATH),
+editados pelo painel /admin — ver mark_leaders_by_id() e CLAUDE.md seção 17.
+`read_leaders_csv`/`match_leaders` continuam aqui só pra migração única a
+partir da antiga planilha (Google Sheets publicado como CSV), usada pelo
+endpoint POST /admin/api/leaders/import-from-sheet — não fazem mais parte
+do pipeline mensal.
 
 Histórico: JSON append-only (data/history.json) — cada rodada é uma lista
 de grupos (listas de ids). Da mais antiga para a mais recente.
@@ -88,20 +89,50 @@ def match_leaders(people: list[dict], leaders: list[dict]) -> dict:
     return out
 
 
-def mark_leaders(people: list[dict], leaders: list[dict]) -> list[dict]:
-    """Casa líderes com os ativos do Convenia e seta is_leader + slack_id/email."""
+
+# ---- líderes por ID (painel admin) ----
+# LEADERS_PATH aponta pro arquivo real (ex.: um Volume do Railway, pra
+# sobreviver a redeploys — mesmo espírito de HISTORY_PATH). Sem a env var,
+# cai no caminho antigo dentro do repo.
+def _leaders_path(path: str | None = None) -> str:
+    return path or os.environ.get("LEADERS_PATH", "../data/leaders.json")
+
+
+def load_leaders(path: str | None = None) -> list[dict]:
+    """Cada item: {"id": <id do Convenia>, "slack_id": opcional,
+    "is_anniversary_leader": opcional} — ver group_admin.py/seção 17."""
+    path = _leaders_path(path)
+    if not os.path.exists(path):
+        return []
+    return json.load(open(path, encoding="utf-8")).get("leaders", [])
+
+
+def save_leaders(leaders: list[dict], path: str | None = None) -> None:
+    path = _leaders_path(path)
+    json.dump({"leaders": leaders}, open(path, "w", encoding="utf-8"), ensure_ascii=False, indent=2)
+
+
+def mark_leaders_by_id(people: list[dict], leaders: list[dict]) -> tuple[list[dict], list[str]]:
+    """Marca is_leader a partir da lista de líderes por ID do Convenia
+    (substitui o casamento por nome/e-mail da antiga planilha — sem mais
+    'ambiguous'/'not_found' por apelido, porque o ID já veio de uma escolha
+    direta no painel). Retorna (people, missing_ids): missing_ids são
+    líderes cadastrados que não estão elegíveis no Convenia este mês (ex.:
+    desligados) e por isso não puderam ser marcados."""
     by_id = {p["id"]: p for p in people}
-    matches = match_leaders(people, leaders)
     for p in people:
         p["is_leader"] = False
-    for m in matches.values():
-        if m["status"] == "ok" and m["id"] in by_id:
-            p = by_id[m["id"]]
-            p["is_leader"] = True
-            l = m["leader"]
-            if l.get("slack_id"): p["slack_id"] = l["slack_id"]
-            if l.get("email"): p["email"] = l["email"]
-    return people
+    missing = []
+    for l in leaders:
+        p = by_id.get(l["id"])
+        if p is None:
+            missing.append(l["id"])
+            continue
+        p["is_leader"] = True
+        if l.get("slack_id"):
+            p["slack_id"] = l["slack_id"]
+    return people, missing
+
 
 # ---- histórico ----
 # HISTORY_PATH aponta pro arquivo real (ex.: um Volume do Railway montado fora

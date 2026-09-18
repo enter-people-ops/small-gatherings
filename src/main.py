@@ -3,15 +3,16 @@ Orquestrador mensal. Roda no dia 1 de cada mês.
 
 Passos:
   1. Busca elegíveis no Convenia (ativos + admitidos no mês).
-  2. Lê líderes na planilha e marca is_leader.
+  2. Lê líderes cadastrados no painel admin (por ID do Convenia) e marca is_leader.
   3. Forma os grupos (diversidade + novidade vs histórico).
   4. Gera o artefato HTML e (opcional) publica.
   5. Monta as 3 mensagens do Slack.
   6. Envia (se --send) e persiste o histórico.
 
 Variáveis de ambiente:
-  CONVENIA_TOKEN, SLACK_BOT_TOKEN, LEADERS_CSV_URL, ARTIFACT_URL,
-  EMAIL_DOMAIN (default getenter.ai)
+  CONVENIA_TOKEN, SLACK_BOT_TOKEN, ARTIFACT_URL, EMAIL_DOMAIN (default getenter.ai)
+  LEADERS_CSV_URL é opcional agora — só usada pela migração única em
+  POST /admin/api/leaders/import-from-sheet (ver CLAUDE.md seção 17).
 
 Uso:
   python main.py --dry-run          # não envia nada, só gera artefato + previews
@@ -104,25 +105,20 @@ def run(send: bool):
         print(f"[para {dm['name']} / {dm['slack_id']}]\n{dm['text']}\n")
 
 def diagnose() -> dict:
-    """Diagnóstico read-only: por que os líderes não bateram? Não envia nada."""
+    """Diagnóstico read-only: os líderes cadastrados no painel admin (por ID
+    do Convenia) ainda estão elegíveis este mês? Não envia nada."""
     ref = dt.date.today()
     people = convenia.fetch_eligible(os.environ["CONVENIA_TOKEN"], ref, enrich=False)
-    leaders = sheets.read_leaders_csv(os.environ["LEADERS_CSV_URL"])
-    matches = sheets.match_leaders(people, leaders)
-    ok = [n for n, m in matches.items() if m["status"] == "ok"]
-    via_email = sum(1 for m in matches.values() if m["status"] == "ok" and m.get("via") == "email")
-    ambiguous = {n: m.get("candidates") for n, m in matches.items() if m["status"] == "ambiguous"}
-    not_found = [n for n, m in matches.items() if m["status"] == "not_found"]
+    leaders = sheets.load_leaders()
+    _, missing = sheets.mark_leaders_by_id(people, leaders)
     return {
         "convenia_count": len(people),
-        "sheet_leaders_count": len(leaders),
-        "matched_leaders": len(ok),
-        "matched_via_email": via_email,
-        "matched_via_name": len(ok) - via_email,
-        "ambiguous": ambiguous,          # nome/email que bate com >1 pessoa -> desambiguar
-        "not_found": not_found,          # não bate com ninguém -> corrigir grafia/apelido
-        "hint": ("ok = casados (por email ou nome). ambiguous = adicione sobrenome na planilha. "
-                 "not_found = grafia/apelido nao bate com nenhum ativo do Convenia."),
+        "leaders_count": len(leaders),
+        "matched_leaders": len(leaders) - len(missing),
+        "missing_leaders": missing,  # IDs cadastrados como líder mas não elegíveis este mês (ex.: desligados)
+        "hint": ("Líderes são escolhidos direto no Convenia pelo painel /admin — não tem mais "
+                 "'ambiguous'/'not_found' por nome. 'missing_leaders' é quem foi cadastrado como líder "
+                 "mas não está mais elegível (revise em /admin > Líderes)."),
     }
 
 
@@ -234,15 +230,18 @@ def run_api(send: bool) -> dict:
         team_overrides = json.load(open(team_overrides_path, encoding="utf-8"))
     team_overrides_result = convenia.apply_team_overrides(people, team_overrides)
 
-    leaders = sheets.read_leaders_csv(os.environ["LEADERS_CSV_URL"])
-    people = sheets.mark_leaders(people, leaders)
+    leaders = sheets.load_leaders()
+    people, missing_leaders = sheets.mark_leaders_by_id(people, leaders)
     by_id = {p["id"]: p for p in people}
 
-    # aniversários de casa do mês + líder especial (Mateus) por e-mail
+    # aniversários de casa do mês + líder especial (do grupo do aniversário) —
+    # é o líder marcado com is_anniversary_leader:true no painel /admin
+    # (substitui o antigo ANNIVERSARY_LEADER_EMAIL, que dependia de e-mail
+    # corporativo que o Convenia quase nunca preenche).
     anniversaries = work_anniversaries(people, ref)
-    special_email = os.environ.get("ANNIVERSARY_LEADER_EMAIL", "mateus@getenter.ai").lower()
-    special = next((p for p in people if (p.get("email") or "").lower() == special_email
-                    and p.get("is_leader")), None)
+    special_entry = next((l for l in leaders if l.get("is_anniversary_leader")), None)
+    special = (by_id.get(special_entry["id"]) if special_entry else None)
+    special = special if (special and special.get("is_leader")) else None
     special_id = special["id"] if special else None
 
     persons = [to_person(p) for p in people]
@@ -285,6 +284,7 @@ def run_api(send: bool) -> dict:
               "special_leader": (special["name"] if special else None),
               "gender_distribution": dict(gender_dist.most_common()),
               "team_overrides": team_overrides_result,
+              "missing_leaders": missing_leaders,
               "general_channel": os.environ.get("CANAL_TESTE_GERAL") if test_mode else os.environ.get("CANAL_GERAL"),
               "leaders_channel": os.environ.get("CANAL_TESTE_LIDERES") if test_mode else os.environ.get("CANAL_LIDERES"),
               "report_target": os.environ.get("CANAL_TESTE_RELATORIO") if test_mode else os.environ.get("DM_RELATORIO"),
