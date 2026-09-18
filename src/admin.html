@@ -17,13 +17,14 @@
   --font:"Geist",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
   --r-lg:8px; --r-xl:12px; --r-2xl:16px; --r-full:9999px; --ease:cubic-bezier(.2,0,.2,1); --dur:150ms;
   --tag-lead-bg:rgb(226,217,238); --tag-lead-fg:rgb(99,71,148);
+  --tabbar-h:53px;
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg-2);color:var(--tx);font-family:var(--font);font-size:15px;line-height:1.5}
 .wrap{max-width:1100px;margin:0 auto;padding:32px 20px 80px}
 h1{font-weight:600;font-size:26px;margin:0 0 4px;letter-spacing:-.3px}
-h2{font-weight:600;font-size:18px;margin:36px 0 14px;letter-spacing:-.2px}
-.sub{color:var(--tx-2);font-size:14px;margin:0 0 28px}
+h2{font-weight:600;font-size:16px;margin:0 0 4px;letter-spacing:-.2px}
+.sub{color:var(--tx-2);font-size:14px;margin:0 0 20px}
 .card{background:var(--bg);box-shadow:var(--ring);border-radius:var(--r-xl);padding:20px}
 #login{max-width:380px;margin:60px auto}
 #login label{display:block;font-weight:500;font-size:13px;margin-bottom:8px}
@@ -40,23 +41,58 @@ input,select{font:inherit}
 .btn.small{padding:6px 12px;font-size:12.5px}
 .btn:disabled{opacity:.5;cursor:default}
 #app{display:none}
-.toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;position:sticky;top:0;
-  background:var(--bg-2);padding:12px 0;z-index:5}
-#search{flex:1;min-width:180px;font:inherit;font-size:14px;height:40px;padding:0 14px;border:0;border-radius:var(--r-full);
-  box-shadow:var(--ring); outline:none}
-#search:focus{box-shadow:var(--ring-focus)}
 .status{font-size:13px;color:var(--tx-2)}
 .status.dirty{color:var(--danger)}
 .toast{font-size:13px;padding:8px 14px;border-radius:var(--r-lg);margin-bottom:16px;display:none}
 .toast.ok{display:block;background:var(--ok-bg);color:var(--ok)}
 .toast.err{display:block;background:var(--danger-bg);color:var(--danger)}
 
+/* resumo */
+.summary{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.stat{background:var(--bg);box-shadow:var(--ring-2);border-radius:var(--r-full);padding:7px 13px;
+  font-size:12.5px;color:var(--tx-2);white-space:nowrap}
+.stat b{color:var(--tx);font-weight:600}
+.stat.warn{box-shadow:inset 0 0 0 1.5px var(--danger);color:var(--danger)}
+.stat.warn b{color:var(--danger)}
+.stat.ok{box-shadow:inset 0 0 0 1.5px var(--ok);color:var(--ok)}
+.stat.ok b{color:var(--ok)}
+
+/* abas */
+.tabs{display:flex;gap:4px;overflow-x:auto;position:sticky;top:0;background:var(--bg-2);z-index:8;
+  box-shadow:inset 0 -1px 0 rgba(0,0,0,.08);margin-bottom:20px}
+.tab-btn{border:0;background:none;padding:14px 16px;font:inherit;font-size:14px;font-weight:500;
+  color:var(--tx-2);cursor:pointer;position:relative;white-space:nowrap;display:flex;align-items:center;gap:6px}
+.tab-btn:hover{color:var(--tx)}
+.tab-btn.active{color:var(--tx);font-weight:600}
+.tab-btn.active::after{content:"";position:absolute;left:14px;right:14px;bottom:0;height:2px;background:var(--brand)}
+.tab-badge{font-size:10.5px;font-weight:600;background:var(--tx-3);color:#fff;border-radius:var(--r-full);
+  padding:1px 6px;min-width:16px;text-align:center}
+.tab-badge.warn{background:var(--danger)}
+.tab-dot{width:7px;height:7px;border-radius:var(--r-full);background:var(--tx-3)}
+.tab-dot.ok{background:var(--ok)}
+.tab-dot.warn{background:var(--danger)}
+.tab-panel[hidden]{display:none}
+
+.toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;position:sticky;
+  top:var(--tabbar-h);background:var(--bg-2);padding:10px 0;z-index:5}
+#search{flex:1;min-width:180px;font:inherit;font-size:14px;height:40px;padding:0 14px;border:0;border-radius:var(--r-full);
+  box-shadow:var(--ring); outline:none}
+#search:focus{box-shadow:var(--ring-focus)}
+
 /* envio */
-.send-card{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:28px}
+.send-card{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .send-card h3{margin:0 0 4px;font-size:16px;font-weight:600}
 .send-card .meta{font-size:13px;color:var(--tx-2)}
 .send-card .meta.warn{color:var(--danger)}
 .send-card.sent{box-shadow:inset 0 0 0 1.5px var(--ok)}
+
+/* modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(20,18,14,.4);display:flex;align-items:center;
+  justify-content:center;z-index:50;padding:20px}
+.modal-overlay[hidden]{display:none}
+.modal{max-width:420px;width:100%}
+.modal p{margin:0 0 20px;font-size:14.5px;line-height:1.55}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px}
 
 /* adicionar pessoa */
 .addbar{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start;margin-bottom:16px;position:relative}
@@ -66,7 +102,7 @@ input,select{font:inherit}
 #roster-results{position:absolute;top:46px;left:0;right:0;background:var(--bg);box-shadow:var(--ring),0 8px 24px rgba(0,0,0,.12);
   border-radius:var(--r-lg);z-index:6;max-height:260px;overflow:auto;display:none}
 #roster-results.show{display:block}
-.roster-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 14px;font-size:13.5px}
+.roster-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 14px;font-size:13.5px;color:var(--tx-2)}
 .roster-row+.roster-row{box-shadow:inset 0 1px 0 rgba(0,0,0,.06)}
 .roster-row .rmeta{color:var(--tx-3);font-size:12px}
 
@@ -126,7 +162,7 @@ input,select{font:inherit}
 <body>
 <div class="wrap">
   <h1>Admin de Grupos</h1>
-  <p class="sub">Mover, adicionar ou remover pessoas dos grupos já formados, editar as sugestões de rolê, e só disparar as mensagens no Slack quando estiver tudo revisado.</p>
+  <p class="sub">Mover, adicionar ou remover pessoas dos grupos já formados, gerenciar líderes, editar as sugestões de rolê, e só disparar as mensagens no Slack quando estiver tudo revisado.</p>
 
   <div id="login" class="card">
     <label for="key">X-Run-Key</label>
@@ -137,61 +173,84 @@ input,select{font:inherit}
 
   <div id="app">
     <div class="toast" id="toast"></div>
+    <div class="summary" id="summary"></div>
 
-    <div class="card send-card" id="send-card">
-      <div>
-        <h3 id="send-title">Envio das mensagens</h3>
-        <div class="meta" id="send-meta">carregando…</div>
-        <div class="meta warn" id="send-unresolved" style="display:none"></div>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="grupos">Grupos</button>
+      <button class="tab-btn" data-tab="lideres">Líderes</button>
+      <button class="tab-btn" data-tab="role">Sugestões de rolê</button>
+      <button class="tab-btn" data-tab="envio">Envio <span class="tab-dot" id="envio-dot"></span></button>
+    </div>
+
+    <div class="tab-panel" data-panel="grupos">
+      <div class="toolbar">
+        <input id="search" type="search" placeholder="Buscar por nome…">
+        <span class="status" id="status">carregando…</span>
+        <button class="btn" id="discard">Descartar alterações</button>
+        <button class="btn primary" id="save">Salvar alterações</button>
       </div>
-      <button class="btn primary" id="send-btn">Enviar mensagens</button>
+
+      <div class="addbar">
+        <input id="roster-q" type="search" placeholder="Adicionar pessoa: busque por nome…" autocomplete="off">
+        <select id="roster-dest"></select>
+        <div id="roster-results"></div>
+      </div>
+
+      <div class="grid" id="grid"></div>
+
+      <div class="card removed-card" id="removed-card" style="display:none">
+        <h3>Removidos desta rodada</h3>
+        <div id="removed-list"></div>
+      </div>
     </div>
 
-    <h2>Grupos</h2>
-    <div class="toolbar">
-      <input id="search" type="search" placeholder="Buscar por nome…">
-      <span class="status" id="status">carregando…</span>
-      <button class="btn" id="discard">Descartar alterações</button>
-      <button class="btn primary" id="save">Salvar alterações</button>
+    <div class="tab-panel" data-panel="lideres" hidden>
+      <p class="sub">Quem lidera define quantos grupos existem no próximo <code>/run</code>. Marque no máximo 1 como "líder do aniversário" (reúne quem faz aniversário de casa no mês).</p>
+      <div class="toolbar">
+        <span class="status" id="ld-status">carregando…</span>
+        <button class="btn" id="ld-import">Importar da planilha (uma vez)</button>
+        <button class="btn primary" id="ld-save">Salvar líderes</button>
+      </div>
+      <div class="addbar">
+        <input id="leader-q" type="search" placeholder="Adicionar líder: busque por nome…" autocomplete="off">
+        <div id="leader-results"></div>
+      </div>
+      <div class="card">
+        <div id="ld-list"></div>
+      </div>
     </div>
 
-    <div class="addbar">
-      <input id="roster-q" type="search" placeholder="Adicionar pessoa: busque por nome…" autocomplete="off">
-      <select id="roster-dest"></select>
-      <div id="roster-results"></div>
+    <div class="tab-panel" data-panel="role" hidden>
+      <div class="toolbar">
+        <span class="status" id="hs-status">carregando…</span>
+        <button class="btn" id="hs-add-row">+ sugestão</button>
+        <button class="btn primary" id="hs-save">Salvar sugestões</button>
+      </div>
+      <div class="card">
+        <div class="hs-head"><span>Categoria</span><span>Nome</span><span>Área</span><span>Nota</span><span>Link do Maps</span><span></span></div>
+        <div id="hs-list"></div>
+      </div>
     </div>
 
-    <div class="grid" id="grid"></div>
+    <div class="tab-panel" data-panel="envio" hidden>
+      <div class="card send-card" id="send-card">
+        <div>
+          <h3 id="send-title">Envio das mensagens</h3>
+          <div class="meta" id="send-meta">carregando…</div>
+          <div class="meta warn" id="send-unresolved" style="display:none"></div>
+        </div>
+        <button class="btn primary" id="send-btn">Enviar mensagens</button>
+      </div>
+    </div>
+  </div>
 
-    <div class="card removed-card" id="removed-card" style="display:none">
-      <h3>Removidos desta rodada</h3>
-      <div id="removed-list"></div>
-    </div>
-
-    <h2>Líderes</h2>
-    <p class="sub" style="margin-top:-8px">Quem lidera define quantos grupos existem no próximo <code>/run</code>. Marque no máximo 1 como "líder do aniversário" (reúne quem faz aniversário de casa no mês).</p>
-    <div class="toolbar">
-      <span class="status" id="ld-status">carregando…</span>
-      <button class="btn" id="ld-import">Importar da planilha (uma vez)</button>
-      <button class="btn primary" id="ld-save">Salvar líderes</button>
-    </div>
-    <div class="addbar">
-      <input id="leader-q" type="search" placeholder="Adicionar líder: busque por nome…" autocomplete="off">
-      <div id="leader-results"></div>
-    </div>
-    <div class="card">
-      <div id="ld-list"></div>
-    </div>
-
-    <h2>Sugestões de rolê ("Onde marcar")</h2>
-    <div class="toolbar">
-      <span class="status" id="hs-status">carregando…</span>
-      <button class="btn" id="hs-add-row">+ sugestão</button>
-      <button class="btn primary" id="hs-save">Salvar sugestões</button>
-    </div>
-    <div class="card">
-      <div class="hs-head"><span>Categoria</span><span>Nome</span><span>Área</span><span>Nota</span><span>Link do Maps</span><span></span></div>
-      <div id="hs-list"></div>
+  <div class="modal-overlay" id="modal-overlay" hidden>
+    <div class="modal card">
+      <p id="modal-text"></p>
+      <div class="modal-actions">
+        <button class="btn" id="modal-cancel">Cancelar</button>
+        <button class="btn primary" id="modal-confirm">Confirmar</button>
+      </div>
     </div>
   </div>
 </div>
@@ -203,6 +262,9 @@ let byId = {};            // id -> person (inclui gente ainda não salva, adicio
 let assignments = {};     // id -> group_index atual (só quem está "ativo" numa rodada)
 let original = {};        // id -> group_index original (pra dirty-check / descartar)
 let removedIds = new Set();
+
+let LEADERS = [];
+let leadersOriginal = "";
 
 let HOTSPOTS = [];         // cópia local editável de {cat,name,area,note,maps_url}
 let hotspotsOriginal = "";
@@ -216,6 +278,69 @@ async function api(path, opts){
   const data = await res.json().catch(()=>({}));
   if(!res.ok) throw new Error(data.error || "Erro na requisição.");
   return data;
+}
+
+// -------------------------------------------------------------------- abas
+function switchTab(name){
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
+  document.querySelectorAll(".tab-panel").forEach(p => { p.hidden = p.dataset.panel !== name; });
+}
+document.querySelectorAll(".tab-btn").forEach(b => b.addEventListener("click", () => switchTab(b.dataset.tab)));
+
+function setTabBadge(tab, count){
+  const btn = document.querySelector(`.tab-btn[data-tab="${tab}"]`);
+  let badge = btn.querySelector(".tab-badge");
+  if(count > 0){
+    if(!badge){ badge = document.createElement("span"); badge.className = "tab-badge warn"; btn.appendChild(badge); }
+    badge.textContent = count;
+  } else if(badge){
+    badge.remove();
+  }
+}
+
+// ------------------------------------------------------------------ modal
+function showModal(text){
+  return new Promise(resolve => {
+    document.getElementById("modal-text").textContent = text;
+    const overlay = document.getElementById("modal-overlay");
+    const cancelBtn = document.getElementById("modal-cancel");
+    const confirmBtn = document.getElementById("modal-confirm");
+    overlay.hidden = false;
+    function cleanup(v){
+      overlay.hidden = true;
+      cancelBtn.removeEventListener("click", onCancel);
+      confirmBtn.removeEventListener("click", onConfirm);
+      resolve(v);
+    }
+    function onCancel(){ cleanup(false); }
+    function onConfirm(){ cleanup(true); }
+    cancelBtn.addEventListener("click", onCancel);
+    confirmBtn.addEventListener("click", onConfirm);
+  });
+}
+
+// ----------------------------------------------------------------- resumo
+function renderSummary(){
+  const groups = DATA ? currentGroups() : [];
+  const warnCount = DATA ? groupWarnings(groups).filter(w => w.length).length : 0;
+  const totalPeople = Object.keys(assignments).length;
+  const sent = !!(DATA && DATA.sent_at);
+  const notEligibleLeaders = LEADERS.filter(l => l.eligible === false).length;
+
+  const chip = (value, label, cls) => `<div class="stat ${cls||''}"><b>${value}</b> ${label}</div>`;
+  document.getElementById("summary").innerHTML = [
+    DATA ? chip(DATA.groups.length, "grupos") : "",
+    DATA ? chip(totalPeople, "pessoas") : "",
+    warnCount ? chip(warnCount, "grupo(s) com aviso", "warn") : "",
+    chip(LEADERS.length, "líderes", notEligibleLeaders ? "warn" : ""),
+    chip(HOTSPOTS.length, "sugestões de rolê"),
+    DATA ? chip(sent ? "✓" : "…", sent ? "enviado" : "não enviado", sent ? "ok" : "warn") : "",
+  ].filter(Boolean).join("");
+
+  setTabBadge("grupos", warnCount);
+  setTabBadge("lideres", notEligibleLeaders);
+  const dot = document.getElementById("envio-dot");
+  dot.className = "tab-dot " + (sent ? "ok" : "warn");
 }
 
 // ---------------------------------------------------------------- grupos
@@ -318,6 +443,7 @@ function render(){
   document.getElementById("save").disabled = !dirty;
   document.getElementById("discard").disabled = !dirty;
   renderSendCard(dirty);
+  renderSummary();
 }
 
 function renderSendCard(dirty){
@@ -356,7 +482,9 @@ function showToast(msg, ok){
 }
 
 async function saveGroups(){
-  document.getElementById("save").disabled = true;
+  const btn = document.getElementById("save");
+  const original_text = btn.textContent;
+  btn.disabled = true; btn.textContent = "Salvando…";
   try{
     const data = await api("/admin/api/groups", {
       method: "POST",
@@ -372,6 +500,8 @@ async function saveGroups(){
   }catch(e){
     showToast(e.message, false);
     render();
+  }finally{
+    btn.textContent = original_text;
   }
 }
 
@@ -393,6 +523,7 @@ let rosterT;
 async function searchRoster(q){
   const box = document.getElementById("roster-results");
   if((q||"").trim().length < 2){ box.className = ""; box.innerHTML = ""; return; }
+  box.className = "show"; box.innerHTML = `<div class="roster-row">Buscando…</div>`;
   let people;
   try{ people = await api("/admin/api/roster?q=" + encodeURIComponent(q)); }
   catch(e){ box.className = "show"; box.innerHTML = `<div class="roster-row">${esc(e.message)}</div>`; return; }
@@ -434,9 +565,10 @@ async function sendNow(){
   const msg = already
     ? "Este mês JÁ foi enviado. Tem certeza que quer reenviar as mensagens pra todo mundo de novo?"
     : "Confirma o envio das mensagens no Slack (mensagem geral, líderes, DMs e relatório)? Essa ação não pode ser desfeita.";
-  if(!confirm(msg)) return;
+  if(!(await showModal(msg))) return;
   const btn = document.getElementById("send-btn");
-  btn.disabled = true;
+  const original_text = btn.textContent;
+  btn.disabled = true; btn.textContent = "Enviando…";
   try{
     const res = await api("/admin/api/send", {
       method: "POST",
@@ -448,13 +580,12 @@ async function sendNow(){
   }catch(e){
     showToast(e.message, false);
     render();
+  }finally{
+    btn.textContent = original_text;
   }
 }
 
 // -------------------------------------------------------------- líderes
-let LEADERS = [];
-let leadersOriginal = "";
-
 function ldSnapshot(){
   return JSON.stringify(LEADERS.map(l => ({id: l.id, slack_id: l.slack_id || null, is_anniversary_leader: !!l.is_anniversary_leader})));
 }
@@ -487,6 +618,7 @@ function updateLdStatus(){
   status.textContent = dirty ? "alterações não salvas" : "tudo salvo";
   status.className = "status" + (dirty ? " dirty" : "");
   document.getElementById("ld-save").disabled = !dirty;
+  renderSummary();
 }
 
 async function loadLeaders(){
@@ -497,7 +629,9 @@ async function loadLeaders(){
 }
 
 async function saveLeaders(){
-  document.getElementById("ld-save").disabled = true;
+  const btn = document.getElementById("ld-save");
+  const original_text = btn.textContent;
+  btn.disabled = true; btn.textContent = "Salvando…";
   try{
     const payload = LEADERS.map(l => ({id: l.id, slack_id: l.slack_id || null, is_anniversary_leader: !!l.is_anniversary_leader}));
     const res = await api("/admin/api/leaders", {
@@ -509,6 +643,8 @@ async function saveLeaders(){
   }catch(e){
     showToast(e.message, false);
     updateLdStatus();
+  }finally{
+    btn.textContent = original_text;
   }
 }
 
@@ -516,6 +652,7 @@ let leaderT;
 async function searchLeaderCandidates(q){
   const box = document.getElementById("leader-results");
   if((q||"").trim().length < 2){ box.className = ""; box.innerHTML = ""; return; }
+  box.className = "show"; box.innerHTML = `<div class="roster-row">Buscando…</div>`;
   let people;
   try{ people = await api("/admin/api/leaders/roster?q=" + encodeURIComponent(q)); }
   catch(e){ box.className = "show"; box.innerHTML = `<div class="roster-row">${esc(e.message)}</div>`; return; }
@@ -542,7 +679,11 @@ document.getElementById("leader-q").addEventListener("input", e => {
 });
 
 async function importLeadersFromSheet(){
-  if(!confirm("Isso SUBSTITUI toda a lista de líderes atual pelo resultado do casamento com a planilha antiga (LEADERS_CSV_URL). Só faz sentido rodar uma vez, na migração. Continuar?")) return;
+  const ok = await showModal("Isso SUBSTITUI toda a lista de líderes atual pelo resultado do casamento com a planilha antiga (LEADERS_CSV_URL). Só faz sentido rodar uma vez, na migração. Continuar?");
+  if(!ok) return;
+  const btn = document.getElementById("ld-import");
+  const original_text = btn.textContent;
+  btn.disabled = true; btn.textContent = "Importando…";
   try{
     const res = await api("/admin/api/leaders/import-from-sheet", {method: "POST"});
     const extra = [];
@@ -552,6 +693,8 @@ async function importLeadersFromSheet(){
     await loadLeaders();
   }catch(e){
     showToast(e.message, false);
+  }finally{
+    btn.disabled = false; btn.textContent = original_text;
   }
 }
 
@@ -585,6 +728,7 @@ function updateHsStatus(){
   status.textContent = dirty ? "alterações não salvas" : "tudo salvo";
   status.className = "status" + (dirty ? " dirty" : "");
   document.getElementById("hs-save").disabled = !dirty;
+  renderSummary();
 }
 
 async function loadHotspots(){
@@ -595,7 +739,9 @@ async function loadHotspots(){
 }
 
 async function saveHotspots(){
-  document.getElementById("hs-save").disabled = true;
+  const btn = document.getElementById("hs-save");
+  const original_text = btn.textContent;
+  btn.disabled = true; btn.textContent = "Salvando…";
   try{
     const res = await api("/admin/api/hotspots", {
       method: "POST",
@@ -608,6 +754,8 @@ async function saveHotspots(){
   }catch(e){
     showToast(e.message, false);
     updateHsStatus();
+  }finally{
+    btn.textContent = original_text;
   }
 }
 
@@ -623,6 +771,7 @@ async function boot(){
     render();
     await loadLeaders();
     await loadHotspots();
+    renderSummary();
   }catch(e){
     document.getElementById("login-error").textContent = e.message;
     document.getElementById("login-error").style.display = "block";
