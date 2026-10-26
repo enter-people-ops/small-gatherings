@@ -219,7 +219,12 @@ def build_groups(persons: list, history, cfg, special_leader_id: str | None,
 def run_api(send: bool) -> dict:
     """Versão para o servidor/Make: roda o pipeline e devolve os payloads.
     Se send=True, envia pelo Slack aqui mesmo. Se False, o Make envia."""
-    ref = dt.date.today(); label = month_label(ref)
+    # TEMPORÁRIO (rodada de novembro/2026): até 31/10/2026 o app trata a data
+    # como 01/11/2026 (mês, aniversariantes e admitidos do mês). A partir de
+    # 01/11/2026 volta a usar a data real, sem precisar reverter.
+    _today = dt.date.today()
+    ref = dt.date(2026, 11, 1) if _today <= dt.date(2026, 10, 31) else _today
+    label = month_label(ref)
     people = convenia.fetch_eligible(os.environ["CONVENIA_TOKEN"], ref)
 
     # correções manuais de `team` (Convenia errado/desatualizado) — ver
